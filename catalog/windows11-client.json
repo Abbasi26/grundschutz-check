@@ -1,0 +1,2980 @@
+{
+  "schema_version": "0.1.0",
+  "catalog": {
+    "id": "grundschutzcheck.windows11.client",
+    "title": "Windows 11 client checks for BSI IT-Grundschutz and Grundschutz++",
+    "version": "0.1.0",
+    "released": "2026-10-21",
+    "description": "Read-only checks for a Windows 11 client. Requirement ids are copied from published BSI documents. Every windows11_carryover value is unverified because the setting values come from the Windows 10 Hilfsmittel.",
+    "target": "Windows 11 client",
+    "applicability_note": "Concrete values are carried over from Hilfsmittel zur Umsetzung der Anforderungen des IT-Grundschutz-Kompendiums fuer Windows-Clients, version 1.0, 20 February 2025, written for Windows 10 version 21H2 and later. BSI has not published a Windows 11 settings matrix. SYS.2.2.3 in the IT-Grundschutz-Kompendium Edition 2023 applies to Windows 10 and Windows 11. SiSyPHuS hardening checklists published by BSI address Windows 10 LTSC 2019 (1809). There is no published BSI Windows 11 SiSyPHuS matrix, so v0.1 does not score one.",
+    "sources": [
+      {
+        "id": "bsi-hilfsmittel-windows-client-1.0",
+        "title": "Hilfsmittel zur Umsetzung der Anforderungen des IT-Grundschutz-Kompendiums fuer Windows-Clients",
+        "version": "1.0",
+        "released": "2025-02-20",
+        "url": "https://www.bsi.bund.de/SharedDocs/Downloads/DE/BSI/Grundschutz/Hilfsmittel/Hilfsmittel_IT_Grundschutz_Windows_Client.html"
+      },
+      {
+        "id": "it-grundschutz-kompendium-2023",
+        "title": "IT-Grundschutz-Kompendium Edition 2023",
+        "version": "2023",
+        "url": "https://www.bsi.bund.de/DE/Themen/Unternehmen-und-Organisationen/Standards-und-Zertifizierung/IT-Grundschutz/IT-Grundschutz-Kompendium/it-grundschutz-kompendium_node.html"
+      },
+      {
+        "id": "grundschutz-plus-plus-2026-09-24",
+        "title": "Anwenderkatalog Grundschutz++",
+        "version": "2026-09-24T07:12:39.131983+00:00",
+        "url": "https://github.com/BSI-Bund/Stand-der-Technik-Bibliothek/blob/main/control_layer/Grundschutz%2B%2B/Grundschutz%2B%2B-resolved_catalog.json"
+      }
+    ]
+  },
+  "modules": [
+    {
+      "id": "SYS.2.1",
+      "title": "Allgemeiner Client"
+    },
+    {
+      "id": "SYS.2.2.3",
+      "title": "Clients unter Windows"
+    },
+    {
+      "id": "DET.3",
+      "title": "Detektion (Grundschutz++ practice DET.3, not a Kompendium Baustein)"
+    }
+  ],
+  "checks": [
+    {
+      "id": "GS-W11-001",
+      "title": "Password history remembers 24 passwords",
+      "severity": "medium",
+      "mapping": "verified",
+      "windows11_carryover": "unverified",
+      "module": {
+        "id": "SYS.2.1"
+      },
+      "references": [
+        {
+          "framework": "it-grundschutz-kompendium",
+          "requirement_id": "SYS.2.1.A1",
+          "title": "Sichere Authentisierung von Benutzenden",
+          "mapping": "verified",
+          "source_id": "bsi-hilfsmittel-windows-client-1.0",
+          "note": "Requirement from the IT-Grundschutz-Kompendium, Edition 2023. The setting value is taken from the BSI Hilfsmittel for Windows clients, version 1.0 (20 February 2025)."
+        },
+        {
+          "framework": "grundschutz-plus-plus",
+          "requirement_id": "BER.6.2",
+          "title": "Blockieren von Passwort Recycling",
+          "mapping": "verified",
+          "source_id": "grundschutz-plus-plus-2026-09-24",
+          "note": "The control requires blocking reuse and does not fix a history depth. Depth 24 is the Hilfsmittel value."
+        }
+      ],
+      "rationale": "The Hilfsmittel sets Enforce password history to 24 passwords remembered. The concrete value is carried over from the Windows 10 Hilfsmittel (from Windows 10 version 21H2). BSI has not published a Windows 11 settings matrix. SYS.2.2.3 Edition 2023 applies to Windows 10 and Windows 11.",
+      "conflict_note": "",
+      "applicability_note": "secedit /export reads the local security database. On a domain member, account policy in that database does not govern domain accounts. Domain accounts follow the Default Domain Policy on a domain controller. v0.1 does not query a domain controller.",
+      "evaluation": {
+        "method": "secedit",
+        "section": "System Access",
+        "key": "PasswordHistorySize",
+        "operator": "equals",
+        "expected": 24
+      },
+      "remediation": {
+        "summary": "Apply the Group Policy or the snippet below. v0.1 does not apply this change.",
+        "gpo": "Computer Configuration/Windows Settings/Security Settings/Account Policies/Password Policy\nEnforce password history: 24 passwords remembered",
+        "intune": "Settings Catalog mirrors this Group Policy path:\nComputer Configuration/Windows Settings/Security Settings/Account Policies/Password Policy\nNo OMA-URI is cited because it was not confirmed for this setting.",
+        "registry": "; Security template fragment for secedit. This is not a Registry Editor file.\n; On a domain member, account policy here does not govern domain accounts.\n\n[System Access]\nPasswordHistorySize = 24\n"
+      }
+    },
+    {
+      "id": "GS-W11-002",
+      "title": "Minimum password length is at least 10 characters",
+      "severity": "medium",
+      "mapping": "verified",
+      "windows11_carryover": "unverified",
+      "module": {
+        "id": "SYS.2.1"
+      },
+      "references": [
+        {
+          "framework": "it-grundschutz-kompendium",
+          "requirement_id": "SYS.2.1.A1",
+          "title": "Sichere Authentisierung von Benutzenden",
+          "mapping": "verified",
+          "source_id": "bsi-hilfsmittel-windows-client-1.0",
+          "note": "Requirement from the IT-Grundschutz-Kompendium, Edition 2023. The setting value is taken from the BSI Hilfsmittel for Windows clients, version 1.0 (20 February 2025). Option 2 in the Hilfsmittel is 10 to 12 characters. Option 1 (passphrase) is 20 to 25. The scored floor is 10 so both options pass."
+        },
+        {
+          "framework": "grundschutz-plus-plus",
+          "requirement_id": "BER.6.4",
+          "title": "Kriterien für die Qualität von Passwörtern",
+          "mapping": "unverified",
+          "source_id": "grundschutz-plus-plus-2026-09-24",
+          "note": "Guidance says a length under 14 is not recommended when no other measures exist. 10 is weaker than that sentence, so this citation is unverified."
+        }
+      ],
+      "rationale": "Password complexity is not scored on its own. The passphrase option wants complexity disabled, and the complex-password option wants it enabled. The concrete value is carried over from the Windows 10 Hilfsmittel (from Windows 10 version 21H2). BSI has not published a Windows 11 settings matrix. SYS.2.2.3 Edition 2023 applies to Windows 10 and Windows 11.",
+      "conflict_note": "Grundschutz++ BER.6.4 says a length under 14 is not recommended when no other measures are in place. This check uses the Hilfsmittel floor of 10 so option 2 is not failed. The BER.6.4 citation is unverified.",
+      "applicability_note": "secedit /export reads the local security database. On a domain member, account policy in that database does not govern domain accounts. Domain accounts follow the Default Domain Policy on a domain controller. v0.1 does not query a domain controller.",
+      "evaluation": {
+        "method": "secedit",
+        "section": "System Access",
+        "key": "MinimumPasswordLength",
+        "operator": "greater_or_equal",
+        "expected": 10
+      },
+      "remediation": {
+        "summary": "Apply the Group Policy or the snippet below. v0.1 does not apply this change.",
+        "gpo": "Computer Configuration/Windows Settings/Security Settings/Account Policies/Password Policy\nMinimum password length: at least 10 (Hilfsmittel option 2 is 10-12; option 1 is 20-25)",
+        "intune": "Settings Catalog mirrors this Group Policy path:\nComputer Configuration/Windows Settings/Security Settings/Account Policies/Password Policy\nNo OMA-URI is cited because it was not confirmed for this setting.",
+        "registry": "; Security template fragment for secedit. This is not a Registry Editor file.\n; On a domain member, account policy here does not govern domain accounts.\n\n[System Access]\nMinimumPasswordLength = 10\n"
+      }
+    },
+    {
+      "id": "GS-W11-003",
+      "title": "Minimum password age is at least 1 day",
+      "severity": "medium",
+      "mapping": "verified",
+      "windows11_carryover": "unverified",
+      "module": {
+        "id": "SYS.2.1"
+      },
+      "references": [
+        {
+          "framework": "it-grundschutz-kompendium",
+          "requirement_id": "SYS.2.1.A1",
+          "title": "Sichere Authentisierung von Benutzenden",
+          "mapping": "verified",
+          "source_id": "bsi-hilfsmittel-windows-client-1.0",
+          "note": "Requirement from the IT-Grundschutz-Kompendium, Edition 2023. The setting value is taken from the BSI Hilfsmittel for Windows clients, version 1.0 (20 February 2025)."
+        }
+      ],
+      "rationale": "The Hilfsmittel sets Minimum password age to 1 day so a user cannot cycle the history in one sitting. The concrete value is carried over from the Windows 10 Hilfsmittel (from Windows 10 version 21H2). BSI has not published a Windows 11 settings matrix. SYS.2.2.3 Edition 2023 applies to Windows 10 and Windows 11.",
+      "conflict_note": "",
+      "applicability_note": "secedit /export reads the local security database. On a domain member, account policy in that database does not govern domain accounts. Domain accounts follow the Default Domain Policy on a domain controller. v0.1 does not query a domain controller.",
+      "evaluation": {
+        "method": "secedit",
+        "section": "System Access",
+        "key": "MinimumPasswordAge",
+        "operator": "greater_or_equal",
+        "expected": 1
+      },
+      "remediation": {
+        "summary": "Apply the Group Policy or the snippet below. v0.1 does not apply this change.",
+        "gpo": "Computer Configuration/Windows Settings/Security Settings/Account Policies/Password Policy\nMinimum password age: 1 day",
+        "intune": "Settings Catalog mirrors this Group Policy path:\nComputer Configuration/Windows Settings/Security Settings/Account Policies/Password Policy\nNo OMA-URI is cited because it was not confirmed for this setting.",
+        "registry": "; Security template fragment for secedit. This is not a Registry Editor file.\n; On a domain member, account policy here does not govern domain accounts.\n\n[System Access]\nMinimumPasswordAge = 1\n"
+      }
+    },
+    {
+      "id": "GS-W11-004",
+      "title": "Maximum password age is 365 days",
+      "severity": "low",
+      "mapping": "verified",
+      "windows11_carryover": "unverified",
+      "module": {
+        "id": "SYS.2.1"
+      },
+      "references": [
+        {
+          "framework": "it-grundschutz-kompendium",
+          "requirement_id": "SYS.2.1.A1",
+          "title": "Sichere Authentisierung von Benutzenden",
+          "mapping": "verified",
+          "source_id": "bsi-hilfsmittel-windows-client-1.0",
+          "note": "Requirement from the IT-Grundschutz-Kompendium, Edition 2023. The setting value is taken from the BSI Hilfsmittel for Windows clients, version 1.0 (20 February 2025). The Hilfsmittel recommends 365 days."
+        },
+        {
+          "framework": "grundschutz-plus-plus",
+          "requirement_id": "BER.6.5",
+          "title": "Anlassbezogene Passwortwechsel",
+          "mapping": "unverified",
+          "source_id": "grundschutz-plus-plus-2026-09-24",
+          "note": "BER.6.5 says a password change should happen only for a specific reason. A fixed maximum age conflicts with that statement."
+        }
+      ],
+      "rationale": "The scored value is the Hilfsmittel recommendation of 365 days under SYS.2.1.A1. The concrete value is carried over from the Windows 10 Hilfsmittel (from Windows 10 version 21H2). BSI has not published a Windows 11 settings matrix. SYS.2.2.3 Edition 2023 applies to Windows 10 and Windows 11.",
+      "conflict_note": "The Hilfsmittel for SYS.2.1.A1 recommends a maximum password age of 365 days. Grundschutz++ BER.6.5 (catalog 2026-09-24) says password changes should be made only when there is a specific reason. This check scores the Hilfsmittel value. The BER.6.5 citation is unverified. Severity is low because the documents disagree.",
+      "applicability_note": "secedit /export reads the local security database. On a domain member, account policy in that database does not govern domain accounts. Domain accounts follow the Default Domain Policy on a domain controller. v0.1 does not query a domain controller.",
+      "evaluation": {
+        "method": "secedit",
+        "section": "System Access",
+        "key": "MaximumPasswordAge",
+        "operator": "equals",
+        "expected": 365
+      },
+      "remediation": {
+        "summary": "Apply the Group Policy or the snippet below. v0.1 does not apply this change.",
+        "gpo": "Computer Configuration/Windows Settings/Security Settings/Account Policies/Password Policy\nMaximum password age: 365 days",
+        "intune": "Settings Catalog mirrors this Group Policy path:\nComputer Configuration/Windows Settings/Security Settings/Account Policies/Password Policy\nNo OMA-URI is cited because it was not confirmed for this setting.",
+        "registry": "; Security template fragment for secedit. This is not a Registry Editor file.\n; On a domain member, account policy here does not govern domain accounts.\n\n[System Access]\nMaximumPasswordAge = 365\n"
+      }
+    },
+    {
+      "id": "GS-W11-005",
+      "title": "Account lockout is 10 attempts and 15 minutes",
+      "severity": "medium",
+      "mapping": "verified",
+      "windows11_carryover": "unverified",
+      "module": {
+        "id": "SYS.2.1"
+      },
+      "references": [
+        {
+          "framework": "it-grundschutz-kompendium",
+          "requirement_id": "SYS.2.1.A1",
+          "title": "Sichere Authentisierung von Benutzenden",
+          "mapping": "verified",
+          "source_id": "bsi-hilfsmittel-windows-client-1.0",
+          "note": "Requirement from the IT-Grundschutz-Kompendium, Edition 2023. The setting value is taken from the BSI Hilfsmittel for Windows clients, version 1.0 (20 February 2025)."
+        },
+        {
+          "framework": "grundschutz-plus-plus",
+          "requirement_id": "BER.3.10",
+          "title": "Anmeldeversuchsgrenze am System",
+          "mapping": "verified",
+          "source_id": "grundschutz-plus-plus-2026-09-24",
+          "note": "The control is parameterized and does not fix the number 10. The threshold and the 15 minute windows are the Hilfsmittel values."
+        }
+      ],
+      "rationale": "The Hilfsmittel sets the lockout threshold to 10 invalid attempts, the duration to 15 minutes, and the reset counter to 15 minutes. The concrete value is carried over from the Windows 10 Hilfsmittel (from Windows 10 version 21H2). BSI has not published a Windows 11 settings matrix. SYS.2.2.3 Edition 2023 applies to Windows 10 and Windows 11.",
+      "conflict_note": "",
+      "applicability_note": "secedit /export reads the local security database. On a domain member, account policy in that database does not govern domain accounts. Domain accounts follow the Default Domain Policy on a domain controller. v0.1 does not query a domain controller.",
+      "evaluation": {
+        "method": "all_of",
+        "evaluations": [
+          {
+            "method": "secedit",
+            "section": "System Access",
+            "key": "LockoutBadCount",
+            "operator": "equals",
+            "expected": 10
+          },
+          {
+            "method": "secedit",
+            "section": "System Access",
+            "key": "LockoutDuration",
+            "operator": "equals",
+            "expected": 15
+          },
+          {
+            "method": "secedit",
+            "section": "System Access",
+            "key": "ResetLockoutCount",
+            "operator": "equals",
+            "expected": 15
+          }
+        ]
+      },
+      "remediation": {
+        "summary": "Apply the Group Policy or the snippet below. v0.1 does not apply this change.",
+        "gpo": "Computer Configuration/Windows Settings/Security Settings/Account Policies/Account Lockout Policy\nAccount lockout threshold: 10\nAccount lockout duration: 15 minutes\nReset account lockout counter after: 15 minutes",
+        "intune": "Settings Catalog mirrors this Group Policy path:\nComputer Configuration/Windows Settings/Security Settings/Account Policies/Account Lockout Policy\nNo OMA-URI is cited because it was not confirmed for this setting.",
+        "registry": "; Security template fragment for secedit. This is not a Registry Editor file.\n; On a domain member, account policy here does not govern domain accounts.\n\n[System Access]\nLockoutBadCount = 10\nLockoutDuration = 15\nResetLockoutCount = 15\n"
+      }
+    },
+    {
+      "id": "GS-W11-006",
+      "title": "Guest account is disabled",
+      "severity": "medium",
+      "mapping": "verified",
+      "windows11_carryover": "unverified",
+      "module": {
+        "id": "SYS.2.1"
+      },
+      "references": [
+        {
+          "framework": "it-grundschutz-kompendium",
+          "requirement_id": "SYS.2.1.A16",
+          "title": "Deaktivierung und Deinstallation nicht benötigter Komponenten und Kennungen",
+          "mapping": "verified",
+          "source_id": "bsi-hilfsmittel-windows-client-1.0",
+          "note": "Requirement from the IT-Grundschutz-Kompendium, Edition 2023. The setting value is taken from the BSI Hilfsmittel for Windows clients, version 1.0 (20 February 2025)."
+        },
+        {
+          "framework": "grundschutz-plus-plus",
+          "requirement_id": "KONF.2.4",
+          "title": "Deaktivierung nicht benötigter Systemfunktionen",
+          "mapping": "verified",
+          "source_id": "grundschutz-plus-plus-2026-09-24",
+          "note": "Guidance names unneeded identities as an example of a function to disable."
+        }
+      ],
+      "rationale": "The Hilfsmittel disables the Guest account under SYS.2.1.A16. The concrete value is carried over from the Windows 10 Hilfsmittel (from Windows 10 version 21H2). BSI has not published a Windows 11 settings matrix. SYS.2.2.3 Edition 2023 applies to Windows 10 and Windows 11.",
+      "conflict_note": "",
+      "applicability_note": "",
+      "evaluation": {
+        "method": "secedit",
+        "section": "System Access",
+        "key": "EnableGuestAccount",
+        "operator": "equals",
+        "expected": 0
+      },
+      "remediation": {
+        "summary": "Apply the Group Policy or the snippet below. v0.1 does not apply this change.",
+        "gpo": "Computer Configuration/Windows Settings/Security Settings/Local Policies/Security Options\nAccounts: Guest account status: Disabled",
+        "intune": "Settings Catalog mirrors this Group Policy path:\nComputer Configuration/Windows Settings/Security Settings/Local Policies/Security Options\nNo OMA-URI is cited because it was not confirmed for this setting.",
+        "registry": "; Security template fragment for secedit. This is not a Registry Editor file.\n; On a domain member, account policy here does not govern domain accounts.\n\n[System Access]\nEnableGuestAccount = 0\n"
+      }
+    },
+    {
+      "id": "GS-W11-007",
+      "title": "Ctrl+Alt+Del is required for logon",
+      "severity": "medium",
+      "mapping": "verified",
+      "windows11_carryover": "unverified",
+      "module": {
+        "id": "SYS.2.1"
+      },
+      "references": [
+        {
+          "framework": "it-grundschutz-kompendium",
+          "requirement_id": "SYS.2.1.A1",
+          "title": "Sichere Authentisierung von Benutzenden",
+          "mapping": "verified",
+          "source_id": "bsi-hilfsmittel-windows-client-1.0",
+          "note": "Requirement from the IT-Grundschutz-Kompendium, Edition 2023. The setting value is taken from the BSI Hilfsmittel for Windows clients, version 1.0 (20 February 2025)."
+        }
+      ],
+      "rationale": "The Hilfsmittel sets Interactive logon: Do not require CTRL+ALT+DEL to Disabled, which stores DisableCAD as 0. The concrete value is carried over from the Windows 10 Hilfsmittel (from Windows 10 version 21H2). BSI has not published a Windows 11 settings matrix. SYS.2.2.3 Edition 2023 applies to Windows 10 and Windows 11.",
+      "conflict_note": "",
+      "applicability_note": "",
+      "evaluation": {
+        "method": "registry",
+        "hive": "HKLM",
+        "path": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
+        "name": "DisableCAD",
+        "operator": "equals",
+        "expected": 0
+      },
+      "remediation": {
+        "summary": "Apply the Group Policy or the snippet below. v0.1 does not apply this change.",
+        "gpo": "Computer Configuration/Windows Settings/Security Settings/Local Policies/Security Options\nInteractive logon: Do not require CTRL+ALT+DEL: Disabled",
+        "intune": "Settings Catalog mirrors this Group Policy path:\nComputer Configuration/Windows Settings/Security Settings/Local Policies/Security Options\nNo OMA-URI is cited because it was not confirmed for this setting.",
+        "registry": "Windows Registry Editor Version 5.00\n\n[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System]\n\"DisableCAD\"=dword:00000000\n"
+      }
+    },
+    {
+      "id": "GS-W11-008",
+      "title": "Cached domain logons are 4 or fewer",
+      "severity": "medium",
+      "mapping": "verified",
+      "windows11_carryover": "unverified",
+      "module": {
+        "id": "SYS.2.1"
+      },
+      "references": [
+        {
+          "framework": "it-grundschutz-kompendium",
+          "requirement_id": "SYS.2.1.A1",
+          "title": "Sichere Authentisierung von Benutzenden",
+          "mapping": "verified",
+          "source_id": "bsi-hilfsmittel-windows-client-1.0",
+          "note": "Requirement from the IT-Grundschutz-Kompendium, Edition 2023. The setting value is taken from the BSI Hilfsmittel for Windows clients, version 1.0 (20 February 2025)."
+        },
+        {
+          "framework": "grundschutz-plus-plus",
+          "requirement_id": "BER.3.20",
+          "title": "Zwischenspeicherung von Zugangsdaten",
+          "mapping": "verified",
+          "source_id": "grundschutz-plus-plus-2026-09-24",
+          "note": "Guidance names the Protected Users group as one Windows implementation. This check scores the Hilfsmittel cache limit. A pass does not show that accounts are members of Protected Users."
+        }
+      ],
+      "rationale": "The Hilfsmittel says the number of previous logons to cache should be 4 or fewer. The registry value is a string and is compared numerically. The concrete value is carried over from the Windows 10 Hilfsmittel (from Windows 10 version 21H2). BSI has not published a Windows 11 settings matrix. SYS.2.2.3 Edition 2023 applies to Windows 10 and Windows 11.",
+      "conflict_note": "",
+      "applicability_note": "",
+      "evaluation": {
+        "method": "registry",
+        "hive": "HKLM",
+        "path": "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon",
+        "name": "CachedLogonsCount",
+        "operator": "less_or_equal",
+        "expected": 4
+      },
+      "remediation": {
+        "summary": "Apply the Group Policy or the snippet below. v0.1 does not apply this change.",
+        "gpo": "Computer Configuration/Windows Settings/Security Settings/Local Policies/Security Options\nInteractive logon: Number of previous logons to cache: 4 or fewer",
+        "intune": "Settings Catalog mirrors this Group Policy path:\nComputer Configuration/Windows Settings/Security Settings/Local Policies/Security Options\nNo OMA-URI is cited because it was not confirmed for this setting.",
+        "registry": "Windows Registry Editor Version 5.00\n\n[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon]\n\"CachedLogonsCount\"=\"4\"\n"
+      }
+    },
+    {
+      "id": "GS-W11-009",
+      "title": "Machine inactivity limit is 600 to 900 seconds",
+      "severity": "medium",
+      "mapping": "verified",
+      "windows11_carryover": "unverified",
+      "module": {
+        "id": "SYS.2.1"
+      },
+      "references": [
+        {
+          "framework": "it-grundschutz-kompendium",
+          "requirement_id": "SYS.2.1.A1",
+          "title": "Sichere Authentisierung von Benutzenden",
+          "mapping": "verified",
+          "source_id": "bsi-hilfsmittel-windows-client-1.0",
+          "note": "Requirement from the IT-Grundschutz-Kompendium, Edition 2023. The setting value is taken from the BSI Hilfsmittel for Windows clients, version 1.0 (20 February 2025). The Hilfsmittel allows 600 to 900 seconds and explicitly excludes 0."
+        },
+        {
+          "framework": "grundschutz-plus-plus",
+          "requirement_id": "BER.3.12",
+          "title": "Systemsperre bei Inaktivität",
+          "mapping": "verified",
+          "source_id": "grundschutz-plus-plus-2026-09-24",
+          "note": "The control is parameterized. Guidance gives 5 to 15 minutes as an example. The scored range is the Hilfsmittel value."
+        }
+      ],
+      "rationale": "Interactive logon: Machine inactivity limit must be inside 600 to 900 seconds. Zero means the limit is off and fails this check. The concrete value is carried over from the Windows 10 Hilfsmittel (from Windows 10 version 21H2). BSI has not published a Windows 11 settings matrix. SYS.2.2.3 Edition 2023 applies to Windows 10 and Windows 11.",
+      "conflict_note": "",
+      "applicability_note": "",
+      "evaluation": {
+        "method": "registry",
+        "hive": "HKLM",
+        "path": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
+        "name": "InactivityTimeoutSecs",
+        "operator": "in_range",
+        "expected": [
+          600,
+          900
+        ]
+      },
+      "remediation": {
+        "summary": "Apply the Group Policy or the snippet below. v0.1 does not apply this change.",
+        "gpo": "Computer Configuration/Windows Settings/Security Settings/Local Policies/Security Options\nInteractive logon: Machine inactivity limit: 600 to 900 seconds, not 0",
+        "intune": "Settings Catalog mirrors this Group Policy path:\nComputer Configuration/Windows Settings/Security Settings/Local Policies/Security Options\nNo OMA-URI is cited because it was not confirmed for this setting.",
+        "registry": "Windows Registry Editor Version 5.00\n\n[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System]\n\"InactivityTimeoutSecs\"=dword:00000384\n"
+      }
+    },
+    {
+      "id": "GS-W11-010",
+      "title": "Diagnostic data level is 0 (Security)",
+      "severity": "high",
+      "mapping": "verified",
+      "windows11_carryover": "unverified",
+      "module": {
+        "id": "SYS.2.2.3"
+      },
+      "references": [
+        {
+          "framework": "it-grundschutz-kompendium",
+          "requirement_id": "SYS.2.2.3.A4",
+          "title": "Telemetrie und Datenschutzeinstellungen unter Windows",
+          "mapping": "verified",
+          "source_id": "bsi-hilfsmittel-windows-client-1.0",
+          "note": "Requirement from the IT-Grundschutz-Kompendium, Edition 2023. The setting value is taken from the BSI Hilfsmittel for Windows clients, version 1.0 (20 February 2025). The Hilfsmittel lists 0 - Security for Enterprise, or 1 - Required where 0 is not effective."
+        },
+        {
+          "framework": "grundschutz-plus-plus",
+          "requirement_id": "KONF.2.4",
+          "title": "Deaktivierung nicht benötigter Systemfunktionen",
+          "mapping": "verified",
+          "source_id": "grundschutz-plus-plus-2026-09-24",
+          "note": "Guidance names telemetry services as an example of a function to disable."
+        }
+      ],
+      "rationale": "The Hilfsmittel recommends Allow Telemetry 0 - Security where that value is honored. This check expects 0 and does not weaken the expected value to 1. The concrete value is carried over from the Windows 10 Hilfsmittel (from Windows 10 version 21H2). BSI has not published a Windows 11 settings matrix. SYS.2.2.3 Edition 2023 applies to Windows 10 and Windows 11.",
+      "conflict_note": "",
+      "applicability_note": "Microsoft documents value 0 (Security) as applying to Windows 10 Enterprise, Education, and Server, and as treated as 1 on other devices. The Policy CSP applicability line lists Windows 10 version 1507 and later and does not name Windows 11. The UI name is now Allow Diagnostic Data. windows11_carryover stays unverified.",
+      "evaluation": {
+        "method": "registry",
+        "hive": "HKLM",
+        "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\DataCollection",
+        "name": "AllowTelemetry",
+        "operator": "equals",
+        "expected": 0
+      },
+      "remediation": {
+        "summary": "Apply the Group Policy or the snippet below. v0.1 does not apply this change.",
+        "gpo": "Computer Configuration/Administrative Templates/Windows Components/Data Collection and Preview Builds\nAllow Telemetry: Enabled, 0 - Security",
+        "intune": "Settings Catalog: Computer Configuration/Administrative Templates/Windows Components/Data Collection and Preview Builds\nOMA-URI: ./Device/Vendor/MSFT/Policy/Config/System/AllowTelemetry",
+        "registry": "Windows Registry Editor Version 5.00\n\n[HKEY_LOCAL_MACHINE\\SOFTWARE\\Policies\\Microsoft\\Windows\\DataCollection]\n\"AllowTelemetry\"=dword:00000000\n"
+      }
+    },
+    {
+      "id": "GS-W11-011",
+      "title": "Device name is not sent in diagnostic data",
+      "severity": "medium",
+      "mapping": "verified",
+      "windows11_carryover": "unverified",
+      "module": {
+        "id": "SYS.2.2.3"
+      },
+      "references": [
+        {
+          "framework": "it-grundschutz-kompendium",
+          "requirement_id": "SYS.2.2.3.A4",
+          "title": "Telemetrie und Datenschutzeinstellungen unter Windows",
+          "mapping": "verified",
+          "source_id": "bsi-hilfsmittel-windows-client-1.0",
+          "note": "Requirement from the IT-Grundschutz-Kompendium, Edition 2023. The setting value is taken from the BSI Hilfsmittel for Windows clients, version 1.0 (20 February 2025)."
+        }
+      ],
+      "rationale": "The Hilfsmittel sets Allow device name to be sent in Windows diagnostic data to Disabled. The CSP default is that the device name is not sent, so a missing value passes. The concrete value is carried over from the Windows 10 Hilfsmittel (from Windows 10 version 21H2). BSI has not published a Windows 11 settings matrix. SYS.2.2.3 Edition 2023 applies to Windows 10 and Windows 11.",
+      "conflict_note": "",
+      "applicability_note": "",
+      "evaluation": {
+        "method": "registry",
+        "hive": "HKLM",
+        "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\DataCollection",
+        "name": "AllowDeviceNameInDiagnosticData",
+        "operator": "equals",
+        "expected": 0,
+        "when_absent": "pass"
+      },
+      "remediation": {
+        "summary": "Apply the Group Policy or the snippet below. v0.1 does not apply this change.",
+        "gpo": "Computer Configuration/Administrative Templates/Windows Components/Data Collection and Preview Builds\nAllow device name to be sent in Windows diagnostic data: Disabled",
+        "intune": "Settings Catalog: Computer Configuration/Administrative Templates/Windows Components/Data Collection and Preview Builds\nOMA-URI: ./Device/Vendor/MSFT/Policy/Config/System/AllowDeviceNameInDiagnosticData",
+        "registry": "Windows Registry Editor Version 5.00\n\n[HKEY_LOCAL_MACHINE\\SOFTWARE\\Policies\\Microsoft\\Windows\\DataCollection]\n\"AllowDeviceNameInDiagnosticData\"=dword:00000000\n"
+      }
+    },
+    {
+      "id": "GS-W11-012",
+      "title": "Connected User Experiences and Telemetry service is disabled",
+      "severity": "high",
+      "mapping": "verified",
+      "windows11_carryover": "unverified",
+      "module": {
+        "id": "SYS.2.2.3"
+      },
+      "references": [
+        {
+          "framework": "it-grundschutz-kompendium",
+          "requirement_id": "SYS.2.2.3.A25",
+          "title": "Umgang mit Fernzugriffsfunktionen der Connected User Experience and Telemetry",
+          "mapping": "verified",
+          "source_id": "bsi-hilfsmittel-windows-client-1.0",
+          "note": "Requirement from the IT-Grundschutz-Kompendium, Edition 2023. The setting value is taken from the BSI Hilfsmittel for Windows clients, version 1.0 (20 February 2025)."
+        },
+        {
+          "framework": "grundschutz-plus-plus",
+          "requirement_id": "KONF.2.4",
+          "title": "Deaktivierung nicht benötigter Systemfunktionen",
+          "mapping": "verified",
+          "source_id": "grundschutz-plus-plus-2026-09-24",
+          "note": "Guidance names telemetry services as an example of a function to disable."
+        }
+      ],
+      "rationale": "The Hilfsmittel sets the Connected User Experiences and Telemetry service (DiagTrack) to Disabled. The concrete value is carried over from the Windows 10 Hilfsmittel (from Windows 10 version 21H2). BSI has not published a Windows 11 settings matrix. SYS.2.2.3 Edition 2023 applies to Windows 10 and Windows 11.",
+      "conflict_note": "",
+      "applicability_note": "",
+      "evaluation": {
+        "method": "service",
+        "name": "DiagTrack",
+        "property": "start_type",
+        "operator": "equals",
+        "expected": "Disabled"
+      },
+      "remediation": {
+        "summary": "Apply the Group Policy or the snippet below. v0.1 does not apply this change.",
+        "gpo": "Computer Configuration/Windows Settings/Security Settings/System Services\nConnected User Experiences and Telemetry: Disabled\nThe Hilfsmittel notes that this policy path is not available in the client-side editor. Set the service start type to Disabled.",
+        "intune": "Settings Catalog mirrors this Group Policy path:\nComputer Configuration/Windows Settings/Security Settings/System Services\nNo OMA-URI is cited because it was not confirmed for this setting.",
+        "registry": "v0.1 does not change services. A local administrator can set the start type with:\nsc.exe config DiagTrack start= disabled\nThe space after start= is required by sc.exe.\n"
+      }
+    },
+    {
+      "id": "GS-W11-013",
+      "title": "Diagtrack-Listener autologger is stopped",
+      "severity": "medium",
+      "mapping": "verified",
+      "windows11_carryover": "unverified",
+      "module": {
+        "id": "SYS.2.2.3"
+      },
+      "references": [
+        {
+          "framework": "it-grundschutz-kompendium",
+          "requirement_id": "SYS.2.2.3.A25",
+          "title": "Umgang mit Fernzugriffsfunktionen der Connected User Experience and Telemetry",
+          "mapping": "verified",
+          "source_id": "bsi-hilfsmittel-windows-client-1.0",
+          "note": "Requirement from the IT-Grundschutz-Kompendium, Edition 2023. The setting value is taken from the BSI Hilfsmittel for Windows clients, version 1.0 (20 February 2025)."
+        }
+      ],
+      "rationale": "The Hilfsmittel registry table sets Diagtrack-Listener Start to 0. The concrete value is carried over from the Windows 10 Hilfsmittel (from Windows 10 version 21H2). BSI has not published a Windows 11 settings matrix. SYS.2.2.3 Edition 2023 applies to Windows 10 and Windows 11.",
+      "conflict_note": "",
+      "applicability_note": "",
+      "evaluation": {
+        "method": "registry",
+        "hive": "HKLM",
+        "path": "SYSTEM\\CurrentControlSet\\Control\\WMI\\Autologger\\Diagtrack-Listener",
+        "name": "Start",
+        "operator": "equals",
+        "expected": 0
+      },
+      "remediation": {
+        "summary": "Apply the Group Policy or the snippet below. v0.1 does not apply this change.",
+        "gpo": "Performance Monitor / Data Collector Sets / Startup Event Trace Sessions / Diagtrack-Listener: Enabled cleared.\nThe Hilfsmittel also documents the registry value below.",
+        "intune": "Settings Catalog mirrors this Group Policy path:\nPerformance Monitor / Data Collector Sets / Startup Event Trace Sessions / Diagtrack-Listener: Enabled cleared.\nNo OMA-URI is cited because it was not confirmed for this setting.",
+        "registry": "Windows Registry Editor Version 5.00\n\n[HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\WMI\\Autologger\\Diagtrack-Listener]\n\"Start\"=dword:00000000\n"
+      }
+    },
+    {
+      "id": "GS-W11-014",
+      "title": "Microsoft accounts cannot be added or used to sign in",
+      "severity": "medium",
+      "mapping": "verified",
+      "windows11_carryover": "unverified",
+      "module": {
+        "id": "SYS.2.2.3"
+      },
+      "references": [
+        {
+          "framework": "it-grundschutz-kompendium",
+          "requirement_id": "SYS.2.2.3.A6",
+          "title": "Integration von Online-Konten in das Betriebssystem",
+          "mapping": "verified",
+          "source_id": "bsi-hilfsmittel-windows-client-1.0",
+          "note": "Requirement from the IT-Grundschutz-Kompendium, Edition 2023. The setting value is taken from the BSI Hilfsmittel for Windows clients, version 1.0 (20 February 2025)."
+        },
+        {
+          "framework": "grundschutz-plus-plus",
+          "requirement_id": "KONF.2.4.2",
+          "title": "Externe Cloud-Anbindungen",
+          "mapping": "verified",
+          "source_id": "grundschutz-plus-plus-2026-09-24",
+          "note": "Guidance names sign-in to a cloud directory as a cloud connection to disable when it is not required."
+        }
+      ],
+      "rationale": "The Hilfsmittel sets Accounts: Block Microsoft accounts to Users can't add or log on with Microsoft accounts, which is NoConnectedUser 3. The concrete value is carried over from the Windows 10 Hilfsmittel (from Windows 10 version 21H2). BSI has not published a Windows 11 settings matrix. SYS.2.2.3 Edition 2023 applies to Windows 10 and Windows 11.",
+      "conflict_note": "",
+      "applicability_note": "",
+      "evaluation": {
+        "method": "registry",
+        "hive": "HKLM",
+        "path": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
+        "name": "NoConnectedUser",
+        "operator": "equals",
+        "expected": 3
+      },
+      "remediation": {
+        "summary": "Apply the Group Policy or the snippet below. v0.1 does not apply this change.",
+        "gpo": "Computer Configuration/Windows Settings/Security Settings/Local Policies/Security Options\nAccounts: Block Microsoft accounts: Users can't add or log on with Microsoft accounts",
+        "intune": "Settings Catalog mirrors this Group Policy path:\nComputer Configuration/Windows Settings/Security Settings/Local Policies/Security Options\nNo OMA-URI is cited because it was not confirmed for this setting.",
+        "registry": "Windows Registry Editor Version 5.00\n\n[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System]\n\"NoConnectedUser\"=dword:00000003\n"
+      }
+    },
+    {
+      "id": "GS-W11-015",
+      "title": "Microsoft Defender real-time protection is on",
+      "severity": "high",
+      "mapping": "verified",
+      "windows11_carryover": "unverified",
+      "module": {
+        "id": "SYS.2.1"
+      },
+      "references": [
+        {
+          "framework": "it-grundschutz-kompendium",
+          "requirement_id": "SYS.2.1.A6",
+          "title": "Einsatz von Schutzprogrammen gegen Schadsoftware",
+          "mapping": "verified",
+          "source_id": "bsi-hilfsmittel-windows-client-1.0",
+          "note": "Requirement from the IT-Grundschutz-Kompendium, Edition 2023. The setting value is taken from the BSI Hilfsmittel for Windows clients, version 1.0 (20 February 2025)."
+        },
+        {
+          "framework": "it-grundschutz-kompendium",
+          "requirement_id": "SYS.2.2.3.A5",
+          "title": "Schutz vor Schadsoftware unter Windows",
+          "mapping": "verified",
+          "source_id": "bsi-hilfsmittel-windows-client-1.0",
+          "note": "Requirement from the IT-Grundschutz-Kompendium, Edition 2023. The setting value is taken from the BSI Hilfsmittel for Windows clients, version 1.0 (20 February 2025). The Hilfsmittel says SYS.2.2.3.A5 is met by implementing SYS.2.1.A6."
+        },
+        {
+          "framework": "grundschutz-plus-plus",
+          "requirement_id": "KONF.7.1",
+          "title": "Echtzeitscanner",
+          "mapping": "verified",
+          "source_id": "grundschutz-plus-plus-2026-09-24",
+          "note": "The control asks for an automatic malware check when a file is opened or installed. Real-time protection is that indicator. A pass does not prove signatures are current, so KONF.7.6 is not cited."
+        }
+      ],
+      "rationale": "The Hilfsmittel sets Turn off real-time protection to Disabled for the office workplace that uses Microsoft Defender. Get-MpPreference DisableRealtimeMonitoring is false in that state. A third-party antivirus product may turn Defender off. This check expects Defender because that is the Hilfsmittel example. The concrete value is carried over from the Windows 10 Hilfsmittel (from Windows 10 version 21H2). BSI has not published a Windows 11 settings matrix. SYS.2.2.3 Edition 2023 applies to Windows 10 and Windows 11.",
+      "conflict_note": "",
+      "applicability_note": "",
+      "evaluation": {
+        "method": "defender",
+        "property": "DisableRealtimeMonitoring",
+        "operator": "equals",
+        "expected": false
+      },
+      "remediation": {
+        "summary": "Apply the Group Policy or the snippet below. v0.1 does not apply this change.",
+        "gpo": "Computer Configuration/Administrative Templates/Windows Components/Microsoft Defender Antivirus/Real-time Protection\nTurn off real-time protection: Disabled",
+        "intune": "Settings Catalog mirrors this Group Policy path:\nComputer Configuration/Administrative Templates/Windows Components/Microsoft Defender Antivirus/Real-time Protection\nNo OMA-URI is cited because it was not confirmed for this setting.",
+        "registry": "Windows Registry Editor Version 5.00\n\n[HKEY_LOCAL_MACHINE\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Real-Time Protection]\n\"DisableRealtimeMonitoring\"=dword:00000000\n"
+      }
+    },
+    {
+      "id": "GS-W11-016",
+      "title": "Defender behavior monitoring and downloaded-file scanning are on",
+      "severity": "medium",
+      "mapping": "verified",
+      "windows11_carryover": "unverified",
+      "module": {
+        "id": "SYS.2.1"
+      },
+      "references": [
+        {
+          "framework": "it-grundschutz-kompendium",
+          "requirement_id": "SYS.2.1.A6",
+          "title": "Einsatz von Schutzprogrammen gegen Schadsoftware",
+          "mapping": "verified",
+          "source_id": "bsi-hilfsmittel-windows-client-1.0",
+          "note": "Requirement from the IT-Grundschutz-Kompendium, Edition 2023. The setting value is taken from the BSI Hilfsmittel for Windows clients, version 1.0 (20 February 2025)."
+        },
+        {
+          "framework": "grundschutz-plus-plus",
+          "requirement_id": "KONF.7.1",
+          "title": "Echtzeitscanner",
+          "mapping": "verified",
+          "source_id": "grundschutz-plus-plus-2026-09-24",
+          "note": "Control id and title from Anwenderkatalog Grundschutz++, resolved catalog version 2026-09-24T07:12:39.131983+00:00."
+        }
+      ],
+      "rationale": "The Hilfsmittel enables behavior monitoring and scanning of downloaded files and attachments. Both map to Get-MpPreference properties that are false when the protection is on. The concrete value is carried over from the Windows 10 Hilfsmittel (from Windows 10 version 21H2). BSI has not published a Windows 11 settings matrix. SYS.2.2.3 Edition 2023 applies to Windows 10 and Windows 11.",
+      "conflict_note": "",
+      "applicability_note": "",
+      "evaluation": {
+        "method": "all_of",
+        "evaluations": [
+          {
+            "method": "defender",
+            "property": "DisableBehaviorMonitoring",
+            "operator": "equals",
+            "expected": false
+          },
+          {
+            "method": "defender",
+            "property": "DisableIOAVProtection",
+            "operator": "equals",
+            "expected": false
+          }
+        ]
+      },
+      "remediation": {
+        "summary": "Apply the Group Policy or the snippet below. v0.1 does not apply this change.",
+        "gpo": "Computer Configuration/Administrative Templates/Windows Components/Microsoft Defender Antivirus/Real-time Protection\nTurn on behavior monitoring: Enabled\nScan all downloaded files and attachments: Enabled",
+        "intune": "Settings Catalog mirrors this Group Policy path:\nComputer Configuration/Administrative Templates/Windows Components/Microsoft Defender Antivirus/Real-time Protection\nNo OMA-URI is cited because it was not confirmed for this setting.",
+        "registry": "Windows Registry Editor Version 5.00\n\n[HKEY_LOCAL_MACHINE\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Real-Time Protection]\n\"DisableBehaviorMonitoring\"=dword:00000000\n\"DisableIOAVProtection\"=dword:00000000\n"
+      }
+    },
+    {
+      "id": "GS-W11-017",
+      "title": "Defender blocks potentially unwanted applications",
+      "severity": "medium",
+      "mapping": "verified",
+      "windows11_carryover": "unverified",
+      "module": {
+        "id": "SYS.2.1"
+      },
+      "references": [
+        {
+          "framework": "it-grundschutz-kompendium",
+          "requirement_id": "SYS.2.1.A6",
+          "title": "Einsatz von Schutzprogrammen gegen Schadsoftware",
+          "mapping": "verified",
+          "source_id": "bsi-hilfsmittel-windows-client-1.0",
+          "note": "Requirement from the IT-Grundschutz-Kompendium, Edition 2023. The setting value is taken from the BSI Hilfsmittel for Windows clients, version 1.0 (20 February 2025). The Hilfsmittel sets Configure detection for potentially unwanted applications to Block."
+        }
+      ],
+      "rationale": "PUAProtection 1 is Block. Audit mode (2) does not pass. The concrete value is carried over from the Windows 10 Hilfsmittel (from Windows 10 version 21H2). BSI has not published a Windows 11 settings matrix. SYS.2.2.3 Edition 2023 applies to Windows 10 and Windows 11.",
+      "conflict_note": "",
+      "applicability_note": "",
+      "evaluation": {
+        "method": "defender",
+        "property": "PUAProtection",
+        "operator": "equals",
+        "expected": 1
+      },
+      "remediation": {
+        "summary": "Apply the Group Policy or the snippet below. v0.1 does not apply this change.",
+        "gpo": "Computer Configuration/Administrative Templates/Windows Components/Microsoft Defender Antivirus\nConfigure detection for potentially unwanted applications: Enabled, Block",
+        "intune": "Settings Catalog mirrors this Group Policy path:\nComputer Configuration/Administrative Templates/Windows Components/Microsoft Defender Antivirus\nNo OMA-URI is cited because it was not confirmed for this setting.",
+        "registry": "Windows Registry Editor Version 5.00\n\n[HKEY_LOCAL_MACHINE\\SOFTWARE\\Policies\\Microsoft\\Windows Defender]\n\"PUAProtection\"=dword:00000001\n"
+      }
+    },
+    {
+      "id": "GS-W11-018",
+      "title": "Microsoft Defender Antivirus service is running",
+      "severity": "high",
+      "mapping": "verified",
+      "windows11_carryover": "unverified",
+      "module": {
+        "id": "SYS.2.1"
+      },
+      "references": [
+        {
+          "framework": "it-grundschutz-kompendium",
+          "requirement_id": "SYS.2.1.A6",
+          "title": "Einsatz von Schutzprogrammen gegen Schadsoftware",
+          "mapping": "verified",
+          "source_id": "bsi-hilfsmittel-windows-client-1.0",
+          "note": "Requirement from the IT-Grundschutz-Kompendium, Edition 2023. The setting value is taken from the BSI Hilfsmittel for Windows clients, version 1.0 (20 February 2025)."
+        },
+        {
+          "framework": "it-grundschutz-kompendium",
+          "requirement_id": "SYS.2.2.3.A5",
+          "title": "Schutz vor Schadsoftware unter Windows",
+          "mapping": "verified",
+          "source_id": "bsi-hilfsmittel-windows-client-1.0",
+          "note": "Requirement from the IT-Grundschutz-Kompendium, Edition 2023. The setting value is taken from the BSI Hilfsmittel for Windows clients, version 1.0 (20 February 2025)."
+        }
+      ],
+      "rationale": "WinDefend must be Automatic and Running for the Defender settings above to be in effect. A third-party product may stop this service. The concrete value is carried over from the Windows 10 Hilfsmittel (from Windows 10 version 21H2). BSI has not published a Windows 11 settings matrix. SYS.2.2.3 Edition 2023 applies to Windows 10 and Windows 11.",
+      "conflict_note": "",
+      "applicability_note": "",
+      "evaluation": {
+        "method": "all_of",
+        "evaluations": [
+          {
+            "method": "service",
+            "name": "WinDefend",
+            "property": "start_type",
+            "operator": "equals",
+            "expected": "Automatic"
+          },
+          {
+            "method": "service",
+            "name": "WinDefend",
+            "property": "status",
+            "operator": "equals",
+            "expected": "Running"
+          }
+        ]
+      },
+      "remediation": {
+        "summary": "Apply the Group Policy or the snippet below. v0.1 does not apply this change.",
+        "gpo": "Services: Windows Defender Antivirus Service (WinDefend), start type Automatic, status Running.",
+        "intune": "Settings Catalog mirrors this Group Policy path:\nServices: Windows Defender Antivirus Service (WinDefend), start type Automatic, status Running.\nNo OMA-URI is cited because it was not confirmed for this setting.",
+        "registry": "v0.1 does not change services. A local administrator can set the start type with:\nsc.exe config WinDefend start= auto\nThe space after start= is required by sc.exe.\nThe service must also be running.\n"
+      }
+    },
+    {
+      "id": "GS-W11-019",
+      "title": "SMBv1 server is disabled",
+      "severity": "high",
+      "mapping": "verified",
+      "windows11_carryover": "unverified",
+      "module": {
+        "id": "SYS.2.1"
+      },
+      "references": [
+        {
+          "framework": "it-grundschutz-kompendium",
+          "requirement_id": "SYS.2.1.A16",
+          "title": "Deaktivierung und Deinstallation nicht benötigter Komponenten und Kennungen",
+          "mapping": "verified",
+          "source_id": "bsi-hilfsmittel-windows-client-1.0",
+          "note": "Requirement from the IT-Grundschutz-Kompendium, Edition 2023. The setting value is taken from the BSI Hilfsmittel for Windows clients, version 1.0 (20 February 2025)."
+        },
+        {
+          "framework": "grundschutz-plus-plus",
+          "requirement_id": "KONF.2.4",
+          "title": "Deaktivierung nicht benötigter Systemfunktionen",
+          "mapping": "verified",
+          "source_id": "grundschutz-plus-plus-2026-09-24",
+          "note": "Guidance names unused network protocols as an example. The Hilfsmittel names SMBv1 specifically."
+        }
+      ],
+      "rationale": "The Hilfsmittel sets Configure SMB v1 server to Disabled. That writes LanmanServer SMB1 = 0. Do not set the client-driver policy itself to Disabled, because the Hilfsmittel says that deletes the start type. The concrete value is carried over from the Windows 10 Hilfsmittel (from Windows 10 version 21H2). BSI has not published a Windows 11 settings matrix. SYS.2.2.3 Edition 2023 applies to Windows 10 and Windows 11.",
+      "conflict_note": "",
+      "applicability_note": "",
+      "evaluation": {
+        "method": "registry",
+        "hive": "HKLM",
+        "path": "SYSTEM\\CurrentControlSet\\Services\\LanmanServer\\Parameters",
+        "name": "SMB1",
+        "operator": "equals",
+        "expected": 0
+      },
+      "remediation": {
+        "summary": "Apply the Group Policy or the snippet below. v0.1 does not apply this change.",
+        "gpo": "Computer Configuration/Administrative Templates/MS Security Guide\nConfigure SMB v1 server: Disabled",
+        "intune": "Settings Catalog mirrors this Group Policy path:\nComputer Configuration/Administrative Templates/MS Security Guide\nNo OMA-URI is cited because it was not confirmed for this setting.",
+        "registry": "Windows Registry Editor Version 5.00\n\n[HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Services\\LanmanServer\\Parameters]\n\"SMB1\"=dword:00000000\n"
+      }
+    },
+    {
+      "id": "GS-W11-020",
+      "title": "SMBv1 client driver is disabled",
+      "severity": "high",
+      "mapping": "verified",
+      "windows11_carryover": "unverified",
+      "module": {
+        "id": "SYS.2.1"
+      },
+      "references": [
+        {
+          "framework": "it-grundschutz-kompendium",
+          "requirement_id": "SYS.2.1.A16",
+          "title": "Deaktivierung und Deinstallation nicht benötigter Komponenten und Kennungen",
+          "mapping": "verified",
+          "source_id": "bsi-hilfsmittel-windows-client-1.0",
+          "note": "Requirement from the IT-Grundschutz-Kompendium, Edition 2023. The setting value is taken from the BSI Hilfsmittel for Windows clients, version 1.0 (20 February 2025)."
+        },
+        {
+          "framework": "grundschutz-plus-plus",
+          "requirement_id": "KONF.2.4",
+          "title": "Deaktivierung nicht benötigter Systemfunktionen",
+          "mapping": "verified",
+          "source_id": "grundschutz-plus-plus-2026-09-24",
+          "note": "Control id and title from Anwenderkatalog Grundschutz++, resolved catalog version 2026-09-24T07:12:39.131983+00:00."
+        }
+      ],
+      "rationale": "The Hilfsmittel sets Configure SMB v1 client driver to Enable the policy and choose Disable driver. That is mrxsmb10 Start = 4. The concrete value is carried over from the Windows 10 Hilfsmittel (from Windows 10 version 21H2). BSI has not published a Windows 11 settings matrix. SYS.2.2.3 Edition 2023 applies to Windows 10 and Windows 11.",
+      "conflict_note": "",
+      "applicability_note": "",
+      "evaluation": {
+        "method": "registry",
+        "hive": "HKLM",
+        "path": "SYSTEM\\CurrentControlSet\\Services\\mrxsmb10",
+        "name": "Start",
+        "operator": "equals",
+        "expected": 4
+      },
+      "remediation": {
+        "summary": "Apply the Group Policy or the snippet below. v0.1 does not apply this change.",
+        "gpo": "Computer Configuration/Administrative Templates/MS Security Guide\nConfigure SMB v1 client driver: Enabled, Disable driver (recommended)",
+        "intune": "Settings Catalog mirrors this Group Policy path:\nComputer Configuration/Administrative Templates/MS Security Guide\nNo OMA-URI is cited because it was not confirmed for this setting.",
+        "registry": "Windows Registry Editor Version 5.00\n\n[HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Services\\mrxsmb10]\n\"Start\"=dword:00000004\n"
+      }
+    },
+    {
+      "id": "GS-W11-021",
+      "title": "LLMNR multicast name resolution is off",
+      "severity": "medium",
+      "mapping": "verified",
+      "windows11_carryover": "unverified",
+      "module": {
+        "id": "SYS.2.1"
+      },
+      "references": [
+        {
+          "framework": "it-grundschutz-kompendium",
+          "requirement_id": "SYS.2.1.A16",
+          "title": "Deaktivierung und Deinstallation nicht benötigter Komponenten und Kennungen",
+          "mapping": "verified",
+          "source_id": "bsi-hilfsmittel-windows-client-1.0",
+          "note": "Requirement from the IT-Grundschutz-Kompendium, Edition 2023. The setting value is taken from the BSI Hilfsmittel for Windows clients, version 1.0 (20 February 2025)."
+        },
+        {
+          "framework": "grundschutz-plus-plus",
+          "requirement_id": "KONF.2.4",
+          "title": "Deaktivierung nicht benötigter Systemfunktionen",
+          "mapping": "verified",
+          "source_id": "grundschutz-plus-plus-2026-09-24",
+          "note": "Control id and title from Anwenderkatalog Grundschutz++, resolved catalog version 2026-09-24T07:12:39.131983+00:00."
+        }
+      ],
+      "rationale": "The Hilfsmittel sets Turn off multicast name resolution to Enabled. That writes EnableMulticast = 0. The Hilfsmittel says this covers LLMNR and not mDNS. The concrete value is carried over from the Windows 10 Hilfsmittel (from Windows 10 version 21H2). BSI has not published a Windows 11 settings matrix. SYS.2.2.3 Edition 2023 applies to Windows 10 and Windows 11.",
+      "conflict_note": "",
+      "applicability_note": "",
+      "evaluation": {
+        "method": "registry",
+        "hive": "HKLM",
+        "path": "SOFTWARE\\Policies\\Microsoft\\Windows NT\\DNSClient",
+        "name": "EnableMulticast",
+        "operator": "equals",
+        "expected": 0
+      },
+      "remediation": {
+        "summary": "Apply the Group Policy or the snippet below. v0.1 does not apply this change.",
+        "gpo": "Computer Configuration/Administrative Templates/Network/DNS Client\nTurn off multicast name resolution: Enabled",
+        "intune": "Settings Catalog mirrors this Group Policy path:\nComputer Configuration/Administrative Templates/Network/DNS Client\nNo OMA-URI is cited because it was not confirmed for this setting.",
+        "registry": "Windows Registry Editor Version 5.00\n\n[HKEY_LOCAL_MACHINE\\SOFTWARE\\Policies\\Microsoft\\Windows NT\\DNSClient]\n\"EnableMulticast\"=dword:00000000\n"
+      }
+    },
+    {
+      "id": "GS-W11-022",
+      "title": "Autorun commands and AutoPlay are disabled",
+      "severity": "medium",
+      "mapping": "verified",
+      "windows11_carryover": "unverified",
+      "module": {
+        "id": "SYS.2.1"
+      },
+      "references": [
+        {
+          "framework": "it-grundschutz-kompendium",
+          "requirement_id": "SYS.2.1.A16",
+          "title": "Deaktivierung und Deinstallation nicht benötigter Komponenten und Kennungen",
+          "mapping": "verified",
+          "source_id": "bsi-hilfsmittel-windows-client-1.0",
+          "note": "Requirement from the IT-Grundschutz-Kompendium, Edition 2023. The setting value is taken from the BSI Hilfsmittel for Windows clients, version 1.0 (20 February 2025)."
+        },
+        {
+          "framework": "grundschutz-plus-plus",
+          "requirement_id": "KONF.3.8",
+          "title": "Einschränkung von Wechselmedien",
+          "mapping": "verified",
+          "source_id": "grundschutz-plus-plus-2026-09-24",
+          "note": "The control covers automatic mounting and opening of removable media. Autorun and AutoPlay are the Windows settings the Hilfsmittel names."
+        }
+      ],
+      "rationale": "The Hilfsmittel sets the default AutoRun behavior to Do not execute any autorun commands (NoAutorun = 1) and Turn off Autoplay to All drives (NoDriveTypeAutoRun = 255). The concrete value is carried over from the Windows 10 Hilfsmittel (from Windows 10 version 21H2). BSI has not published a Windows 11 settings matrix. SYS.2.2.3 Edition 2023 applies to Windows 10 and Windows 11.",
+      "conflict_note": "",
+      "applicability_note": "",
+      "evaluation": {
+        "method": "all_of",
+        "evaluations": [
+          {
+            "method": "registry",
+            "hive": "HKLM",
+            "path": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer",
+            "name": "NoAutorun",
+            "operator": "equals",
+            "expected": 1
+          },
+          {
+            "method": "registry",
+            "hive": "HKLM",
+            "path": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer",
+            "name": "NoDriveTypeAutoRun",
+            "operator": "equals",
+            "expected": 255
+          }
+        ]
+      },
+      "remediation": {
+        "summary": "Apply the Group Policy or the snippet below. v0.1 does not apply this change.",
+        "gpo": "Computer Configuration/Administrative Templates/Windows Components/AutoPlay Policies\nSet the default behavior for AutoRun: Enabled, Do not execute any autorun commands\nTurn off Autoplay: Enabled, All drives",
+        "intune": "Settings Catalog mirrors this Group Policy path:\nComputer Configuration/Administrative Templates/Windows Components/AutoPlay Policies\nNo OMA-URI is cited because it was not confirmed for this setting.",
+        "registry": "Windows Registry Editor Version 5.00\n\n[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer]\n\"NoAutorun\"=dword:00000001\n\"NoDriveTypeAutoRun\"=dword:000000ff\n"
+      }
+    },
+    {
+      "id": "GS-W11-023",
+      "title": "IP source routing is disabled",
+      "severity": "medium",
+      "mapping": "verified",
+      "windows11_carryover": "unverified",
+      "module": {
+        "id": "SYS.2.1"
+      },
+      "references": [
+        {
+          "framework": "it-grundschutz-kompendium",
+          "requirement_id": "SYS.2.1.A16",
+          "title": "Deaktivierung und Deinstallation nicht benötigter Komponenten und Kennungen",
+          "mapping": "verified",
+          "source_id": "bsi-hilfsmittel-windows-client-1.0",
+          "note": "Requirement from the IT-Grundschutz-Kompendium, Edition 2023. The setting value is taken from the BSI Hilfsmittel for Windows clients, version 1.0 (20 February 2025)."
+        }
+      ],
+      "rationale": "The Hilfsmittel sets both MSS DisableIPSourceRouting policies to the highest protection, which is registry value 2. No Grundschutz++ id is attached because none of the confirmed controls names source routing. The concrete value is carried over from the Windows 10 Hilfsmittel (from Windows 10 version 21H2). BSI has not published a Windows 11 settings matrix. SYS.2.2.3 Edition 2023 applies to Windows 10 and Windows 11.",
+      "conflict_note": "",
+      "applicability_note": "",
+      "evaluation": {
+        "method": "all_of",
+        "evaluations": [
+          {
+            "method": "registry",
+            "hive": "HKLM",
+            "path": "SYSTEM\\CurrentControlSet\\Services\\Tcpip\\Parameters",
+            "name": "DisableIPSourceRouting",
+            "operator": "equals",
+            "expected": 2
+          },
+          {
+            "method": "registry",
+            "hive": "HKLM",
+            "path": "SYSTEM\\CurrentControlSet\\Services\\Tcpip6\\Parameters",
+            "name": "DisableIPSourceRouting",
+            "operator": "equals",
+            "expected": 2
+          }
+        ]
+      },
+      "remediation": {
+        "summary": "Apply the Group Policy or the snippet below. v0.1 does not apply this change.",
+        "gpo": "Computer Configuration/Administrative Templates/MSS (Legacy)\nMSS: (DisableIPSourceRouting) IP source routing protection level: Highest protection\nMSS: (DisableIPSourceRouting IPv6): Highest protection",
+        "intune": "Settings Catalog mirrors this Group Policy path:\nComputer Configuration/Administrative Templates/MSS (Legacy)\nNo OMA-URI is cited because it was not confirmed for this setting.",
+        "registry": "Windows Registry Editor Version 5.00\n\n[HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Services\\Tcpip\\Parameters]\n\"DisableIPSourceRouting\"=dword:00000002\n\n[HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Services\\Tcpip6\\Parameters]\n\"DisableIPSourceRouting\"=dword:00000002\n"
+      }
+    },
+    {
+      "id": "GS-W11-024",
+      "title": "SMB client always requires packet signing",
+      "severity": "high",
+      "mapping": "verified",
+      "windows11_carryover": "unverified",
+      "module": {
+        "id": "SYS.2.1"
+      },
+      "references": [
+        {
+          "framework": "it-grundschutz-kompendium",
+          "requirement_id": "SYS.2.1.A18",
+          "title": "Nutzung von verschlüsselten Kommunikationsverbindungen",
+          "mapping": "verified",
+          "source_id": "bsi-hilfsmittel-windows-client-1.0",
+          "note": "Requirement from the IT-Grundschutz-Kompendium, Edition 2023. The setting value is taken from the BSI Hilfsmittel for Windows clients, version 1.0 (20 February 2025)."
+        }
+      ],
+      "rationale": "The Hilfsmittel enables Microsoft network client: Digitally sign communications (always). The weaker 'if server agrees' setting is not scored. The concrete value is carried over from the Windows 10 Hilfsmittel (from Windows 10 version 21H2). BSI has not published a Windows 11 settings matrix. SYS.2.2.3 Edition 2023 applies to Windows 10 and Windows 11.",
+      "conflict_note": "",
+      "applicability_note": "",
+      "evaluation": {
+        "method": "registry",
+        "hive": "HKLM",
+        "path": "SYSTEM\\CurrentControlSet\\Services\\LanmanWorkstation\\Parameters",
+        "name": "RequireSecuritySignature",
+        "operator": "equals",
+        "expected": 1
+      },
+      "remediation": {
+        "summary": "Apply the Group Policy or the snippet below. v0.1 does not apply this change.",
+        "gpo": "Computer Configuration/Windows Settings/Security Settings/Local Policies/Security Options\nMicrosoft network client: Digitally sign communications (always): Enabled",
+        "intune": "Settings Catalog mirrors this Group Policy path:\nComputer Configuration/Windows Settings/Security Settings/Local Policies/Security Options\nNo OMA-URI is cited because it was not confirmed for this setting.",
+        "registry": "Windows Registry Editor Version 5.00\n\n[HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Services\\LanmanWorkstation\\Parameters]\n\"RequireSecuritySignature\"=dword:00000001\n"
+      }
+    },
+    {
+      "id": "GS-W11-025",
+      "title": "SMB server always requires packet signing",
+      "severity": "high",
+      "mapping": "verified",
+      "windows11_carryover": "unverified",
+      "module": {
+        "id": "SYS.2.1"
+      },
+      "references": [
+        {
+          "framework": "it-grundschutz-kompendium",
+          "requirement_id": "SYS.2.1.A18",
+          "title": "Nutzung von verschlüsselten Kommunikationsverbindungen",
+          "mapping": "verified",
+          "source_id": "bsi-hilfsmittel-windows-client-1.0",
+          "note": "Requirement from the IT-Grundschutz-Kompendium, Edition 2023. The setting value is taken from the BSI Hilfsmittel for Windows clients, version 1.0 (20 February 2025)."
+        }
+      ],
+      "rationale": "The Hilfsmittel enables Microsoft network server: Digitally sign communications (always). The concrete value is carried over from the Windows 10 Hilfsmittel (from Windows 10 version 21H2). BSI has not published a Windows 11 settings matrix. SYS.2.2.3 Edition 2023 applies to Windows 10 and Windows 11.",
+      "conflict_note": "",
+      "applicability_note": "",
+      "evaluation": {
+        "method": "registry",
+        "hive": "HKLM",
+        "path": "SYSTEM\\CurrentControlSet\\Services\\LanmanServer\\Parameters",
+        "name": "RequireSecuritySignature",
+        "operator": "equals",
+        "expected": 1
+      },
+      "remediation": {
+        "summary": "Apply the Group Policy or the snippet below. v0.1 does not apply this change.",
+        "gpo": "Computer Configuration/Windows Settings/Security Settings/Local Policies/Security Options\nMicrosoft network server: Digitally sign communications (always): Enabled",
+        "intune": "Settings Catalog mirrors this Group Policy path:\nComputer Configuration/Windows Settings/Security Settings/Local Policies/Security Options\nNo OMA-URI is cited because it was not confirmed for this setting.",
+        "registry": "Windows Registry Editor Version 5.00\n\n[HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Services\\LanmanServer\\Parameters]\n\"RequireSecuritySignature\"=dword:00000001\n"
+      }
+    },
+    {
+      "id": "GS-W11-026",
+      "title": "LAN Manager authentication is NTLMv2 only",
+      "severity": "high",
+      "mapping": "verified",
+      "windows11_carryover": "unverified",
+      "module": {
+        "id": "SYS.2.1"
+      },
+      "references": [
+        {
+          "framework": "it-grundschutz-kompendium",
+          "requirement_id": "SYS.2.1.A18",
+          "title": "Nutzung von verschlüsselten Kommunikationsverbindungen",
+          "mapping": "verified",
+          "source_id": "bsi-hilfsmittel-windows-client-1.0",
+          "note": "Requirement from the IT-Grundschutz-Kompendium, Edition 2023. The setting value is taken from the BSI Hilfsmittel for Windows clients, version 1.0 (20 February 2025)."
+        },
+        {
+          "framework": "grundschutz-plus-plus",
+          "requirement_id": "KONF.2.4",
+          "title": "Deaktivierung nicht benötigter Systemfunktionen",
+          "mapping": "verified",
+          "source_id": "grundschutz-plus-plus-2026-09-24",
+          "note": "Guidance explicitly names NTLMv1 as a protocol to disable when it is not required."
+        }
+      ],
+      "rationale": "The Hilfsmittel sets LAN Manager authentication level to Send NTLMv2 response only. Refuse LM and NTLM, which is LmCompatibilityLevel 5. The concrete value is carried over from the Windows 10 Hilfsmittel (from Windows 10 version 21H2). BSI has not published a Windows 11 settings matrix. SYS.2.2.3 Edition 2023 applies to Windows 10 and Windows 11.",
+      "conflict_note": "",
+      "applicability_note": "",
+      "evaluation": {
+        "method": "registry",
+        "hive": "HKLM",
+        "path": "SYSTEM\\CurrentControlSet\\Control\\Lsa",
+        "name": "LmCompatibilityLevel",
+        "operator": "equals",
+        "expected": 5
+      },
+      "remediation": {
+        "summary": "Apply the Group Policy or the snippet below. v0.1 does not apply this change.",
+        "gpo": "Computer Configuration/Windows Settings/Security Settings/Local Policies/Security Options\nNetwork security: LAN Manager authentication level: Send NTLMv2 response only. Refuse LM & NTLM",
+        "intune": "Settings Catalog mirrors this Group Policy path:\nComputer Configuration/Windows Settings/Security Settings/Local Policies/Security Options\nNo OMA-URI is cited because it was not confirmed for this setting.",
+        "registry": "Windows Registry Editor Version 5.00\n\n[HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Lsa]\n\"LmCompatibilityLevel\"=dword:00000005\n"
+      }
+    },
+    {
+      "id": "GS-W11-027",
+      "title": "NTLM sessions require NTLMv2 and 128-bit encryption",
+      "severity": "high",
+      "mapping": "verified",
+      "windows11_carryover": "unverified",
+      "module": {
+        "id": "SYS.2.1"
+      },
+      "references": [
+        {
+          "framework": "it-grundschutz-kompendium",
+          "requirement_id": "SYS.2.1.A18",
+          "title": "Nutzung von verschlüsselten Kommunikationsverbindungen",
+          "mapping": "verified",
+          "source_id": "bsi-hilfsmittel-windows-client-1.0",
+          "note": "Requirement from the IT-Grundschutz-Kompendium, Edition 2023. The setting value is taken from the BSI Hilfsmittel for Windows clients, version 1.0 (20 February 2025)."
+        }
+      ],
+      "rationale": "The Hilfsmittel requires NTLMv2 session security and 128-bit encryption for NTLM SSP clients and servers. The bitmask is 0x80000 plus 0x20000000, which is 537395200 (0x20080000). Extra bits may be set. The concrete value is carried over from the Windows 10 Hilfsmittel (from Windows 10 version 21H2). BSI has not published a Windows 11 settings matrix. SYS.2.2.3 Edition 2023 applies to Windows 10 and Windows 11.",
+      "conflict_note": "",
+      "applicability_note": "",
+      "evaluation": {
+        "method": "all_of",
+        "evaluations": [
+          {
+            "method": "registry",
+            "hive": "HKLM",
+            "path": "SYSTEM\\CurrentControlSet\\Control\\Lsa",
+            "name": "NTLMMinClientSec",
+            "operator": "bits_set",
+            "expected": 537395200
+          },
+          {
+            "method": "registry",
+            "hive": "HKLM",
+            "path": "SYSTEM\\CurrentControlSet\\Control\\Lsa",
+            "name": "NTLMMinServerSec",
+            "operator": "bits_set",
+            "expected": 537395200
+          }
+        ]
+      },
+      "remediation": {
+        "summary": "Apply the Group Policy or the snippet below. v0.1 does not apply this change.",
+        "gpo": "Computer Configuration/Windows Settings/Security Settings/Local Policies/Security Options\nNetwork security: Minimum session security for NTLM SSP based clients: Require NTLMv2 session security, Require 128-bit encryption\nThe same two options for servers.",
+        "intune": "Settings Catalog mirrors this Group Policy path:\nComputer Configuration/Windows Settings/Security Settings/Local Policies/Security Options\nNo OMA-URI is cited because it was not confirmed for this setting.",
+        "registry": "Windows Registry Editor Version 5.00\n\n[HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Lsa]\n\"NTLMMinClientSec\"=dword:20080000\n\"NTLMMinServerSec\"=dword:20080000\n"
+      }
+    },
+    {
+      "id": "GS-W11-028",
+      "title": "LDAP client signing is required",
+      "severity": "medium",
+      "mapping": "verified",
+      "windows11_carryover": "unverified",
+      "module": {
+        "id": "SYS.2.1"
+      },
+      "references": [
+        {
+          "framework": "it-grundschutz-kompendium",
+          "requirement_id": "SYS.2.1.A18",
+          "title": "Nutzung von verschlüsselten Kommunikationsverbindungen",
+          "mapping": "verified",
+          "source_id": "bsi-hilfsmittel-windows-client-1.0",
+          "note": "Requirement from the IT-Grundschutz-Kompendium, Edition 2023. The setting value is taken from the BSI Hilfsmittel for Windows clients, version 1.0 (20 February 2025)."
+        }
+      ],
+      "rationale": "The Hilfsmittel sets LDAP client signing requirements to Require signing, which is LDAPClientIntegrity 2. The concrete value is carried over from the Windows 10 Hilfsmittel (from Windows 10 version 21H2). BSI has not published a Windows 11 settings matrix. SYS.2.2.3 Edition 2023 applies to Windows 10 and Windows 11.",
+      "conflict_note": "",
+      "applicability_note": "",
+      "evaluation": {
+        "method": "registry",
+        "hive": "HKLM",
+        "path": "SYSTEM\\CurrentControlSet\\Services\\LDAP",
+        "name": "LDAPClientIntegrity",
+        "operator": "equals",
+        "expected": 2
+      },
+      "remediation": {
+        "summary": "Apply the Group Policy or the snippet below. v0.1 does not apply this change.",
+        "gpo": "Computer Configuration/Windows Settings/Security Settings/Local Policies/Security Options\nNetwork security: LDAP client signing requirements: Require signing",
+        "intune": "Settings Catalog mirrors this Group Policy path:\nComputer Configuration/Windows Settings/Security Settings/Local Policies/Security Options\nNo OMA-URI is cited because it was not confirmed for this setting.",
+        "registry": "Windows Registry Editor Version 5.00\n\n[HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Services\\LDAP]\n\"LDAPClientIntegrity\"=dword:00000002\n"
+      }
+    },
+    {
+      "id": "GS-W11-029",
+      "title": "TLS 1.0 and TLS 1.1 client protocols are disabled",
+      "severity": "high",
+      "mapping": "verified",
+      "windows11_carryover": "unverified",
+      "module": {
+        "id": "SYS.2.1"
+      },
+      "references": [
+        {
+          "framework": "it-grundschutz-kompendium",
+          "requirement_id": "SYS.2.1.A18",
+          "title": "Nutzung von verschlüsselten Kommunikationsverbindungen",
+          "mapping": "verified",
+          "source_id": "bsi-hilfsmittel-windows-client-1.0",
+          "note": "Requirement from the IT-Grundschutz-Kompendium, Edition 2023. The setting value is taken from the BSI Hilfsmittel for Windows clients, version 1.0 (20 February 2025)."
+        },
+        {
+          "framework": "grundschutz-plus-plus",
+          "requirement_id": "KONF.2.4",
+          "title": "Deaktivierung nicht benötigter Systemfunktionen",
+          "mapping": "verified",
+          "source_id": "grundschutz-plus-plus-2026-09-24",
+          "note": "Guidance explicitly names TLS 1.1 as a weak algorithm to disable."
+        }
+      ],
+      "rationale": "The Hilfsmittel SChannel table sets TLS 1.0 and TLS 1.1 client Enabled to 0 and DisabledByDefault to 1. Server protocols are in the same table and are not part of this check. The concrete value is carried over from the Windows 10 Hilfsmittel (from Windows 10 version 21H2). BSI has not published a Windows 11 settings matrix. SYS.2.2.3 Edition 2023 applies to Windows 10 and Windows 11.",
+      "conflict_note": "",
+      "applicability_note": "",
+      "evaluation": {
+        "method": "all_of",
+        "evaluations": [
+          {
+            "method": "registry",
+            "hive": "HKLM",
+            "path": "SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\SCHANNEL\\Protocols\\TLS 1.0\\Client",
+            "name": "Enabled",
+            "operator": "equals",
+            "expected": 0
+          },
+          {
+            "method": "registry",
+            "hive": "HKLM",
+            "path": "SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\SCHANNEL\\Protocols\\TLS 1.0\\Client",
+            "name": "DisabledByDefault",
+            "operator": "equals",
+            "expected": 1
+          },
+          {
+            "method": "registry",
+            "hive": "HKLM",
+            "path": "SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\SCHANNEL\\Protocols\\TLS 1.1\\Client",
+            "name": "Enabled",
+            "operator": "equals",
+            "expected": 0
+          },
+          {
+            "method": "registry",
+            "hive": "HKLM",
+            "path": "SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\SCHANNEL\\Protocols\\TLS 1.1\\Client",
+            "name": "DisabledByDefault",
+            "operator": "equals",
+            "expected": 1
+          }
+        ]
+      },
+      "remediation": {
+        "summary": "Apply the Group Policy or the snippet below. v0.1 does not apply this change.",
+        "gpo": "Registry only. The Hilfsmittel says Microsoft does not ship an ADMX for these SChannel protocol values.\nTLS 1.0 Client and TLS 1.1 Client: Enabled 0, DisabledByDefault 1.",
+        "intune": "Settings Catalog mirrors this Group Policy path:\nRegistry only. The Hilfsmittel says Microsoft does not ship an ADMX for these SChannel protocol values.\nNo OMA-URI is cited because it was not confirmed for this setting.",
+        "registry": "Windows Registry Editor Version 5.00\n\n[HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\SCHANNEL\\Protocols\\TLS 1.0\\Client]\n\"Enabled\"=dword:00000000\n\"DisabledByDefault\"=dword:00000001\n\n[HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\SCHANNEL\\Protocols\\TLS 1.1\\Client]\n\"Enabled\"=dword:00000000\n\"DisabledByDefault\"=dword:00000001\n"
+      }
+    },
+    {
+      "id": "GS-W11-030",
+      "title": "TLS 1.2 client protocol is enabled",
+      "severity": "high",
+      "mapping": "verified",
+      "windows11_carryover": "unverified",
+      "module": {
+        "id": "SYS.2.1"
+      },
+      "references": [
+        {
+          "framework": "it-grundschutz-kompendium",
+          "requirement_id": "SYS.2.1.A18",
+          "title": "Nutzung von verschlüsselten Kommunikationsverbindungen",
+          "mapping": "verified",
+          "source_id": "bsi-hilfsmittel-windows-client-1.0",
+          "note": "Requirement from the IT-Grundschutz-Kompendium, Edition 2023. The setting value is taken from the BSI Hilfsmittel for Windows clients, version 1.0 (20 February 2025)."
+        }
+      ],
+      "rationale": "The Hilfsmittel SChannel table sets TLS 1.2 client Enabled to 1 and DisabledByDefault to 0. Disabling TLS 1.0 must not disable TLS 1.2. The concrete value is carried over from the Windows 10 Hilfsmittel (from Windows 10 version 21H2). BSI has not published a Windows 11 settings matrix. SYS.2.2.3 Edition 2023 applies to Windows 10 and Windows 11.",
+      "conflict_note": "",
+      "applicability_note": "",
+      "evaluation": {
+        "method": "all_of",
+        "evaluations": [
+          {
+            "method": "registry",
+            "hive": "HKLM",
+            "path": "SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\SCHANNEL\\Protocols\\TLS 1.2\\Client",
+            "name": "Enabled",
+            "operator": "equals",
+            "expected": 1
+          },
+          {
+            "method": "registry",
+            "hive": "HKLM",
+            "path": "SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\SCHANNEL\\Protocols\\TLS 1.2\\Client",
+            "name": "DisabledByDefault",
+            "operator": "equals",
+            "expected": 0
+          }
+        ]
+      },
+      "remediation": {
+        "summary": "Apply the Group Policy or the snippet below. v0.1 does not apply this change.",
+        "gpo": "Registry only. TLS 1.2 Client: Enabled 1, DisabledByDefault 0.",
+        "intune": "Settings Catalog mirrors this Group Policy path:\nRegistry only. TLS 1.2 Client: Enabled 1, DisabledByDefault 0.\nNo OMA-URI is cited because it was not confirmed for this setting.",
+        "registry": "Windows Registry Editor Version 5.00\n\n[HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\SCHANNEL\\Protocols\\TLS 1.2\\Client]\n\"Enabled\"=dword:00000001\n\"DisabledByDefault\"=dword:00000000\n"
+      }
+    },
+    {
+      "id": "GS-W11-031",
+      "title": "Anonymous enumeration of SAM accounts and shares is disabled",
+      "severity": "medium",
+      "mapping": "verified",
+      "windows11_carryover": "unverified",
+      "module": {
+        "id": "SYS.2.2.3"
+      },
+      "references": [
+        {
+          "framework": "it-grundschutz-kompendium",
+          "requirement_id": "SYS.2.2.3.A12",
+          "title": "Datei- und Freigabeberechtigungen unter Windows",
+          "mapping": "verified",
+          "source_id": "bsi-hilfsmittel-windows-client-1.0",
+          "note": "Requirement from the IT-Grundschutz-Kompendium, Edition 2023. The setting value is taken from the BSI Hilfsmittel for Windows clients, version 1.0 (20 February 2025)."
+        }
+      ],
+      "rationale": "The Hilfsmittel enables Network access: Do not allow anonymous enumeration of SAM accounts and shares. The default allows it. RestrictAnonymous = 1. The concrete value is carried over from the Windows 10 Hilfsmittel (from Windows 10 version 21H2). BSI has not published a Windows 11 settings matrix. SYS.2.2.3 Edition 2023 applies to Windows 10 and Windows 11.",
+      "conflict_note": "",
+      "applicability_note": "",
+      "evaluation": {
+        "method": "registry",
+        "hive": "HKLM",
+        "path": "SYSTEM\\CurrentControlSet\\Control\\Lsa",
+        "name": "RestrictAnonymous",
+        "operator": "equals",
+        "expected": 1
+      },
+      "remediation": {
+        "summary": "Apply the Group Policy or the snippet below. v0.1 does not apply this change.",
+        "gpo": "Computer Configuration/Windows Settings/Security Settings/Local Policies/Security Options\nNetwork access: Do not allow anonymous enumeration of SAM accounts and shares: Enabled",
+        "intune": "Settings Catalog mirrors this Group Policy path:\nComputer Configuration/Windows Settings/Security Settings/Local Policies/Security Options\nNo OMA-URI is cited because it was not confirmed for this setting.",
+        "registry": "Windows Registry Editor Version 5.00\n\n[HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Lsa]\n\"RestrictAnonymous\"=dword:00000001\n"
+      }
+    },
+    {
+      "id": "GS-W11-032",
+      "title": "Network credentials are not stored for later authentication",
+      "severity": "medium",
+      "mapping": "verified",
+      "windows11_carryover": "unverified",
+      "module": {
+        "id": "SYS.2.2.3"
+      },
+      "references": [
+        {
+          "framework": "it-grundschutz-kompendium",
+          "requirement_id": "SYS.2.2.3.A17",
+          "title": "Keine Speicherung von Daten zur automatischen Anmeldung",
+          "mapping": "verified",
+          "source_id": "bsi-hilfsmittel-windows-client-1.0",
+          "note": "Requirement from the IT-Grundschutz-Kompendium, Edition 2023. The setting value is taken from the BSI Hilfsmittel for Windows clients, version 1.0 (20 February 2025)."
+        },
+        {
+          "framework": "grundschutz-plus-plus",
+          "requirement_id": "BER.3.20",
+          "title": "Zwischenspeicherung von Zugangsdaten",
+          "mapping": "verified",
+          "source_id": "grundschutz-plus-plus-2026-09-24",
+          "note": "Guidance names Protected Users as one Windows implementation. This check scores the Hilfsmittel setting DisableDomainCreds."
+        }
+      ],
+      "rationale": "The Hilfsmittel enables Network access: Do not allow storage of passwords and credentials for network authentication. That is DisableDomainCreds = 1. The concrete value is carried over from the Windows 10 Hilfsmittel (from Windows 10 version 21H2). BSI has not published a Windows 11 settings matrix. SYS.2.2.3 Edition 2023 applies to Windows 10 and Windows 11.",
+      "conflict_note": "",
+      "applicability_note": "",
+      "evaluation": {
+        "method": "registry",
+        "hive": "HKLM",
+        "path": "SYSTEM\\CurrentControlSet\\Control\\Lsa",
+        "name": "DisableDomainCreds",
+        "operator": "equals",
+        "expected": 1
+      },
+      "remediation": {
+        "summary": "Apply the Group Policy or the snippet below. v0.1 does not apply this change.",
+        "gpo": "Computer Configuration/Windows Settings/Security Settings/Local Policies/Security Options\nNetwork access: Do not allow storage of passwords and credentials for network authentication: Enabled",
+        "intune": "Settings Catalog mirrors this Group Policy path:\nComputer Configuration/Windows Settings/Security Settings/Local Policies/Security Options\nNo OMA-URI is cited because it was not confirmed for this setting.",
+        "registry": "Windows Registry Editor Version 5.00\n\n[HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Lsa]\n\"DisableDomainCreds\"=dword:00000001\n"
+      }
+    },
+    {
+      "id": "GS-W11-033",
+      "title": "Remote Assistance invitations and offers are disabled",
+      "severity": "medium",
+      "mapping": "verified",
+      "windows11_carryover": "unverified",
+      "module": {
+        "id": "SYS.2.2.3"
+      },
+      "references": [
+        {
+          "framework": "it-grundschutz-kompendium",
+          "requirement_id": "SYS.2.2.3.A18",
+          "title": "Einsatz der Windows-Remoteunterstützung",
+          "mapping": "verified",
+          "source_id": "bsi-hilfsmittel-windows-client-1.0",
+          "note": "Requirement from the IT-Grundschutz-Kompendium, Edition 2023. The setting value is taken from the BSI Hilfsmittel for Windows clients, version 1.0 (20 February 2025)."
+        },
+        {
+          "framework": "grundschutz-plus-plus",
+          "requirement_id": "KONF.4.4",
+          "title": "Einschränkung von Fernwartungsfunktionen",
+          "mapping": "verified",
+          "source_id": "grundschutz-plus-plus-2026-09-24",
+          "note": "Guidance names remote maintenance functions, including remote clipboard and drive mounting, as something to restrict. Remote Assistance is the Hilfsmittel function scored here."
+        }
+      ],
+      "rationale": "The Hilfsmittel says to disable solicited and offered Remote Assistance when the function is not used. fAllowToGetHelp and fAllowUnsolicited are 0. The concrete value is carried over from the Windows 10 Hilfsmittel (from Windows 10 version 21H2). BSI has not published a Windows 11 settings matrix. SYS.2.2.3 Edition 2023 applies to Windows 10 and Windows 11.",
+      "conflict_note": "",
+      "applicability_note": "",
+      "evaluation": {
+        "method": "all_of",
+        "evaluations": [
+          {
+            "method": "registry",
+            "hive": "HKLM",
+            "path": "SOFTWARE\\Policies\\Microsoft\\Windows NT\\Terminal Services",
+            "name": "fAllowToGetHelp",
+            "operator": "equals",
+            "expected": 0
+          },
+          {
+            "method": "registry",
+            "hive": "HKLM",
+            "path": "SOFTWARE\\Policies\\Microsoft\\Windows NT\\Terminal Services",
+            "name": "fAllowUnsolicited",
+            "operator": "equals",
+            "expected": 0
+          }
+        ]
+      },
+      "remediation": {
+        "summary": "Apply the Group Policy or the snippet below. v0.1 does not apply this change.",
+        "gpo": "Computer Configuration/Administrative Templates/System/Remote Assistance\nConfigure Solicited Remote Assistance: Disabled\nConfigure Offer Remote Assistance: Disabled",
+        "intune": "Settings Catalog mirrors this Group Policy path:\nComputer Configuration/Administrative Templates/System/Remote Assistance\nNo OMA-URI is cited because it was not confirmed for this setting.",
+        "registry": "Windows Registry Editor Version 5.00\n\n[HKEY_LOCAL_MACHINE\\SOFTWARE\\Policies\\Microsoft\\Windows NT\\Terminal Services]\n\"fAllowToGetHelp\"=dword:00000000\n\"fAllowUnsolicited\"=dword:00000000\n"
+      }
+    },
+    {
+      "id": "GS-W11-034",
+      "title": "Remote Desktop requires Network Level Authentication",
+      "severity": "high",
+      "mapping": "verified",
+      "windows11_carryover": "unverified",
+      "module": {
+        "id": "SYS.2.2.3"
+      },
+      "references": [
+        {
+          "framework": "it-grundschutz-kompendium",
+          "requirement_id": "SYS.2.2.3.A19",
+          "title": "Sicherheit beim Fernzugriff über RDP",
+          "mapping": "verified",
+          "source_id": "bsi-hilfsmittel-windows-client-1.0",
+          "note": "Requirement from the IT-Grundschutz-Kompendium, Edition 2023. The setting value is taken from the BSI Hilfsmittel for Windows clients, version 1.0 (20 February 2025)."
+        },
+        {
+          "framework": "grundschutz-plus-plus",
+          "requirement_id": "KONF.4.3",
+          "title": "Authentifizierung von Fernwartungsfunktionen",
+          "mapping": "verified",
+          "source_id": "grundschutz-plus-plus-2026-09-24",
+          "note": "The control requires remote-maintenance authentication. NLA is the Hilfsmittel setting for RDP."
+        }
+      ],
+      "rationale": "The Hilfsmittel enables Require user authentication for remote connections by using Network Level Authentication. UserAuthentication = 1. Whether RDP itself is enabled is conditional in the Hilfsmittel and is not a hard failure in v0.1. The concrete value is carried over from the Windows 10 Hilfsmittel (from Windows 10 version 21H2). BSI has not published a Windows 11 settings matrix. SYS.2.2.3 Edition 2023 applies to Windows 10 and Windows 11.",
+      "conflict_note": "",
+      "applicability_note": "",
+      "evaluation": {
+        "method": "registry",
+        "hive": "HKLM",
+        "path": "SOFTWARE\\Policies\\Microsoft\\Windows NT\\Terminal Services",
+        "name": "UserAuthentication",
+        "operator": "equals",
+        "expected": 1
+      },
+      "remediation": {
+        "summary": "Apply the Group Policy or the snippet below. v0.1 does not apply this change.",
+        "gpo": "Computer Configuration/Administrative Templates/Windows Components/Remote Desktop Services/Remote Desktop Session Host/Security\nRequire user authentication for remote connections by using Network Level Authentication: Enabled",
+        "intune": "Settings Catalog mirrors this Group Policy path:\nComputer Configuration/Administrative Templates/Windows Components/Remote Desktop Services/Remote Desktop Session Host/Security\nNo OMA-URI is cited because it was not confirmed for this setting.",
+        "registry": "Windows Registry Editor Version 5.00\n\n[HKEY_LOCAL_MACHINE\\SOFTWARE\\Policies\\Microsoft\\Windows NT\\Terminal Services]\n\"UserAuthentication\"=dword:00000001\n"
+      }
+    },
+    {
+      "id": "GS-W11-035",
+      "title": "Remote Desktop uses TLS and high encryption",
+      "severity": "medium",
+      "mapping": "verified",
+      "windows11_carryover": "unverified",
+      "module": {
+        "id": "SYS.2.2.3"
+      },
+      "references": [
+        {
+          "framework": "it-grundschutz-kompendium",
+          "requirement_id": "SYS.2.2.3.A19",
+          "title": "Sicherheit beim Fernzugriff über RDP",
+          "mapping": "verified",
+          "source_id": "bsi-hilfsmittel-windows-client-1.0",
+          "note": "Requirement from the IT-Grundschutz-Kompendium, Edition 2023. The setting value is taken from the BSI Hilfsmittel for Windows clients, version 1.0 (20 February 2025)."
+        }
+      ],
+      "rationale": "The Hilfsmittel sets the security layer to SSL (SecurityLayer = 2) and the encryption level to High (MinEncryptionLevel = 3). The concrete value is carried over from the Windows 10 Hilfsmittel (from Windows 10 version 21H2). BSI has not published a Windows 11 settings matrix. SYS.2.2.3 Edition 2023 applies to Windows 10 and Windows 11.",
+      "conflict_note": "",
+      "applicability_note": "",
+      "evaluation": {
+        "method": "all_of",
+        "evaluations": [
+          {
+            "method": "registry",
+            "hive": "HKLM",
+            "path": "SOFTWARE\\Policies\\Microsoft\\Windows NT\\Terminal Services",
+            "name": "SecurityLayer",
+            "operator": "equals",
+            "expected": 2
+          },
+          {
+            "method": "registry",
+            "hive": "HKLM",
+            "path": "SOFTWARE\\Policies\\Microsoft\\Windows NT\\Terminal Services",
+            "name": "MinEncryptionLevel",
+            "operator": "equals",
+            "expected": 3
+          }
+        ]
+      },
+      "remediation": {
+        "summary": "Apply the Group Policy or the snippet below. v0.1 does not apply this change.",
+        "gpo": "Computer Configuration/Administrative Templates/Windows Components/Remote Desktop Services/Remote Desktop Session Host/Security\nRequire use of specific security layer for remote (RDP) connections: Enabled, SSL\nSet client connection encryption level: Enabled, High Level",
+        "intune": "Settings Catalog mirrors this Group Policy path:\nComputer Configuration/Administrative Templates/Windows Components/Remote Desktop Services/Remote Desktop Session Host/Security\nNo OMA-URI is cited because it was not confirmed for this setting.",
+        "registry": "Windows Registry Editor Version 5.00\n\n[HKEY_LOCAL_MACHINE\\SOFTWARE\\Policies\\Microsoft\\Windows NT\\Terminal Services]\n\"SecurityLayer\"=dword:00000002\n\"MinEncryptionLevel\"=dword:00000003\n"
+      }
+    },
+    {
+      "id": "GS-W11-036",
+      "title": "Remote Desktop drive redirection is disabled",
+      "severity": "medium",
+      "mapping": "verified",
+      "windows11_carryover": "unverified",
+      "module": {
+        "id": "SYS.2.2.3"
+      },
+      "references": [
+        {
+          "framework": "it-grundschutz-kompendium",
+          "requirement_id": "SYS.2.2.3.A19",
+          "title": "Sicherheit beim Fernzugriff über RDP",
+          "mapping": "verified",
+          "source_id": "bsi-hilfsmittel-windows-client-1.0",
+          "note": "Requirement from the IT-Grundschutz-Kompendium, Edition 2023. The setting value is taken from the BSI Hilfsmittel for Windows clients, version 1.0 (20 February 2025)."
+        },
+        {
+          "framework": "grundschutz-plus-plus",
+          "requirement_id": "KONF.4.4",
+          "title": "Einschränkung von Fernwartungsfunktionen",
+          "mapping": "verified",
+          "source_id": "grundschutz-plus-plus-2026-09-24",
+          "note": "Guidance names automatic connection of drives during remote maintenance."
+        }
+      ],
+      "rationale": "The Hilfsmittel enables Do not allow drive redirection. fDisableCdm = 1. The concrete value is carried over from the Windows 10 Hilfsmittel (from Windows 10 version 21H2). BSI has not published a Windows 11 settings matrix. SYS.2.2.3 Edition 2023 applies to Windows 10 and Windows 11.",
+      "conflict_note": "",
+      "applicability_note": "",
+      "evaluation": {
+        "method": "registry",
+        "hive": "HKLM",
+        "path": "SOFTWARE\\Policies\\Microsoft\\Windows NT\\Terminal Services",
+        "name": "fDisableCdm",
+        "operator": "equals",
+        "expected": 1
+      },
+      "remediation": {
+        "summary": "Apply the Group Policy or the snippet below. v0.1 does not apply this change.",
+        "gpo": "Computer Configuration/Administrative Templates/Windows Components/Remote Desktop Services/Remote Desktop Session Host/Device and Resource Redirection\nDo not allow drive redirection: Enabled",
+        "intune": "Settings Catalog mirrors this Group Policy path:\nComputer Configuration/Administrative Templates/Windows Components/Remote Desktop Services/Remote Desktop Session Host/Device and Resource Redirection\nNo OMA-URI is cited because it was not confirmed for this setting.",
+        "registry": "Windows Registry Editor Version 5.00\n\n[HKEY_LOCAL_MACHINE\\SOFTWARE\\Policies\\Microsoft\\Windows NT\\Terminal Services]\n\"fDisableCdm\"=dword:00000001\n"
+      }
+    },
+    {
+      "id": "GS-W11-037",
+      "title": "Remote Desktop client does not save passwords",
+      "severity": "medium",
+      "mapping": "verified",
+      "windows11_carryover": "unverified",
+      "module": {
+        "id": "SYS.2.2.3"
+      },
+      "references": [
+        {
+          "framework": "it-grundschutz-kompendium",
+          "requirement_id": "SYS.2.2.3.A19",
+          "title": "Sicherheit beim Fernzugriff über RDP",
+          "mapping": "verified",
+          "source_id": "bsi-hilfsmittel-windows-client-1.0",
+          "note": "Requirement from the IT-Grundschutz-Kompendium, Edition 2023. The setting value is taken from the BSI Hilfsmittel for Windows clients, version 1.0 (20 February 2025)."
+        },
+        {
+          "framework": "grundschutz-plus-plus",
+          "requirement_id": "BER.3.20",
+          "title": "Zwischenspeicherung von Zugangsdaten",
+          "mapping": "verified",
+          "source_id": "grundschutz-plus-plus-2026-09-24",
+          "note": "Control id and title from Anwenderkatalog Grundschutz++, resolved catalog version 2026-09-24T07:12:39.131983+00:00."
+        }
+      ],
+      "rationale": "The Hilfsmittel enables Do not allow passwords to be saved on the Remote Desktop Connection client. DisablePasswordSaving = 1. The concrete value is carried over from the Windows 10 Hilfsmittel (from Windows 10 version 21H2). BSI has not published a Windows 11 settings matrix. SYS.2.2.3 Edition 2023 applies to Windows 10 and Windows 11.",
+      "conflict_note": "",
+      "applicability_note": "",
+      "evaluation": {
+        "method": "registry",
+        "hive": "HKLM",
+        "path": "SOFTWARE\\Policies\\Microsoft\\Windows NT\\Terminal Services",
+        "name": "DisablePasswordSaving",
+        "operator": "equals",
+        "expected": 1
+      },
+      "remediation": {
+        "summary": "Apply the Group Policy or the snippet below. v0.1 does not apply this change.",
+        "gpo": "Computer Configuration/Administrative Templates/Windows Components/Remote Desktop Services/Remote Desktop Connection Client\nDo not allow passwords to be saved: Enabled",
+        "intune": "Settings Catalog mirrors this Group Policy path:\nComputer Configuration/Administrative Templates/Windows Components/Remote Desktop Services/Remote Desktop Connection Client\nNo OMA-URI is cited because it was not confirmed for this setting.",
+        "registry": "Windows Registry Editor Version 5.00\n\n[HKEY_LOCAL_MACHINE\\SOFTWARE\\Policies\\Microsoft\\Windows NT\\Terminal Services]\n\"DisablePasswordSaving\"=dword:00000001\n"
+      }
+    },
+    {
+      "id": "GS-W11-038",
+      "title": "User Account Control admin approval mode is on",
+      "severity": "high",
+      "mapping": "verified",
+      "windows11_carryover": "unverified",
+      "module": {
+        "id": "SYS.2.2.3"
+      },
+      "references": [
+        {
+          "framework": "it-grundschutz-kompendium",
+          "requirement_id": "SYS.2.2.3.A20",
+          "title": "Einsatz der Benutzerkontensteuerung UAC für privilegierte Konten",
+          "mapping": "verified",
+          "source_id": "bsi-hilfsmittel-windows-client-1.0",
+          "note": "Requirement from the IT-Grundschutz-Kompendium, Edition 2023. The setting value is taken from the BSI Hilfsmittel for Windows clients, version 1.0 (20 February 2025)."
+        }
+      ],
+      "rationale": "The Hilfsmittel enables Run all administrators in Admin Approval Mode. EnableLUA = 1. The default is already 1, so a missing value passes. Turning UAC off fails. The concrete value is carried over from the Windows 10 Hilfsmittel (from Windows 10 version 21H2). BSI has not published a Windows 11 settings matrix. SYS.2.2.3 Edition 2023 applies to Windows 10 and Windows 11.",
+      "conflict_note": "",
+      "applicability_note": "",
+      "evaluation": {
+        "method": "registry",
+        "hive": "HKLM",
+        "path": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
+        "name": "EnableLUA",
+        "operator": "equals",
+        "expected": 1,
+        "when_absent": "pass"
+      },
+      "remediation": {
+        "summary": "Apply the Group Policy or the snippet below. v0.1 does not apply this change.",
+        "gpo": "Computer Configuration/Windows Settings/Security Settings/Local Policies/Security Options\nUser Account Control: Run all administrators in Admin Approval Mode: Enabled",
+        "intune": "Settings Catalog mirrors this Group Policy path:\nComputer Configuration/Windows Settings/Security Settings/Local Policies/Security Options\nNo OMA-URI is cited because it was not confirmed for this setting.",
+        "registry": "Windows Registry Editor Version 5.00\n\n[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System]\n\"EnableLUA\"=dword:00000001\n"
+      }
+    },
+    {
+      "id": "GS-W11-039",
+      "title": "UAC prompts for admin credentials on the secure desktop",
+      "severity": "high",
+      "mapping": "verified",
+      "windows11_carryover": "unverified",
+      "module": {
+        "id": "SYS.2.2.3"
+      },
+      "references": [
+        {
+          "framework": "it-grundschutz-kompendium",
+          "requirement_id": "SYS.2.2.3.A20",
+          "title": "Einsatz der Benutzerkontensteuerung UAC für privilegierte Konten",
+          "mapping": "verified",
+          "source_id": "bsi-hilfsmittel-windows-client-1.0",
+          "note": "Requirement from the IT-Grundschutz-Kompendium, Edition 2023. The setting value is taken from the BSI Hilfsmittel for Windows clients, version 1.0 (20 February 2025)."
+        }
+      ],
+      "rationale": "The Hilfsmittel sets the admin elevation prompt to Prompt for credentials on the secure desktop (ConsentPromptBehaviorAdmin = 1), enables Admin Approval Mode for the built-in Administrator (FilterAdministratorToken = 1), and switches to the secure desktop (PromptOnSecureDesktop = 1). The secure-desktop value defaults to 1, so a missing value passes. The other two default more loosely and fail when missing. The concrete value is carried over from the Windows 10 Hilfsmittel (from Windows 10 version 21H2). BSI has not published a Windows 11 settings matrix. SYS.2.2.3 Edition 2023 applies to Windows 10 and Windows 11.",
+      "conflict_note": "",
+      "applicability_note": "",
+      "evaluation": {
+        "method": "all_of",
+        "evaluations": [
+          {
+            "method": "registry",
+            "hive": "HKLM",
+            "path": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
+            "name": "ConsentPromptBehaviorAdmin",
+            "operator": "equals",
+            "expected": 1
+          },
+          {
+            "method": "registry",
+            "hive": "HKLM",
+            "path": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
+            "name": "FilterAdministratorToken",
+            "operator": "equals",
+            "expected": 1
+          },
+          {
+            "method": "registry",
+            "hive": "HKLM",
+            "path": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
+            "name": "PromptOnSecureDesktop",
+            "operator": "equals",
+            "expected": 1,
+            "when_absent": "pass"
+          }
+        ]
+      },
+      "remediation": {
+        "summary": "Apply the Group Policy or the snippet below. v0.1 does not apply this change.",
+        "gpo": "Computer Configuration/Windows Settings/Security Settings/Local Policies/Security Options\nUser Account Control: Behavior of the elevation prompt for administrators in Admin Approval Mode: Prompt for credentials on the secure desktop\nUser Account Control: Admin Approval Mode for the Built-in Administrator account: Enabled\nUser Account Control: Switch to the secure desktop when prompting for elevation: Enabled",
+        "intune": "Settings Catalog mirrors this Group Policy path:\nComputer Configuration/Windows Settings/Security Settings/Local Policies/Security Options\nNo OMA-URI is cited because it was not confirmed for this setting.",
+        "registry": "Windows Registry Editor Version 5.00\n\n[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System]\n\"ConsentPromptBehaviorAdmin\"=dword:00000001\n\"FilterAdministratorToken\"=dword:00000001\n\"PromptOnSecureDesktop\"=dword:00000001\n"
+      }
+    },
+    {
+      "id": "GS-W11-040",
+      "title": "Network logons of local accounts stay filtered by UAC",
+      "severity": "medium",
+      "mapping": "verified",
+      "windows11_carryover": "unverified",
+      "module": {
+        "id": "SYS.2.2.3"
+      },
+      "references": [
+        {
+          "framework": "it-grundschutz-kompendium",
+          "requirement_id": "SYS.2.2.3.A20",
+          "title": "Einsatz der Benutzerkontensteuerung UAC für privilegierte Konten",
+          "mapping": "verified",
+          "source_id": "bsi-hilfsmittel-windows-client-1.0",
+          "note": "Requirement from the IT-Grundschutz-Kompendium, Edition 2023. The setting value is taken from the BSI Hilfsmittel for Windows clients, version 1.0 (20 February 2025). The Hilfsmittel sets Apply UAC restrictions to local accounts on network logons to Enabled when Legacy LAPS is not used."
+        }
+      ],
+      "rationale": "Enabled writes LocalAccountTokenFilterPolicy = 0, a filtered token. Value 1 grants a full token and fails. A missing value is the secure default and passes. The concrete value is carried over from the Windows 10 Hilfsmittel (from Windows 10 version 21H2). BSI has not published a Windows 11 settings matrix. SYS.2.2.3 Edition 2023 applies to Windows 10 and Windows 11.",
+      "conflict_note": "",
+      "applicability_note": "The Hilfsmittel sets this policy to Disabled only while Legacy LAPS is still in use. v0.1 scores the recommendation for systems that do not use Legacy LAPS. Windows LAPS replaced Legacy LAPS for new systems from Windows 11 version 23H2.",
+      "evaluation": {
+        "method": "registry",
+        "hive": "HKLM",
+        "path": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
+        "name": "LocalAccountTokenFilterPolicy",
+        "operator": "equals",
+        "expected": 0,
+        "when_absent": "pass"
+      },
+      "remediation": {
+        "summary": "Apply the Group Policy or the snippet below. v0.1 does not apply this change.",
+        "gpo": "Computer Configuration/Administrative Templates/MS Security Guide\nApply UAC restrictions to local accounts on network logons: Enabled",
+        "intune": "Settings Catalog mirrors this Group Policy path:\nComputer Configuration/Administrative Templates/MS Security Guide\nNo OMA-URI is cited because it was not confirmed for this setting.",
+        "registry": "Windows Registry Editor Version 5.00\n\n[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System]\n\"LocalAccountTokenFilterPolicy\"=dword:00000000\n"
+      }
+    },
+    {
+      "id": "GS-W11-041",
+      "title": "PowerShell script block logging is enabled",
+      "severity": "high",
+      "mapping": "verified",
+      "windows11_carryover": "unverified",
+      "module": {
+        "id": "SYS.2.2.3"
+      },
+      "references": [
+        {
+          "framework": "it-grundschutz-kompendium",
+          "requirement_id": "SYS.2.2.3.A22",
+          "title": "Verwendung der Windows PowerShell",
+          "mapping": "verified",
+          "source_id": "bsi-hilfsmittel-windows-client-1.0",
+          "note": "Requirement from the IT-Grundschutz-Kompendium, Edition 2023. The setting value is taken from the BSI Hilfsmittel for Windows clients, version 1.0 (20 February 2025)."
+        },
+        {
+          "framework": "grundschutz-plus-plus",
+          "requirement_id": "DET.3.1.2",
+          "title": "Ausgeführte Kommandozeilenbefehle",
+          "mapping": "verified",
+          "source_id": "grundschutz-plus-plus-2026-09-24",
+          "note": "The control says to log executed command lines and names Windows PowerShell in the guidance. Script block logging is the Hilfsmittel setting for the script content."
+        }
+      ],
+      "rationale": "The Hilfsmittel enables Turn on PowerShell Script Block Logging. The invocation start/stop option should stay off and is not scored. The concrete value is carried over from the Windows 10 Hilfsmittel (from Windows 10 version 21H2). BSI has not published a Windows 11 settings matrix. SYS.2.2.3 Edition 2023 applies to Windows 10 and Windows 11.",
+      "conflict_note": "",
+      "applicability_note": "",
+      "evaluation": {
+        "method": "registry",
+        "hive": "HKLM",
+        "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\PowerShell\\ScriptBlockLogging",
+        "name": "EnableScriptBlockLogging",
+        "operator": "equals",
+        "expected": 1
+      },
+      "remediation": {
+        "summary": "Apply the Group Policy or the snippet below. v0.1 does not apply this change.",
+        "gpo": "Computer Configuration/Administrative Templates/Windows Components/Windows PowerShell\nTurn on PowerShell Script Block Logging: Enabled\nLog script block invocation start / stop events: not selected",
+        "intune": "Settings Catalog mirrors this Group Policy path:\nComputer Configuration/Administrative Templates/Windows Components/Windows PowerShell\nNo OMA-URI is cited because it was not confirmed for this setting.",
+        "registry": "Windows Registry Editor Version 5.00\n\n[HKEY_LOCAL_MACHINE\\SOFTWARE\\Policies\\Microsoft\\Windows\\PowerShell\\ScriptBlockLogging]\n\"EnableScriptBlockLogging\"=dword:00000001\n"
+      }
+    },
+    {
+      "id": "GS-W11-042",
+      "title": "PowerShell module logging is enabled",
+      "severity": "medium",
+      "mapping": "verified",
+      "windows11_carryover": "unverified",
+      "module": {
+        "id": "SYS.2.2.3"
+      },
+      "references": [
+        {
+          "framework": "it-grundschutz-kompendium",
+          "requirement_id": "SYS.2.2.3.A22",
+          "title": "Verwendung der Windows PowerShell",
+          "mapping": "verified",
+          "source_id": "bsi-hilfsmittel-windows-client-1.0",
+          "note": "Requirement from the IT-Grundschutz-Kompendium, Edition 2023. The setting value is taken from the BSI Hilfsmittel for Windows clients, version 1.0 (20 February 2025)."
+        },
+        {
+          "framework": "grundschutz-plus-plus",
+          "requirement_id": "DET.3.1.2",
+          "title": "Ausgeführte Kommandozeilenbefehle",
+          "mapping": "verified",
+          "source_id": "grundschutz-plus-plus-2026-09-24",
+          "note": "Control id and title from Anwenderkatalog Grundschutz++, resolved catalog version 2026-09-24T07:12:39.131983+00:00."
+        }
+      ],
+      "rationale": "The Hilfsmittel enables Turn on Module Logging. The module list value * is named in the remediation and is not a separate scored value, because only the enable flag is a single registry value with one expected state. The concrete value is carried over from the Windows 10 Hilfsmittel (from Windows 10 version 21H2). BSI has not published a Windows 11 settings matrix. SYS.2.2.3 Edition 2023 applies to Windows 10 and Windows 11.",
+      "conflict_note": "",
+      "applicability_note": "",
+      "evaluation": {
+        "method": "registry",
+        "hive": "HKLM",
+        "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\PowerShell\\ModuleLogging",
+        "name": "EnableModuleLogging",
+        "operator": "equals",
+        "expected": 1
+      },
+      "remediation": {
+        "summary": "Apply the Group Policy or the snippet below. v0.1 does not apply this change.",
+        "gpo": "Computer Configuration/Administrative Templates/Windows Components/Windows PowerShell\nTurn on Module Logging: Enabled\nModule Names: *",
+        "intune": "Settings Catalog mirrors this Group Policy path:\nComputer Configuration/Administrative Templates/Windows Components/Windows PowerShell\nNo OMA-URI is cited because it was not confirmed for this setting.",
+        "registry": "Windows Registry Editor Version 5.00\n\n[HKEY_LOCAL_MACHINE\\SOFTWARE\\Policies\\Microsoft\\Windows\\PowerShell\\ModuleLogging]\n\"EnableModuleLogging\"=dword:00000001\n\n[HKEY_LOCAL_MACHINE\\SOFTWARE\\Policies\\Microsoft\\Windows\\PowerShell\\ModuleLogging\\ModuleNames]\n\"*\"=\"*\"\n"
+      }
+    },
+    {
+      "id": "GS-W11-043",
+      "title": "PowerShell transcription and invocation headers are enabled",
+      "severity": "medium",
+      "mapping": "verified",
+      "windows11_carryover": "unverified",
+      "module": {
+        "id": "SYS.2.2.3"
+      },
+      "references": [
+        {
+          "framework": "it-grundschutz-kompendium",
+          "requirement_id": "SYS.2.2.3.A22",
+          "title": "Verwendung der Windows PowerShell",
+          "mapping": "verified",
+          "source_id": "bsi-hilfsmittel-windows-client-1.0",
+          "note": "Requirement from the IT-Grundschutz-Kompendium, Edition 2023. The setting value is taken from the BSI Hilfsmittel for Windows clients, version 1.0 (20 February 2025)."
+        }
+      ],
+      "rationale": "The Hilfsmittel enables Turn on PowerShell Transcription and selects Include invocation headers. The output directory is environment-specific and is not scored. Script execution policy is not scored: the Hilfsmittel allows either Disabled or Allow only signed scripts. The concrete value is carried over from the Windows 10 Hilfsmittel (from Windows 10 version 21H2). BSI has not published a Windows 11 settings matrix. SYS.2.2.3 Edition 2023 applies to Windows 10 and Windows 11.",
+      "conflict_note": "",
+      "applicability_note": "",
+      "evaluation": {
+        "method": "all_of",
+        "evaluations": [
+          {
+            "method": "registry",
+            "hive": "HKLM",
+            "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\PowerShell\\Transcription",
+            "name": "EnableTranscripting",
+            "operator": "equals",
+            "expected": 1
+          },
+          {
+            "method": "registry",
+            "hive": "HKLM",
+            "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\PowerShell\\Transcription",
+            "name": "EnableInvocationHeader",
+            "operator": "equals",
+            "expected": 1
+          }
+        ]
+      },
+      "remediation": {
+        "summary": "Apply the Group Policy or the snippet below. v0.1 does not apply this change.",
+        "gpo": "Computer Configuration/Administrative Templates/Windows Components/Windows PowerShell\nTurn on PowerShell Transcription: Enabled\nInclude invocation headers: selected\nChoose an output directory that users cannot modify.",
+        "intune": "Settings Catalog mirrors this Group Policy path:\nComputer Configuration/Administrative Templates/Windows Components/Windows PowerShell\nNo OMA-URI is cited because it was not confirmed for this setting.",
+        "registry": "Windows Registry Editor Version 5.00\n\n[HKEY_LOCAL_MACHINE\\SOFTWARE\\Policies\\Microsoft\\Windows\\PowerShell\\Transcription]\n\"EnableTranscripting\"=dword:00000001\n\"EnableInvocationHeader\"=dword:00000001\n"
+      }
+    },
+    {
+      "id": "GS-W11-044",
+      "title": "Restricted Admin mode is not disabled",
+      "severity": "medium",
+      "mapping": "verified",
+      "windows11_carryover": "unverified",
+      "module": {
+        "id": "SYS.2.2.3"
+      },
+      "references": [
+        {
+          "framework": "it-grundschutz-kompendium",
+          "requirement_id": "SYS.2.2.3.A23",
+          "title": "Erweiterter Schutz der Anmeldeinformationen unter Windows",
+          "mapping": "verified",
+          "source_id": "bsi-hilfsmittel-windows-client-1.0",
+          "note": "Requirement from the IT-Grundschutz-Kompendium, Edition 2023. The setting value is taken from the BSI Hilfsmittel for Windows clients, version 1.0 (20 February 2025)."
+        },
+        {
+          "framework": "grundschutz-plus-plus",
+          "requirement_id": "KONF.4.1.1",
+          "title": "Weiterleitung von Anmeldeinformationen",
+          "mapping": "verified",
+          "source_id": "grundschutz-plus-plus-2026-09-24",
+          "note": "The control says to disable forwarding of reusable credentials. The Hilfsmittel registry value keeps Restricted Admin available."
+        }
+      ],
+      "rationale": "The Hilfsmittel table sets DisableRestrictedAdmin to 0. Value 0 means Restricted Admin is not disabled. A missing value fails because the Hilfsmittel says the value has to be set on the target system. The concrete value is carried over from the Windows 10 Hilfsmittel (from Windows 10 version 21H2). BSI has not published a Windows 11 settings matrix. SYS.2.2.3 Edition 2023 applies to Windows 10 and Windows 11.",
+      "conflict_note": "",
+      "applicability_note": "",
+      "evaluation": {
+        "method": "registry",
+        "hive": "HKLM",
+        "path": "SYSTEM\\CurrentControlSet\\Control\\Lsa",
+        "name": "DisableRestrictedAdmin",
+        "operator": "equals",
+        "expected": 0
+      },
+      "remediation": {
+        "summary": "Apply the Group Policy or the snippet below. v0.1 does not apply this change.",
+        "gpo": "Computer Configuration/Administrative Templates/System/Credentials Delegation\nThe Hilfsmittel documents this as a registry value on the RDP target:\nHKLM\\SYSTEM\\CurrentControlSet\\Control\\Lsa DisableRestrictedAdmin = 0",
+        "intune": "Settings Catalog mirrors this Group Policy path:\nComputer Configuration/Administrative Templates/System/Credentials Delegation\nNo OMA-URI is cited because it was not confirmed for this setting.",
+        "registry": "Windows Registry Editor Version 5.00\n\n[HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Lsa]\n\"DisableRestrictedAdmin\"=dword:00000000\n"
+      }
+    },
+    {
+      "id": "GS-W11-045",
+      "title": "NTFS last-access timestamps are updated",
+      "severity": "low",
+      "mapping": "verified",
+      "windows11_carryover": "unverified",
+      "module": {
+        "id": "SYS.2.2.3"
+      },
+      "references": [
+        {
+          "framework": "it-grundschutz-kompendium",
+          "requirement_id": "SYS.2.2.3.A24",
+          "title": "Aktivierung des Last-Access-Zeitstempels",
+          "mapping": "verified",
+          "source_id": "bsi-hilfsmittel-windows-client-1.0",
+          "note": "Requirement from the IT-Grundschutz-Kompendium, Edition 2023. The setting value is taken from the BSI Hilfsmittel for Windows clients, version 1.0 (20 February 2025)."
+        }
+      ],
+      "rationale": "The Hilfsmittel tells the administrator to run fsutil behavior set DisableLastAccess 0, which always updates the timestamp. v0.1 scores only 0. The concrete value is carried over from the Windows 10 Hilfsmittel (from Windows 10 version 21H2). BSI has not published a Windows 11 settings matrix. SYS.2.2.3 Edition 2023 applies to Windows 10 and Windows 11.",
+      "conflict_note": "",
+      "applicability_note": "On Windows 8 and later the values 2 and 3 are system-managed. The Hilfsmittel text describes 2 as updates enabled and 3 as updates disabled. Current Microsoft fsutil documentation describes 2 as updates disabled and 3 as updates enabled. Both descriptions agree that 0 always updates. Many Windows 10 and 11 systems default to 2.",
+      "evaluation": {
+        "method": "registry",
+        "hive": "HKLM",
+        "path": "SYSTEM\\CurrentControlSet\\Control\\FileSystem",
+        "name": "NtfsDisableLastAccessUpdate",
+        "operator": "equals",
+        "expected": 0
+      },
+      "remediation": {
+        "summary": "Apply the Group Policy or the snippet below. v0.1 does not apply this change.",
+        "gpo": "Command documented by the Hilfsmittel (not run by this tool):\nfsutil behavior set DisableLastAccess 0",
+        "intune": "Settings Catalog mirrors this Group Policy path:\nCommand documented by the Hilfsmittel (not run by this tool):\nNo OMA-URI is cited because it was not confirmed for this setting.",
+        "registry": "The Hilfsmittel sets this with fsutil, which writes:\nHKLM\\SYSTEM\\CurrentControlSet\\Control\\FileSystem\nNtfsDisableLastAccessUpdate = 0\n"
+      }
+    },
+    {
+      "id": "GS-W11-046",
+      "title": "Windows Firewall is enabled for every profile",
+      "severity": "high",
+      "mapping": "verified",
+      "windows11_carryover": "unverified",
+      "module": {
+        "id": "SYS.2.1"
+      },
+      "references": [
+        {
+          "framework": "it-grundschutz-kompendium",
+          "requirement_id": "SYS.2.1.A31",
+          "title": "Einrichtung lokaler Paketfilter",
+          "mapping": "verified",
+          "source_id": "bsi-hilfsmittel-windows-client-1.0",
+          "note": "Requirement from the IT-Grundschutz-Kompendium, Edition 2023. The setting value is taken from the BSI Hilfsmittel for Windows clients, version 1.0 (20 February 2025). For normal protection the Hilfsmittel says the default firewall (inbound block, outbound allow) is enough, and that this is not an allow-list."
+        },
+        {
+          "framework": "it-grundschutz-kompendium",
+          "requirement_id": "SYS.3.1.A3",
+          "title": "Einsatz von Personal Firewalls",
+          "mapping": "verified",
+          "source_id": "bsi-hilfsmittel-windows-client-1.0",
+          "note": "Requirement from the IT-Grundschutz-Kompendium, Edition 2023. The setting value is taken from the BSI Hilfsmittel for Windows clients, version 1.0 (20 February 2025). The Hilfsmittel says the Windows firewall is the personal firewall. Laptops used outside the organisation should block outbound traffic even at normal protection. Outbound Block is not scored."
+        },
+        {
+          "framework": "grundschutz-plus-plus",
+          "requirement_id": "KONF.7.15",
+          "title": "Lokale Firewall",
+          "mapping": "verified",
+          "source_id": "grundschutz-plus-plus-2026-09-24",
+          "note": "A pass means the three profiles are enabled. It does not mean an allow-list of connections exists. The control prefers an allow-list."
+        }
+      ],
+      "rationale": "EnableFirewall = 1 on Domain, Private (registry name StandardProfile), and Public. The private profile is stored as StandardProfile. The concrete value is carried over from the Windows 10 Hilfsmittel (from Windows 10 version 21H2). BSI has not published a Windows 11 settings matrix. SYS.2.2.3 Edition 2023 applies to Windows 10 and Windows 11.",
+      "conflict_note": "",
+      "applicability_note": "",
+      "evaluation": {
+        "method": "all_of",
+        "evaluations": [
+          {
+            "method": "registry",
+            "hive": "HKLM",
+            "path": "SYSTEM\\CurrentControlSet\\Services\\SharedAccess\\Parameters\\FirewallPolicy\\DomainProfile",
+            "name": "EnableFirewall",
+            "operator": "equals",
+            "expected": 1
+          },
+          {
+            "method": "registry",
+            "hive": "HKLM",
+            "path": "SYSTEM\\CurrentControlSet\\Services\\SharedAccess\\Parameters\\FirewallPolicy\\StandardProfile",
+            "name": "EnableFirewall",
+            "operator": "equals",
+            "expected": 1
+          },
+          {
+            "method": "registry",
+            "hive": "HKLM",
+            "path": "SYSTEM\\CurrentControlSet\\Services\\SharedAccess\\Parameters\\FirewallPolicy\\PublicProfile",
+            "name": "EnableFirewall",
+            "operator": "equals",
+            "expected": 1
+          }
+        ]
+      },
+      "remediation": {
+        "summary": "Apply the Group Policy or the snippet below. v0.1 does not apply this change.",
+        "gpo": "Computer Configuration/Windows Settings/Security Settings/Windows Defender Firewall with Advanced Security\nDomain, Private, and Public profile: Firewall state On",
+        "intune": "Settings Catalog mirrors this Group Policy path:\nComputer Configuration/Windows Settings/Security Settings/Windows Defender Firewall with Advanced Security\nNo OMA-URI is cited because it was not confirmed for this setting.",
+        "registry": "Windows Registry Editor Version 5.00\n\n[HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Services\\SharedAccess\\Parameters\\FirewallPolicy\\DomainProfile]\n\"EnableFirewall\"=dword:00000001\n\n[HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Services\\SharedAccess\\Parameters\\FirewallPolicy\\StandardProfile]\n\"EnableFirewall\"=dword:00000001\n\n[HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Services\\SharedAccess\\Parameters\\FirewallPolicy\\PublicProfile]\n\"EnableFirewall\"=dword:00000001\n"
+      }
+    },
+    {
+      "id": "GS-W11-047",
+      "title": "Windows Firewall logs dropped packets",
+      "severity": "medium",
+      "mapping": "verified",
+      "windows11_carryover": "unverified",
+      "module": {
+        "id": "SYS.2.1"
+      },
+      "references": [
+        {
+          "framework": "it-grundschutz-kompendium",
+          "requirement_id": "SYS.2.1.A31",
+          "title": "Einrichtung lokaler Paketfilter",
+          "mapping": "verified",
+          "source_id": "bsi-hilfsmittel-windows-client-1.0",
+          "note": "Requirement from the IT-Grundschutz-Kompendium, Edition 2023. The setting value is taken from the BSI Hilfsmittel for Windows clients, version 1.0 (20 February 2025). The Hilfsmittel table sets Log dropped packets to Yes and the size limit to 16384 KB. The size is named in the remediation and is not scored."
+        }
+      ],
+      "rationale": "Each profile must log dropped packets. LogFileSize 16384 KB is the Hilfsmittel size and is not a separate pass/fail, so a different size does not fail this check. The concrete value is carried over from the Windows 10 Hilfsmittel (from Windows 10 version 21H2). BSI has not published a Windows 11 settings matrix. SYS.2.2.3 Edition 2023 applies to Windows 10 and Windows 11.",
+      "conflict_note": "",
+      "applicability_note": "",
+      "evaluation": {
+        "method": "all_of",
+        "evaluations": [
+          {
+            "method": "registry",
+            "hive": "HKLM",
+            "path": "SYSTEM\\CurrentControlSet\\Services\\SharedAccess\\Parameters\\FirewallPolicy\\DomainProfile",
+            "name": "LogDroppedPackets",
+            "operator": "equals",
+            "expected": 1
+          },
+          {
+            "method": "registry",
+            "hive": "HKLM",
+            "path": "SYSTEM\\CurrentControlSet\\Services\\SharedAccess\\Parameters\\FirewallPolicy\\StandardProfile",
+            "name": "LogDroppedPackets",
+            "operator": "equals",
+            "expected": 1
+          },
+          {
+            "method": "registry",
+            "hive": "HKLM",
+            "path": "SYSTEM\\CurrentControlSet\\Services\\SharedAccess\\Parameters\\FirewallPolicy\\PublicProfile",
+            "name": "LogDroppedPackets",
+            "operator": "equals",
+            "expected": 1
+          }
+        ]
+      },
+      "remediation": {
+        "summary": "Apply the Group Policy or the snippet below. v0.1 does not apply this change.",
+        "gpo": "Windows Defender Firewall with Advanced Security, each profile, Logging:\nLog dropped packets: Yes\nSize limit: 16384 KB (recommended, not scored)",
+        "intune": "Settings Catalog mirrors this Group Policy path:\nWindows Defender Firewall with Advanced Security, each profile, Logging:\nNo OMA-URI is cited because it was not confirmed for this setting.",
+        "registry": "Windows Registry Editor Version 5.00\n\n[HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Services\\SharedAccess\\Parameters\\FirewallPolicy\\DomainProfile]\n\"LogDroppedPackets\"=dword:00000001\n\n[HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Services\\SharedAccess\\Parameters\\FirewallPolicy\\StandardProfile]\n\"LogDroppedPackets\"=dword:00000001\n\n[HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Services\\SharedAccess\\Parameters\\FirewallPolicy\\PublicProfile]\n\"LogDroppedPackets\"=dword:00000001\n"
+      }
+    },
+    {
+      "id": "GS-W11-048",
+      "title": "Secure Boot is on",
+      "severity": "high",
+      "mapping": "verified",
+      "windows11_carryover": "unverified",
+      "module": {
+        "id": "SYS.2.1"
+      },
+      "references": [
+        {
+          "framework": "it-grundschutz-kompendium",
+          "requirement_id": "SYS.2.1.A8",
+          "title": "Absicherung des Bootvorgangs",
+          "mapping": "verified",
+          "source_id": "bsi-hilfsmittel-windows-client-1.0",
+          "note": "Requirement from the IT-Grundschutz-Kompendium, Edition 2023. The setting value is taken from the BSI Hilfsmittel for Windows clients, version 1.0 (20 February 2025). The Hilfsmittel says to check in the UEFI firmware that Secure Boot is enabled. This is not a Group Policy setting."
+        },
+        {
+          "framework": "grundschutz-plus-plus",
+          "requirement_id": "KONF.2.9",
+          "title": "Abgesicherter und authentisierter Bootprozess",
+          "mapping": "verified",
+          "source_id": "grundschutz-plus-plus-2026-09-24",
+          "note": "The catalog modal verb is KANN. SYS.2.1.A8 is the primary requirement. Guidance mentions UEFI Secure Boot."
+        }
+      ],
+      "rationale": "Confirm-SecureBootUEFI must return true. If the cmdlet throws, the result is error, not fail. The concrete value is carried over from the Windows 10 Hilfsmittel (from Windows 10 version 21H2). BSI has not published a Windows 11 settings matrix. SYS.2.2.3 Edition 2023 applies to Windows 10 and Windows 11.",
+      "conflict_note": "",
+      "applicability_note": "",
+      "evaluation": {
+        "method": "secureboot",
+        "expected": true
+      },
+      "remediation": {
+        "summary": "Apply the Group Policy or the snippet below. v0.1 does not apply this change.",
+        "gpo": "UEFI firmware: Secure Boot enabled. There is no Group Policy that turns Secure Boot on.",
+        "intune": "Settings Catalog mirrors this Group Policy path:\nUEFI firmware: Secure Boot enabled. There is no Group Policy that turns Secure Boot on.\nNo OMA-URI is cited because it was not confirmed for this setting.",
+        "registry": "Secure Boot is a firmware setting. There is no registry value that turns it on.\n"
+      }
+    },
+    {
+      "id": "GS-W11-049",
+      "title": "BitLocker protects the operating-system volume",
+      "severity": "high",
+      "mapping": "verified",
+      "windows11_carryover": "unverified",
+      "module": {
+        "id": "SYS.2.1"
+      },
+      "references": [
+        {
+          "framework": "it-grundschutz-kompendium",
+          "requirement_id": "SYS.2.1.A28",
+          "title": "Verschlüsselung der Clients",
+          "mapping": "verified",
+          "source_id": "bsi-hilfsmittel-windows-client-1.0",
+          "note": "Requirement from the IT-Grundschutz-Kompendium, Edition 2023. The setting value is taken from the BSI Hilfsmittel for Windows clients, version 1.0 (20 February 2025)."
+        },
+        {
+          "framework": "grundschutz-plus-plus",
+          "requirement_id": "KONF.3.2",
+          "title": "Speicherverschlüsselung",
+          "mapping": "verified",
+          "source_id": "grundschutz-plus-plus-2026-09-24",
+          "note": "Guidance names Windows BitLocker as an example of storage encryption."
+        }
+      ],
+      "rationale": "The operating-system volume ProtectionStatus must be On. Other volumes are not scored. The concrete value is carried over from the Windows 10 Hilfsmittel (from Windows 10 version 21H2). BSI has not published a Windows 11 settings matrix. SYS.2.2.3 Edition 2023 applies to Windows 10 and Windows 11.",
+      "conflict_note": "",
+      "applicability_note": "",
+      "evaluation": {
+        "method": "bitlocker",
+        "volume_type": "OperatingSystem",
+        "property": "protection_status",
+        "operator": "equals",
+        "expected": "On"
+      },
+      "remediation": {
+        "summary": "Apply the Group Policy or the snippet below. v0.1 does not apply this change.",
+        "gpo": "Enable BitLocker on the operating-system volume. The Hilfsmittel discusses client encryption under SYS.2.1.A28. Recovery-key escrow is organisation-specific and is not scored.",
+        "intune": "Settings Catalog mirrors this Group Policy path:\nEnable BitLocker on the operating-system volume. The Hilfsmittel discusses client encryption under SYS.2.1.A28. Recovery-key escrow is organisation-specific and is not scored.\nNo OMA-URI is cited because it was not confirmed for this setting.",
+        "registry": "BitLocker is not enabled by a single registry value.\nmanage-bde -status C:\nmanage-bde -on C: -usedspaceonly\nv0.1 does not run manage-bde.\n"
+      }
+    },
+    {
+      "id": "GS-W11-050",
+      "title": "Automatic updates download and schedule the install",
+      "severity": "high",
+      "mapping": "verified",
+      "windows11_carryover": "unverified",
+      "module": {
+        "id": "SYS.2.1"
+      },
+      "references": [
+        {
+          "framework": "it-grundschutz-kompendium",
+          "requirement_id": "SYS.2.1.A3",
+          "title": "Aktivieren von Autoupdate-Mechanismen",
+          "mapping": "verified",
+          "source_id": "bsi-hilfsmittel-windows-client-1.0",
+          "note": "Requirement from the IT-Grundschutz-Kompendium, Edition 2023. The setting value is taken from the BSI Hilfsmittel for Windows clients, version 1.0 (20 February 2025)."
+        },
+        {
+          "framework": "grundschutz-plus-plus",
+          "requirement_id": "KONF.8.1.1",
+          "title": "Automatische Sicherheitsupdates",
+          "mapping": "verified",
+          "source_id": "grundschutz-plus-plus-2026-09-24",
+          "note": "The control says to install security updates automatically. AUOptions 4 is the Hilfsmittel option. A WSUS URL is environment-specific and is not scored."
+        }
+      ],
+      "rationale": "The Hilfsmittel sets Configure Automatic Updates to option 4, auto download and schedule the install. AUOptions = 4. The concrete value is carried over from the Windows 10 Hilfsmittel (from Windows 10 version 21H2). BSI has not published a Windows 11 settings matrix. SYS.2.2.3 Edition 2023 applies to Windows 10 and Windows 11.",
+      "conflict_note": "",
+      "applicability_note": "",
+      "evaluation": {
+        "method": "registry",
+        "hive": "HKLM",
+        "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\AU",
+        "name": "AUOptions",
+        "operator": "equals",
+        "expected": 4
+      },
+      "remediation": {
+        "summary": "Apply the Group Policy or the snippet below. v0.1 does not apply this change.",
+        "gpo": "Computer Configuration/Administrative Templates/Windows Components/Windows Update\nConfigure Automatic Updates: Enabled, 4 - Auto download and schedule the install",
+        "intune": "Settings Catalog mirrors this Group Policy path:\nComputer Configuration/Administrative Templates/Windows Components/Windows Update\nNo OMA-URI is cited because it was not confirmed for this setting.",
+        "registry": "Windows Registry Editor Version 5.00\n\n[HKEY_LOCAL_MACHINE\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\AU]\n\"AUOptions\"=dword:00000004\n"
+      }
+    },
+    {
+      "id": "GS-W11-051",
+      "title": "Users cannot pause Windows updates",
+      "severity": "medium",
+      "mapping": "verified",
+      "windows11_carryover": "unverified",
+      "module": {
+        "id": "SYS.2.1"
+      },
+      "references": [
+        {
+          "framework": "it-grundschutz-kompendium",
+          "requirement_id": "SYS.2.1.A3",
+          "title": "Aktivieren von Autoupdate-Mechanismen",
+          "mapping": "verified",
+          "source_id": "bsi-hilfsmittel-windows-client-1.0",
+          "note": "Requirement from the IT-Grundschutz-Kompendium, Edition 2023. The setting value is taken from the BSI Hilfsmittel for Windows clients, version 1.0 (20 February 2025)."
+        }
+      ],
+      "rationale": "The Hilfsmittel enables Remove access to the Pause updates feature. SetDisablePauseUXAccess = 1. The concrete value is carried over from the Windows 10 Hilfsmittel (from Windows 10 version 21H2). BSI has not published a Windows 11 settings matrix. SYS.2.2.3 Edition 2023 applies to Windows 10 and Windows 11.",
+      "conflict_note": "",
+      "applicability_note": "",
+      "evaluation": {
+        "method": "registry",
+        "hive": "HKLM",
+        "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate",
+        "name": "SetDisablePauseUXAccess",
+        "operator": "equals",
+        "expected": 1
+      },
+      "remediation": {
+        "summary": "Apply the Group Policy or the snippet below. v0.1 does not apply this change.",
+        "gpo": "Computer Configuration/Administrative Templates/Windows Components/Windows Update\nRemove access to \"Pause updates\" feature: Enabled",
+        "intune": "Settings Catalog mirrors this Group Policy path:\nComputer Configuration/Administrative Templates/Windows Components/Windows Update\nNo OMA-URI is cited because it was not confirmed for this setting.",
+        "registry": "Windows Registry Editor Version 5.00\n\n[HKEY_LOCAL_MACHINE\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate]\n\"SetDisablePauseUXAccess\"=dword:00000001\n"
+      }
+    },
+    {
+      "id": "GS-W11-052",
+      "title": "OneDrive is not used for file storage",
+      "severity": "medium",
+      "mapping": "verified",
+      "windows11_carryover": "unverified",
+      "module": {
+        "id": "SYS.2.2.3"
+      },
+      "references": [
+        {
+          "framework": "it-grundschutz-kompendium",
+          "requirement_id": "SYS.2.2.3.A15",
+          "title": "Einsatz der Synchronisationsmechanismen unter Windows",
+          "mapping": "verified",
+          "source_id": "bsi-hilfsmittel-windows-client-1.0",
+          "note": "Requirement from the IT-Grundschutz-Kompendium, Edition 2023. The setting value is taken from the BSI Hilfsmittel for Windows clients, version 1.0 (20 February 2025)."
+        },
+        {
+          "framework": "grundschutz-plus-plus",
+          "requirement_id": "KONF.2.4.2",
+          "title": "Externe Cloud-Anbindungen",
+          "mapping": "verified",
+          "source_id": "grundschutz-plus-plus-2026-09-24",
+          "note": "Guidance names automatic synchronisation with a cloud as a connection to disable when it is not required."
+        }
+      ],
+      "rationale": "The Hilfsmittel enables Prevent the usage of OneDrive for file storage. DisableFileSyncNGSC = 1. The concrete value is carried over from the Windows 10 Hilfsmittel (from Windows 10 version 21H2). BSI has not published a Windows 11 settings matrix. SYS.2.2.3 Edition 2023 applies to Windows 10 and Windows 11.",
+      "conflict_note": "",
+      "applicability_note": "",
+      "evaluation": {
+        "method": "registry",
+        "hive": "HKLM",
+        "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\OneDrive",
+        "name": "DisableFileSyncNGSC",
+        "operator": "equals",
+        "expected": 1
+      },
+      "remediation": {
+        "summary": "Apply the Group Policy or the snippet below. v0.1 does not apply this change.",
+        "gpo": "Computer Configuration/Administrative Templates/Windows Components/OneDrive\nPrevent the usage of OneDrive for file storage: Enabled",
+        "intune": "Settings Catalog mirrors this Group Policy path:\nComputer Configuration/Administrative Templates/Windows Components/OneDrive\nNo OMA-URI is cited because it was not confirmed for this setting.",
+        "registry": "Windows Registry Editor Version 5.00\n\n[HKEY_LOCAL_MACHINE\\SOFTWARE\\Policies\\Microsoft\\Windows\\OneDrive]\n\"DisableFileSyncNGSC\"=dword:00000001\n"
+      }
+    },
+    {
+      "id": "GS-W11-053",
+      "title": "User activities are not uploaded",
+      "severity": "medium",
+      "mapping": "verified",
+      "windows11_carryover": "unverified",
+      "module": {
+        "id": "SYS.2.2.3"
+      },
+      "references": [
+        {
+          "framework": "it-grundschutz-kompendium",
+          "requirement_id": "SYS.2.2.3.A15",
+          "title": "Einsatz der Synchronisationsmechanismen unter Windows",
+          "mapping": "verified",
+          "source_id": "bsi-hilfsmittel-windows-client-1.0",
+          "note": "Requirement from the IT-Grundschutz-Kompendium, Edition 2023. The setting value is taken from the BSI Hilfsmittel for Windows clients, version 1.0 (20 February 2025)."
+        },
+        {
+          "framework": "grundschutz-plus-plus",
+          "requirement_id": "KONF.2.4.2",
+          "title": "Externe Cloud-Anbindungen",
+          "mapping": "verified",
+          "source_id": "grundschutz-plus-plus-2026-09-24",
+          "note": "Control id and title from Anwenderkatalog Grundschutz++, resolved catalog version 2026-09-24T07:12:39.131983+00:00."
+        }
+      ],
+      "rationale": "The Hilfsmittel sets Allow upload of User Activities to Disabled. UploadUserActivities = 0. The default when the policy is absent is to allow upload, so a missing value fails. The concrete value is carried over from the Windows 10 Hilfsmittel (from Windows 10 version 21H2). BSI has not published a Windows 11 settings matrix. SYS.2.2.3 Edition 2023 applies to Windows 10 and Windows 11.",
+      "conflict_note": "",
+      "applicability_note": "",
+      "evaluation": {
+        "method": "registry",
+        "hive": "HKLM",
+        "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\System",
+        "name": "UploadUserActivities",
+        "operator": "equals",
+        "expected": 0
+      },
+      "remediation": {
+        "summary": "Apply the Group Policy or the snippet below. v0.1 does not apply this change.",
+        "gpo": "Computer Configuration/Administrative Templates/System/OS Policies\nAllow upload of User Activities: Disabled",
+        "intune": "Settings Catalog: Computer Configuration/Administrative Templates/System/OS Policies\nOMA-URI: ./Device/Vendor/MSFT/Policy/Config/Privacy/UploadUserActivities",
+        "registry": "Windows Registry Editor Version 5.00\n\n[HKEY_LOCAL_MACHINE\\SOFTWARE\\Policies\\Microsoft\\Windows\\System]\n\"UploadUserActivities\"=dword:00000000\n"
+      }
+    },
+    {
+      "id": "GS-W11-054",
+      "title": "Clipboard is not synced across devices",
+      "severity": "medium",
+      "mapping": "verified",
+      "windows11_carryover": "unverified",
+      "module": {
+        "id": "SYS.2.2.3"
+      },
+      "references": [
+        {
+          "framework": "it-grundschutz-kompendium",
+          "requirement_id": "SYS.2.2.3.A15",
+          "title": "Einsatz der Synchronisationsmechanismen unter Windows",
+          "mapping": "verified",
+          "source_id": "bsi-hilfsmittel-windows-client-1.0",
+          "note": "Requirement from the IT-Grundschutz-Kompendium, Edition 2023. The setting value is taken from the BSI Hilfsmittel for Windows clients, version 1.0 (20 February 2025)."
+        },
+        {
+          "framework": "grundschutz-plus-plus",
+          "requirement_id": "KONF.2.4.2",
+          "title": "Externe Cloud-Anbindungen",
+          "mapping": "verified",
+          "source_id": "grundschutz-plus-plus-2026-09-24",
+          "note": "Control id and title from Anwenderkatalog Grundschutz++, resolved catalog version 2026-09-24T07:12:39.131983+00:00."
+        }
+      ],
+      "rationale": "The Hilfsmittel sets Allow Clipboard synchronization across devices to Disabled. AllowCrossDeviceClipboard = 0. The concrete value is carried over from the Windows 10 Hilfsmittel (from Windows 10 version 21H2). BSI has not published a Windows 11 settings matrix. SYS.2.2.3 Edition 2023 applies to Windows 10 and Windows 11.",
+      "conflict_note": "",
+      "applicability_note": "",
+      "evaluation": {
+        "method": "registry",
+        "hive": "HKLM",
+        "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\System",
+        "name": "AllowCrossDeviceClipboard",
+        "operator": "equals",
+        "expected": 0
+      },
+      "remediation": {
+        "summary": "Apply the Group Policy or the snippet below. v0.1 does not apply this change.",
+        "gpo": "Computer Configuration/Administrative Templates/System/OS Policies\nAllow Clipboard synchronization across devices: Disabled",
+        "intune": "Settings Catalog: Computer Configuration/Administrative Templates/System/OS Policies\nOMA-URI: ./Device/Vendor/MSFT/Policy/Config/Privacy/AllowCrossDeviceClipboard",
+        "registry": "Windows Registry Editor Version 5.00\n\n[HKEY_LOCAL_MACHINE\\SOFTWARE\\Policies\\Microsoft\\Windows\\System]\n\"AllowCrossDeviceClipboard\"=dword:00000000\n"
+      }
+    },
+    {
+      "id": "GS-W11-055",
+      "title": "Microsoft Store application is turned off",
+      "severity": "low",
+      "mapping": "verified",
+      "windows11_carryover": "unverified",
+      "module": {
+        "id": "SYS.2.2.3"
+      },
+      "references": [
+        {
+          "framework": "it-grundschutz-kompendium",
+          "requirement_id": "SYS.2.2.3.A16",
+          "title": "Anbindung von Windows an den Microsoft-Store",
+          "mapping": "verified",
+          "source_id": "bsi-hilfsmittel-windows-client-1.0",
+          "note": "Requirement from the IT-Grundschutz-Kompendium, Edition 2023. The setting value is taken from the BSI Hilfsmittel for Windows clients, version 1.0 (20 February 2025)."
+        }
+      ],
+      "rationale": "The Hilfsmittel enables Turn off the Store application. RemoveWindowsStore = 1. The separate policy Disable all apps from Microsoft Store is not scored: the Hilfsmittel wording for that policy is ambiguous. The concrete value is carried over from the Windows 10 Hilfsmittel (from Windows 10 version 21H2). BSI has not published a Windows 11 settings matrix. SYS.2.2.3 Edition 2023 applies to Windows 10 and Windows 11.",
+      "conflict_note": "",
+      "applicability_note": "",
+      "evaluation": {
+        "method": "registry",
+        "hive": "HKLM",
+        "path": "SOFTWARE\\Policies\\Microsoft\\WindowsStore",
+        "name": "RemoveWindowsStore",
+        "operator": "equals",
+        "expected": 1
+      },
+      "remediation": {
+        "summary": "Apply the Group Policy or the snippet below. v0.1 does not apply this change.",
+        "gpo": "Computer Configuration/Administrative Templates/Windows Components/Store\nTurn off the Store application: Enabled",
+        "intune": "Settings Catalog mirrors this Group Policy path:\nComputer Configuration/Administrative Templates/Windows Components/Store\nNo OMA-URI is cited because it was not confirmed for this setting.",
+        "registry": "Windows Registry Editor Version 5.00\n\n[HKEY_LOCAL_MACHINE\\SOFTWARE\\Policies\\Microsoft\\WindowsStore]\n\"RemoveWindowsStore\"=dword:00000001\n"
+      }
+    },
+    {
+      "id": "GS-W11-056",
+      "title": "Only administrators install printer drivers",
+      "severity": "medium",
+      "mapping": "verified",
+      "windows11_carryover": "unverified",
+      "module": {
+        "id": "SYS.2.1"
+      },
+      "references": [
+        {
+          "framework": "it-grundschutz-kompendium",
+          "requirement_id": "SYS.2.1.A15",
+          "title": "Sichere Installation und Konfiguration von Clients",
+          "mapping": "verified",
+          "source_id": "bsi-hilfsmittel-windows-client-1.0",
+          "note": "Requirement from the IT-Grundschutz-Kompendium, Edition 2023. The setting value is taken from the BSI Hilfsmittel for Windows clients, version 1.0 (20 February 2025). The Hilfsmittel enables Limits print driver installation to Administrators."
+        }
+      ],
+      "rationale": "RestrictDriverInstallationToAdministrators = 1. After the August 2021 updates, a missing value also means administrators only, so absence passes. Value 0 fails. The concrete value is carried over from the Windows 10 Hilfsmittel (from Windows 10 version 21H2). BSI has not published a Windows 11 settings matrix. SYS.2.2.3 Edition 2023 applies to Windows 10 and Windows 11.",
+      "conflict_note": "",
+      "applicability_note": "",
+      "evaluation": {
+        "method": "registry",
+        "hive": "HKLM",
+        "path": "SOFTWARE\\Policies\\Microsoft\\Windows NT\\Printers\\PointAndPrint",
+        "name": "RestrictDriverInstallationToAdministrators",
+        "operator": "equals",
+        "expected": 1,
+        "when_absent": "pass"
+      },
+      "remediation": {
+        "summary": "Apply the Group Policy or the snippet below. v0.1 does not apply this change.",
+        "gpo": "Computer Configuration/Administrative Templates/MS Security Guide\nLimits print driver installation to Administrators: Enabled",
+        "intune": "Settings Catalog mirrors this Group Policy path:\nComputer Configuration/Administrative Templates/MS Security Guide\nNo OMA-URI is cited because it was not confirmed for this setting.",
+        "registry": "Windows Registry Editor Version 5.00\n\n[HKEY_LOCAL_MACHINE\\SOFTWARE\\Policies\\Microsoft\\Windows NT\\Printers\\PointAndPrint]\n\"RestrictDriverInstallationToAdministrators\"=dword:00000001\n"
+      }
+    },
+    {
+      "id": "GS-W11-057",
+      "title": "Remote Registry service is disabled",
+      "severity": "medium",
+      "mapping": "verified",
+      "windows11_carryover": "unverified",
+      "module": {
+        "id": "SYS.2.1"
+      },
+      "references": [
+        {
+          "framework": "it-grundschutz-kompendium",
+          "requirement_id": "SYS.2.1.A16",
+          "title": "Deaktivierung und Deinstallation nicht benötigter Komponenten und Kennungen",
+          "mapping": "verified",
+          "source_id": "bsi-hilfsmittel-windows-client-1.0",
+          "note": "Requirement from the IT-Grundschutz-Kompendium, Edition 2023. The setting value is taken from the BSI Hilfsmittel for Windows clients, version 1.0 (20 February 2025)."
+        },
+        {
+          "framework": "grundschutz-plus-plus",
+          "requirement_id": "KONF.2.4",
+          "title": "Deaktivierung nicht benötigter Systemfunktionen",
+          "mapping": "verified",
+          "source_id": "grundschutz-plus-plus-2026-09-24",
+          "note": "Control id and title from Anwenderkatalog Grundschutz++, resolved catalog version 2026-09-24T07:12:39.131983+00:00."
+        }
+      ],
+      "rationale": "The Hilfsmittel sets Remote Registry to Disabled. The default start type is Manual, which fails this check. The concrete value is carried over from the Windows 10 Hilfsmittel (from Windows 10 version 21H2). BSI has not published a Windows 11 settings matrix. SYS.2.2.3 Edition 2023 applies to Windows 10 and Windows 11.",
+      "conflict_note": "",
+      "applicability_note": "",
+      "evaluation": {
+        "method": "service",
+        "name": "RemoteRegistry",
+        "property": "start_type",
+        "operator": "equals",
+        "expected": "Disabled"
+      },
+      "remediation": {
+        "summary": "Apply the Group Policy or the snippet below. v0.1 does not apply this change.",
+        "gpo": "Computer Configuration/Windows Settings/Security Settings/System Services\nRemote Registry: Disabled",
+        "intune": "Settings Catalog mirrors this Group Policy path:\nComputer Configuration/Windows Settings/Security Settings/System Services\nNo OMA-URI is cited because it was not confirmed for this setting.",
+        "registry": "v0.1 does not change services. A local administrator can set the start type with:\nsc.exe config RemoteRegistry start= disabled\nThe space after start= is required by sc.exe.\n"
+      }
+    },
+    {
+      "id": "GS-W11-058",
+      "title": "Windows PowerShell 2.0 engine is absent or disabled",
+      "severity": "medium",
+      "mapping": "verified",
+      "windows11_carryover": "unverified",
+      "module": {
+        "id": "SYS.2.1"
+      },
+      "references": [
+        {
+          "framework": "it-grundschutz-kompendium",
+          "requirement_id": "SYS.2.1.A16",
+          "title": "Deaktivierung und Deinstallation nicht benötigter Komponenten und Kennungen",
+          "mapping": "verified",
+          "source_id": "bsi-hilfsmittel-windows-client-1.0",
+          "note": "Requirement from the IT-Grundschutz-Kompendium, Edition 2023. The setting value is taken from the BSI Hilfsmittel for Windows clients, version 1.0 (20 February 2025)."
+        },
+        {
+          "framework": "grundschutz-plus-plus",
+          "requirement_id": "KONF.2.4",
+          "title": "Deaktivierung nicht benötigter Systemfunktionen",
+          "mapping": "verified",
+          "source_id": "grundschutz-plus-plus-2026-09-24",
+          "note": "Control id and title from Anwenderkatalog Grundschutz++, resolved catalog version 2026-09-24T07:12:39.131983+00:00."
+        }
+      ],
+      "rationale": "The Hilfsmittel clears the Windows PowerShell 2.0 feature. Disabled and NotFound both pass. A missing feature row is treated as NotFound. If the feature list itself cannot be read, the result is error. The concrete value is carried over from the Windows 10 Hilfsmittel (from Windows 10 version 21H2). BSI has not published a Windows 11 settings matrix. SYS.2.2.3 Edition 2023 applies to Windows 10 and Windows 11.",
+      "conflict_note": "",
+      "applicability_note": "",
+      "evaluation": {
+        "method": "feature",
+        "name": "MicrosoftWindowsPowerShellV2Root",
+        "operator": "one_of",
+        "expected": [
+          "Disabled",
+          "NotFound"
+        ]
+      },
+      "remediation": {
+        "summary": "Apply the Group Policy or the snippet below. v0.1 does not apply this change.",
+        "gpo": "Windows Features: Windows PowerShell 2.0, including Windows PowerShell 2.0 Engine: cleared.",
+        "intune": "Settings Catalog mirrors this Group Policy path:\nWindows Features: Windows PowerShell 2.0, including Windows PowerShell 2.0 Engine: cleared.\nNo OMA-URI is cited because it was not confirmed for this setting.",
+        "registry": "Disable-WindowsOptionalFeature -Online -FeatureName MicrosoftWindowsPowerShellV2Root -NoRestart\nv0.1 does not run this command.\n"
+      }
+    },
+    {
+      "id": "GS-W11-059",
+      "title": "Six Attack Surface Reduction rules are set to block",
+      "severity": "high",
+      "mapping": "verified",
+      "windows11_carryover": "unverified",
+      "module": {
+        "id": "SYS.2.1"
+      },
+      "references": [
+        {
+          "framework": "it-grundschutz-kompendium",
+          "requirement_id": "SYS.2.1.A6",
+          "title": "Einsatz von Schutzprogrammen gegen Schadsoftware",
+          "mapping": "verified",
+          "source_id": "bsi-hilfsmittel-windows-client-1.0",
+          "note": "Requirement from the IT-Grundschutz-Kompendium, Edition 2023. The setting value is taken from the BSI Hilfsmittel for Windows clients, version 1.0 (20 February 2025). The Hilfsmittel sets these six ASR rule GUIDs to 1 (Block). d1e49aac is 0, 1, or 2 and is not scored."
+        },
+        {
+          "framework": "grundschutz-plus-plus",
+          "requirement_id": "KONF.7.16",
+          "title": "Anti-Exploit",
+          "mapping": "verified",
+          "source_id": "grundschutz-plus-plus-2026-09-24",
+          "note": "Guidance names Defender Exploit Guard as an example of an anti-exploit function."
+        }
+      ],
+      "rationale": "Each scored rule value is 1. Audit (2) or off (0) fails. Rules that the Hilfsmittel leaves optional, including rules that need MAPS, are not scored. The Hilfsmittel gives no required MAPS value. The concrete value is carried over from the Windows 10 Hilfsmittel (from Windows 10 version 21H2). BSI has not published a Windows 11 settings matrix. SYS.2.2.3 Edition 2023 applies to Windows 10 and Windows 11.",
+      "conflict_note": "",
+      "applicability_note": "",
+      "evaluation": {
+        "method": "all_of",
+        "evaluations": [
+          {
+            "method": "registry",
+            "hive": "HKLM",
+            "path": "SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Windows Defender Exploit Guard\\ASR\\Rules",
+            "name": "9e6c4e1f-7d60-472f-ba1a-a39ef669e4b2",
+            "operator": "equals",
+            "expected": 1
+          },
+          {
+            "method": "registry",
+            "hive": "HKLM",
+            "path": "SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Windows Defender Exploit Guard\\ASR\\Rules",
+            "name": "56a863a9-875e-4185-98a7-b882c64b5ce5",
+            "operator": "equals",
+            "expected": 1
+          },
+          {
+            "method": "registry",
+            "hive": "HKLM",
+            "path": "SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Windows Defender Exploit Guard\\ASR\\Rules",
+            "name": "b2b3f03d-6a65-4f7b-a9c7-1c7ef74a9ba4",
+            "operator": "equals",
+            "expected": 1
+          },
+          {
+            "method": "registry",
+            "hive": "HKLM",
+            "path": "SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Windows Defender Exploit Guard\\ASR\\Rules",
+            "name": "d3e037e1-3eb8-44c8-a917-57927947596d",
+            "operator": "equals",
+            "expected": 1
+          },
+          {
+            "method": "registry",
+            "hive": "HKLM",
+            "path": "SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Windows Defender Exploit Guard\\ASR\\Rules",
+            "name": "5beb7efe-fd9a-4556-801d-275e5ffc04cc",
+            "operator": "equals",
+            "expected": 1
+          },
+          {
+            "method": "registry",
+            "hive": "HKLM",
+            "path": "SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Windows Defender Exploit Guard\\ASR\\Rules",
+            "name": "e6db77e5-3df2-4cf1-b95a-636979351e5b",
+            "operator": "equals",
+            "expected": 1
+          }
+        ]
+      },
+      "remediation": {
+        "summary": "Apply the Group Policy or the snippet below. v0.1 does not apply this change.",
+        "gpo": "Computer Configuration/Administrative Templates/Windows Components/Microsoft Defender Antivirus/Microsoft Defender Exploit Guard/Attack Surface Reduction\nConfigure Attack Surface Reduction rules: Enabled\nEach listed GUID: 1 (Block)",
+        "intune": "Settings Catalog mirrors this Group Policy path:\nComputer Configuration/Administrative Templates/Windows Components/Microsoft Defender Antivirus/Microsoft Defender Exploit Guard/Attack Surface Reduction\nNo OMA-URI is cited because it was not confirmed for this setting.",
+        "registry": "Windows Registry Editor Version 5.00\n\n[HKEY_LOCAL_MACHINE\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Windows Defender Exploit Guard\\ASR\\Rules]\n\"9e6c4e1f-7d60-472f-ba1a-a39ef669e4b2\"=dword:00000001\n\"56a863a9-875e-4185-98a7-b882c64b5ce5\"=dword:00000001\n\"b2b3f03d-6a65-4f7b-a9c7-1c7ef74a9ba4\"=dword:00000001\n\"d3e037e1-3eb8-44c8-a917-57927947596d\"=dword:00000001\n\"5beb7efe-fd9a-4556-801d-275e5ffc04cc\"=dword:00000001\n\"e6db77e5-3df2-4cf1-b95a-636979351e5b\"=dword:00000001\n"
+      }
+    },
+    {
+      "id": "GS-W11-060",
+      "title": "Logon auditing records success and failure",
+      "severity": "medium",
+      "mapping": "verified",
+      "windows11_carryover": "unverified",
+      "module": {
+        "id": "DET.3"
+      },
+      "references": [
+        {
+          "framework": "grundschutz-plus-plus",
+          "requirement_id": "DET.3.1.1",
+          "title": "Authentifizierungen",
+          "mapping": "verified",
+          "source_id": "grundschutz-plus-plus-2026-09-24",
+          "note": "The control requires authentication success and failure to be logged. It does not name a Windows audit subcategory. v0.1 maps that outcome to the advanced-audit subcategory Logon and queries its MS-GPAC GUID."
+        },
+        {
+          "framework": "it-grundschutz-kompendium",
+          "requirement_id": "DER.1.A5",
+          "title": "Einsatz von mitgelieferten Systemfunktionen zur Detektion",
+          "mapping": "unverified",
+          "source_id": "it-grundschutz-kompendium-2023",
+          "note": "DER.1.A5 says to use built-in detection and points at the SiSyPHuS logging study. It does not name this subcategory, so the citation is unverified."
+        }
+      ],
+      "rationale": "auditpol subcategory Logon ({0CCE9215-69AE-11D9-BED3-505054503030}) must be Success and Failure. Collection queries that GUID. If the GUID query fails, the de-DE display name Anmelden is accepted. A subcategory that is still missing is error, not fail. The concrete value is carried over from the Windows 10 Hilfsmittel (from Windows 10 version 21H2). BSI has not published a Windows 11 settings matrix. SYS.2.2.3 Edition 2023 applies to Windows 10 and Windows 11.",
+      "conflict_note": "",
+      "applicability_note": "",
+      "evaluation": {
+        "method": "auditpol",
+        "subcategory": "Logon",
+        "subcategory_guid": "{0CCE9215-69AE-11D9-BED3-505054503030}",
+        "operator": "equals",
+        "expected": "Success and Failure"
+      },
+      "remediation": {
+        "summary": "Apply the Group Policy or the snippet below. v0.1 does not apply this change.",
+        "gpo": "Advanced Audit Policy: Logon/Logoff, Logon: Success and Failure.",
+        "intune": "Settings Catalog mirrors this Group Policy path:\nAdvanced Audit Policy: Logon/Logoff, Logon: Success and Failure.\nNo OMA-URI is cited because it was not confirmed for this setting.",
+        "registry": "auditpol /set /subcategory:{0CCE9215-69AE-11D9-BED3-505054503030} /success:enable /failure:enable\nv0.1 does not run auditpol /set.\n"
+      }
+    },
+    {
+      "id": "GS-W11-061",
+      "title": "Credential Validation auditing records success and failure",
+      "severity": "medium",
+      "mapping": "verified",
+      "windows11_carryover": "unverified",
+      "module": {
+        "id": "DET.3"
+      },
+      "references": [
+        {
+          "framework": "grundschutz-plus-plus",
+          "requirement_id": "DET.3.1.1",
+          "title": "Authentifizierungen",
+          "mapping": "verified",
+          "source_id": "grundschutz-plus-plus-2026-09-24",
+          "note": "The control requires authentication success and failure to be logged. Credential Validation is the advanced-audit subcategory for credential checks, queried by its MS-GPAC GUID. The control does not name it."
+        },
+        {
+          "framework": "it-grundschutz-kompendium",
+          "requirement_id": "DER.1.A5",
+          "title": "Einsatz von mitgelieferten Systemfunktionen zur Detektion",
+          "mapping": "unverified",
+          "source_id": "it-grundschutz-kompendium-2023",
+          "note": "DER.1.A5 does not name this subcategory. The citation is unverified."
+        }
+      ],
+      "rationale": "auditpol subcategory Credential Validation ({0CCE923F-69AE-11D9-BED3-505054503030}) must be Success and Failure. Collection queries that GUID. If the GUID query fails, the de-DE display names Anmeldeinformationen überprüfen and Überprüfung der Anmeldeinformationen are accepted. The concrete value is carried over from the Windows 10 Hilfsmittel (from Windows 10 version 21H2). BSI has not published a Windows 11 settings matrix. SYS.2.2.3 Edition 2023 applies to Windows 10 and Windows 11.",
+      "conflict_note": "",
+      "applicability_note": "",
+      "evaluation": {
+        "method": "auditpol",
+        "subcategory": "Credential Validation",
+        "subcategory_guid": "{0CCE923F-69AE-11D9-BED3-505054503030}",
+        "operator": "equals",
+        "expected": "Success and Failure"
+      },
+      "remediation": {
+        "summary": "Apply the Group Policy or the snippet below. v0.1 does not apply this change.",
+        "gpo": "Advanced Audit Policy: Account Logon, Credential Validation: Success and Failure.",
+        "intune": "Settings Catalog mirrors this Group Policy path:\nAdvanced Audit Policy: Account Logon, Credential Validation: Success and Failure.\nNo OMA-URI is cited because it was not confirmed for this setting.",
+        "registry": "auditpol /set /subcategory:{0CCE923F-69AE-11D9-BED3-505054503030} /success:enable /failure:enable\nv0.1 does not run auditpol /set.\n"
+      }
+    },
+    {
+      "id": "GS-W11-062",
+      "title": "WinRM client and service reject unencrypted traffic",
+      "severity": "medium",
+      "mapping": "verified",
+      "windows11_carryover": "unverified",
+      "module": {
+        "id": "SYS.2.1"
+      },
+      "references": [
+        {
+          "framework": "it-grundschutz-kompendium",
+          "requirement_id": "SYS.2.1.A18",
+          "title": "Nutzung von verschlüsselten Kommunikationsverbindungen",
+          "mapping": "verified",
+          "source_id": "bsi-hilfsmittel-windows-client-1.0",
+          "note": "Requirement from the IT-Grundschutz-Kompendium, Edition 2023. The setting value is taken from the BSI Hilfsmittel for Windows clients, version 1.0 (20 February 2025)."
+        }
+      ],
+      "rationale": "The Hilfsmittel sets Allow unencrypted traffic to Disabled for the WinRM client and the WinRM service. A missing policy value passes because the client default is not to allow unencrypted traffic. Basic authentication and digest authentication are in the same Hilfsmittel table and are not scored here. The concrete value is carried over from the Windows 10 Hilfsmittel (from Windows 10 version 21H2). BSI has not published a Windows 11 settings matrix. SYS.2.2.3 Edition 2023 applies to Windows 10 and Windows 11.",
+      "conflict_note": "",
+      "applicability_note": "",
+      "evaluation": {
+        "method": "all_of",
+        "evaluations": [
+          {
+            "method": "registry",
+            "hive": "HKLM",
+            "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WinRM\\Client",
+            "name": "AllowUnencryptedTraffic",
+            "operator": "equals",
+            "expected": 0,
+            "when_absent": "pass"
+          },
+          {
+            "method": "registry",
+            "hive": "HKLM",
+            "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WinRM\\Service",
+            "name": "AllowUnencryptedTraffic",
+            "operator": "equals",
+            "expected": 0,
+            "when_absent": "pass"
+          }
+        ]
+      },
+      "remediation": {
+        "summary": "Apply the Group Policy or the snippet below. v0.1 does not apply this change.",
+        "gpo": "Computer Configuration/Administrative Templates/Windows Components/Windows Remote Management (WinRM)/WinRM Client\nAllow unencrypted traffic: Disabled\nWinRM Service: Allow unencrypted traffic: Disabled",
+        "intune": "Settings Catalog mirrors this Group Policy path:\nComputer Configuration/Administrative Templates/Windows Components/Windows Remote Management (WinRM)/WinRM Client\nNo OMA-URI is cited because it was not confirmed for this setting.",
+        "registry": "Windows Registry Editor Version 5.00\n\n[HKEY_LOCAL_MACHINE\\SOFTWARE\\Policies\\Microsoft\\Windows\\WinRM\\Client]\n\"AllowUnencryptedTraffic\"=dword:00000000\n\n[HKEY_LOCAL_MACHINE\\SOFTWARE\\Policies\\Microsoft\\Windows\\WinRM\\Service]\n\"AllowUnencryptedTraffic\"=dword:00000000\n"
+      }
+    },
+    {
+      "id": "GS-W11-063",
+      "title": "Windows Script Host is disabled",
+      "severity": "medium",
+      "mapping": "verified",
+      "windows11_carryover": "unverified",
+      "module": {
+        "id": "SYS.2.1"
+      },
+      "references": [
+        {
+          "framework": "it-grundschutz-kompendium",
+          "requirement_id": "SYS.2.1.A16",
+          "title": "Deaktivierung und Deinstallation nicht benötigter Komponenten und Kennungen",
+          "mapping": "verified",
+          "source_id": "bsi-hilfsmittel-windows-client-1.0",
+          "note": "Requirement from the IT-Grundschutz-Kompendium, Edition 2023. The setting value is taken from the BSI Hilfsmittel for Windows clients, version 1.0 (20 February 2025). The Hilfsmittel registry table sets Windows Script Host Settings Enabled to 0 when script execution is not required."
+        }
+      ],
+      "rationale": "The Hilfsmittel documents HKLM\\SOFTWARE\\Microsoft\\Windows Script Host\\Settings Enabled = 0. A missing value leaves WSH enabled and fails. The concrete value is carried over from the Windows 10 Hilfsmittel (from Windows 10 version 21H2). BSI has not published a Windows 11 settings matrix. SYS.2.2.3 Edition 2023 applies to Windows 10 and Windows 11.",
+      "conflict_note": "",
+      "applicability_note": "",
+      "evaluation": {
+        "method": "registry",
+        "hive": "HKLM",
+        "path": "SOFTWARE\\Microsoft\\Windows Script Host\\Settings",
+        "name": "Enabled",
+        "operator": "equals",
+        "expected": 0
+      },
+      "remediation": {
+        "summary": "Apply the Group Policy or the snippet below. v0.1 does not apply this change.",
+        "gpo": "The Hilfsmittel documents this as a registry value. There is no separate ADMX path in that table.\nWindows Script Host: Enabled = 0 (do not run scripts).",
+        "intune": "Settings Catalog mirrors this Group Policy path:\nThe Hilfsmittel documents this as a registry value. There is no separate ADMX path in that table.\nNo OMA-URI is cited because it was not confirmed for this setting.",
+        "registry": "Windows Registry Editor Version 5.00\n\n[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows Script Host\\Settings]\n\"Enabled\"=dword:00000000\n"
+      }
+    }
+  ]
+}

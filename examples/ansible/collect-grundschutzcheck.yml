@@ -1,0 +1,55 @@
+---
+# Read-only. Copies GrundschutzCheck to a Windows host, runs it, and fetches the JSON.
+# Run from this directory:
+#   ansible-playbook -i inventory.example.ini collect-grundschutzcheck.yml
+# Exit code 1 from the check means findings. Exit code 2 means a check could not be evaluated.
+- name: Collect a GrundschutzCheck JSON report
+  hosts: windows_clients
+  gather_facts: false
+  vars:
+    gsc_remote_dir: 'C:\ProgramData\GrundschutzCheck'
+    gsc_root: "{{ playbook_dir }}/../.."
+  tasks:
+    - name: Create the remote working directory
+      ansible.windows.win_file:
+        path: "{{ gsc_remote_dir }}"
+        state: directory
+
+    - name: Copy the module manifest
+      ansible.windows.win_copy:
+        src: "{{ gsc_root }}/GrundschutzCheck.psd1"
+        dest: "{{ gsc_remote_dir }}\\GrundschutzCheck.psd1"
+
+    - name: Copy the module
+      ansible.windows.win_copy:
+        src: "{{ gsc_root }}/GrundschutzCheck.psm1"
+        dest: "{{ gsc_remote_dir }}\\GrundschutzCheck.psm1"
+
+    - name: Copy the entry script
+      ansible.windows.win_copy:
+        src: "{{ gsc_root }}/Invoke-GrundschutzCheck.ps1"
+        dest: "{{ gsc_remote_dir }}\\Invoke-GrundschutzCheck.ps1"
+
+    - name: Copy the PowerShell source
+      ansible.windows.win_copy:
+        src: "{{ gsc_root }}/src/"
+        dest: "{{ gsc_remote_dir }}\\src\\"
+
+    - name: Copy the catalog
+      ansible.windows.win_copy:
+        src: "{{ gsc_root }}/catalog/"
+        dest: "{{ gsc_remote_dir }}\\catalog\\"
+
+    - name: Run the read-only check
+      ansible.windows.win_shell: >-
+        powershell.exe -NoProfile -File "{{ gsc_remote_dir }}\Invoke-GrundschutzCheck.ps1"
+        -OutputDirectory "{{ gsc_remote_dir }}\out" -Format Json
+      register: gsc_run
+      changed_when: false
+      failed_when: gsc_run.rc not in [0, 1]
+
+    - name: Fetch the JSON report
+      ansible.builtin.fetch:
+        src: '{{ gsc_remote_dir }}\out\grundschutzcheck-report.json'
+        dest: "{{ playbook_dir }}/collected/"
+        flat: true

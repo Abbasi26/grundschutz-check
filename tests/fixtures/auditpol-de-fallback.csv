@@ -1,0 +1,9 @@
+Computername,Richtlinienziel,Unterkategorie,Unterkategorie-GUID,Einschlusseinstellung,Ausschlusseinstellung
+FIXTURE-WIN11,System,Anmelden,,Erfolg und Fehler,
+FIXTURE-WIN11,System,Anmeldeinformationen überprüfen,,Erfolg und Fehler,
+FIXTURE-WIN11,System,Abmelden,,Erfolg,
+FIXTURE-WIN11,System,Kontosperrung,,Keine Überwachung,
+FIXTURE-WIN11,System,Spezielle Anmeldung,,Erfolg,
+FIXTURE-WIN11,System,Prozesserstellung,,Erfolg und Fehler,
+FIXTURE-WIN11,System,Benutzerkontenverwaltung,,Fehler,
+FIXTURE-WIN11,System,Sicherheitsgruppenverwaltung,,Erfolg,

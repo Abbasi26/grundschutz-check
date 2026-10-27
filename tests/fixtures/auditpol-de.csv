@@ -1,0 +1,9 @@
+Computername,Richtlinienziel,Unterkategorie,Unterkategorie-GUID,Einschlusseinstellung,Ausschlusseinstellung
+FIXTURE-WIN11,System,Anmelden,{0CCE9215-69AE-11D9-BED3-505054503030},Erfolg und Fehler,
+FIXTURE-WIN11,System,Anmeldeinformationen überprüfen,{0CCE923F-69AE-11D9-BED3-505054503030},Erfolg und Fehler,
+FIXTURE-WIN11,System,Abmelden,{0CCE9216-69AE-11D9-BED3-505054503030},Erfolg,
+FIXTURE-WIN11,System,Kontosperrung,{0CCE9217-69AE-11D9-BED3-505054503030},Keine Überwachung,
+FIXTURE-WIN11,System,Spezielle Anmeldung,{0CCE921B-69AE-11D9-BED3-505054503030},Erfolg,
+FIXTURE-WIN11,System,Prozesserstellung,{0CCE922B-69AE-11D9-BED3-505054503030},Erfolg und Fehler,
+FIXTURE-WIN11,System,Benutzerkontenverwaltung,{0CCE9235-69AE-11D9-BED3-505054503030},Fehler,
+FIXTURE-WIN11,System,Sicherheitsgruppenverwaltung,{0CCE9237-69AE-11D9-BED3-505054503030},Erfolg,

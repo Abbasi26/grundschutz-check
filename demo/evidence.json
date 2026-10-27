@@ -1,0 +1,507 @@
+{
+  "host": {
+    "computer_name": "DEMO-WIN11-01",
+    "domain": "DEMO.example",
+    "os_caption": "Windows 11 Enterprise",
+    "os_version": "10.0.26100",
+    "os_build": "26100"
+  },
+  "notes": [
+    "Fictional evidence for the offline demo. No real computer was measured.",
+    "Values that are not overridden match the catalog expectation so those checks pass."
+  ],
+  "registry": [
+    {
+      "hive": "HKLM",
+      "path": "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon",
+      "name": "CachedLogonsCount",
+      "value": "10"
+    },
+    {
+      "hive": "HKLM",
+      "path": "SOFTWARE\\Microsoft\\Windows Script Host\\Settings",
+      "name": "Enabled",
+      "value": 0
+    },
+    {
+      "hive": "HKLM",
+      "path": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer",
+      "name": "NoAutorun",
+      "value": 1
+    },
+    {
+      "hive": "HKLM",
+      "path": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer",
+      "name": "NoDriveTypeAutoRun",
+      "value": 255
+    },
+    {
+      "hive": "HKLM",
+      "path": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
+      "name": "ConsentPromptBehaviorAdmin",
+      "value": 5
+    },
+    {
+      "hive": "HKLM",
+      "path": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
+      "name": "DisableCAD",
+      "value": 0
+    },
+    {
+      "hive": "HKLM",
+      "path": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
+      "name": "EnableLUA",
+      "value": 1
+    },
+    {
+      "hive": "HKLM",
+      "path": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
+      "name": "FilterAdministratorToken",
+      "value": 0
+    },
+    {
+      "hive": "HKLM",
+      "path": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
+      "name": "InactivityTimeoutSecs",
+      "value": 0
+    },
+    {
+      "hive": "HKLM",
+      "path": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
+      "name": "LocalAccountTokenFilterPolicy",
+      "value": 0
+    },
+    {
+      "hive": "HKLM",
+      "path": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
+      "name": "NoConnectedUser",
+      "value": 3
+    },
+    {
+      "hive": "HKLM",
+      "path": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
+      "name": "PromptOnSecureDesktop",
+      "value": 1
+    },
+    {
+      "hive": "HKLM",
+      "path": "SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Windows Defender Exploit Guard\\ASR\\Rules",
+      "name": "56a863a9-875e-4185-98a7-b882c64b5ce5",
+      "value": 1
+    },
+    {
+      "hive": "HKLM",
+      "path": "SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Windows Defender Exploit Guard\\ASR\\Rules",
+      "name": "5beb7efe-fd9a-4556-801d-275e5ffc04cc",
+      "value": 1
+    },
+    {
+      "hive": "HKLM",
+      "path": "SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Windows Defender Exploit Guard\\ASR\\Rules",
+      "name": "9e6c4e1f-7d60-472f-ba1a-a39ef669e4b2",
+      "value": 0
+    },
+    {
+      "hive": "HKLM",
+      "path": "SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Windows Defender Exploit Guard\\ASR\\Rules",
+      "name": "b2b3f03d-6a65-4f7b-a9c7-1c7ef74a9ba4",
+      "value": 1
+    },
+    {
+      "hive": "HKLM",
+      "path": "SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Windows Defender Exploit Guard\\ASR\\Rules",
+      "name": "d3e037e1-3eb8-44c8-a917-57927947596d",
+      "value": 1
+    },
+    {
+      "hive": "HKLM",
+      "path": "SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Windows Defender Exploit Guard\\ASR\\Rules",
+      "name": "e6db77e5-3df2-4cf1-b95a-636979351e5b",
+      "value": 1
+    },
+    {
+      "hive": "HKLM",
+      "path": "SOFTWARE\\Policies\\Microsoft\\Windows NT\\DNSClient",
+      "name": "EnableMulticast",
+      "value": 0
+    },
+    {
+      "hive": "HKLM",
+      "path": "SOFTWARE\\Policies\\Microsoft\\Windows NT\\Printers\\PointAndPrint",
+      "name": "RestrictDriverInstallationToAdministrators",
+      "value": 1
+    },
+    {
+      "hive": "HKLM",
+      "path": "SOFTWARE\\Policies\\Microsoft\\Windows NT\\Terminal Services",
+      "name": "DisablePasswordSaving",
+      "value": 1
+    },
+    {
+      "hive": "HKLM",
+      "path": "SOFTWARE\\Policies\\Microsoft\\Windows NT\\Terminal Services",
+      "name": "fAllowToGetHelp",
+      "value": 0
+    },
+    {
+      "hive": "HKLM",
+      "path": "SOFTWARE\\Policies\\Microsoft\\Windows NT\\Terminal Services",
+      "name": "fAllowUnsolicited",
+      "value": 0
+    },
+    {
+      "hive": "HKLM",
+      "path": "SOFTWARE\\Policies\\Microsoft\\Windows NT\\Terminal Services",
+      "name": "fDisableCdm",
+      "value": 1
+    },
+    {
+      "hive": "HKLM",
+      "path": "SOFTWARE\\Policies\\Microsoft\\Windows NT\\Terminal Services",
+      "name": "MinEncryptionLevel",
+      "value": 3
+    },
+    {
+      "hive": "HKLM",
+      "path": "SOFTWARE\\Policies\\Microsoft\\Windows NT\\Terminal Services",
+      "name": "SecurityLayer",
+      "value": 2
+    },
+    {
+      "hive": "HKLM",
+      "path": "SOFTWARE\\Policies\\Microsoft\\Windows NT\\Terminal Services",
+      "name": "UserAuthentication",
+      "value": 1
+    },
+    {
+      "hive": "HKLM",
+      "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\DataCollection",
+      "name": "AllowDeviceNameInDiagnosticData",
+      "value": 0
+    },
+    {
+      "hive": "HKLM",
+      "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\DataCollection",
+      "name": "AllowTelemetry",
+      "value": 1
+    },
+    {
+      "hive": "HKLM",
+      "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\PowerShell\\ModuleLogging",
+      "name": "EnableModuleLogging",
+      "value": 1
+    },
+    {
+      "hive": "HKLM",
+      "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\PowerShell\\Transcription",
+      "name": "EnableInvocationHeader",
+      "value": 1
+    },
+    {
+      "hive": "HKLM",
+      "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\PowerShell\\Transcription",
+      "name": "EnableTranscripting",
+      "value": 1
+    },
+    {
+      "hive": "HKLM",
+      "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\System",
+      "name": "AllowCrossDeviceClipboard",
+      "value": 0
+    },
+    {
+      "hive": "HKLM",
+      "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\System",
+      "name": "UploadUserActivities",
+      "value": 0
+    },
+    {
+      "hive": "HKLM",
+      "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate",
+      "name": "SetDisablePauseUXAccess",
+      "value": 1
+    },
+    {
+      "hive": "HKLM",
+      "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\AU",
+      "name": "AUOptions",
+      "value": 4
+    },
+    {
+      "hive": "HKLM",
+      "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WinRM\\Client",
+      "name": "AllowUnencryptedTraffic",
+      "value": 1
+    },
+    {
+      "hive": "HKLM",
+      "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WinRM\\Service",
+      "name": "AllowUnencryptedTraffic",
+      "value": 0
+    },
+    {
+      "hive": "HKLM",
+      "path": "SOFTWARE\\Policies\\Microsoft\\WindowsStore",
+      "name": "RemoveWindowsStore",
+      "value": 1
+    },
+    {
+      "hive": "HKLM",
+      "path": "SYSTEM\\CurrentControlSet\\Control\\FileSystem",
+      "name": "NtfsDisableLastAccessUpdate",
+      "value": 0
+    },
+    {
+      "hive": "HKLM",
+      "path": "SYSTEM\\CurrentControlSet\\Control\\Lsa",
+      "name": "DisableDomainCreds",
+      "value": 1
+    },
+    {
+      "hive": "HKLM",
+      "path": "SYSTEM\\CurrentControlSet\\Control\\Lsa",
+      "name": "DisableRestrictedAdmin",
+      "value": 0
+    },
+    {
+      "hive": "HKLM",
+      "path": "SYSTEM\\CurrentControlSet\\Control\\Lsa",
+      "name": "LmCompatibilityLevel",
+      "value": 3
+    },
+    {
+      "hive": "HKLM",
+      "path": "SYSTEM\\CurrentControlSet\\Control\\Lsa",
+      "name": "NTLMMinClientSec",
+      "value": 537395200
+    },
+    {
+      "hive": "HKLM",
+      "path": "SYSTEM\\CurrentControlSet\\Control\\Lsa",
+      "name": "NTLMMinServerSec",
+      "value": 537395200
+    },
+    {
+      "hive": "HKLM",
+      "path": "SYSTEM\\CurrentControlSet\\Control\\Lsa",
+      "name": "RestrictAnonymous",
+      "value": 1
+    },
+    {
+      "hive": "HKLM",
+      "path": "SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\SCHANNEL\\Protocols\\TLS 1.0\\Client",
+      "name": "DisabledByDefault",
+      "value": 1
+    },
+    {
+      "hive": "HKLM",
+      "path": "SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\SCHANNEL\\Protocols\\TLS 1.0\\Client",
+      "name": "Enabled",
+      "value": 1
+    },
+    {
+      "hive": "HKLM",
+      "path": "SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\SCHANNEL\\Protocols\\TLS 1.1\\Client",
+      "name": "DisabledByDefault",
+      "value": 1
+    },
+    {
+      "hive": "HKLM",
+      "path": "SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\SCHANNEL\\Protocols\\TLS 1.1\\Client",
+      "name": "Enabled",
+      "value": 0
+    },
+    {
+      "hive": "HKLM",
+      "path": "SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\SCHANNEL\\Protocols\\TLS 1.2\\Client",
+      "name": "DisabledByDefault",
+      "value": 0
+    },
+    {
+      "hive": "HKLM",
+      "path": "SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\SCHANNEL\\Protocols\\TLS 1.2\\Client",
+      "name": "Enabled",
+      "value": 1
+    },
+    {
+      "hive": "HKLM",
+      "path": "SYSTEM\\CurrentControlSet\\Control\\WMI\\Autologger\\Diagtrack-Listener",
+      "name": "Start",
+      "value": 0
+    },
+    {
+      "hive": "HKLM",
+      "path": "SYSTEM\\CurrentControlSet\\Services\\LanmanServer\\Parameters",
+      "name": "RequireSecuritySignature",
+      "value": 1
+    },
+    {
+      "hive": "HKLM",
+      "path": "SYSTEM\\CurrentControlSet\\Services\\LanmanServer\\Parameters",
+      "name": "SMB1",
+      "value": 0
+    },
+    {
+      "hive": "HKLM",
+      "path": "SYSTEM\\CurrentControlSet\\Services\\LanmanWorkstation\\Parameters",
+      "name": "RequireSecuritySignature",
+      "value": 0
+    },
+    {
+      "hive": "HKLM",
+      "path": "SYSTEM\\CurrentControlSet\\Services\\LDAP",
+      "name": "LDAPClientIntegrity",
+      "value": 2
+    },
+    {
+      "hive": "HKLM",
+      "path": "SYSTEM\\CurrentControlSet\\Services\\mrxsmb10",
+      "name": "Start",
+      "value": 4
+    },
+    {
+      "hive": "HKLM",
+      "path": "SYSTEM\\CurrentControlSet\\Services\\SharedAccess\\Parameters\\FirewallPolicy\\DomainProfile",
+      "name": "EnableFirewall",
+      "value": 1
+    },
+    {
+      "hive": "HKLM",
+      "path": "SYSTEM\\CurrentControlSet\\Services\\SharedAccess\\Parameters\\FirewallPolicy\\DomainProfile",
+      "name": "LogDroppedPackets",
+      "value": 1
+    },
+    {
+      "hive": "HKLM",
+      "path": "SYSTEM\\CurrentControlSet\\Services\\SharedAccess\\Parameters\\FirewallPolicy\\PublicProfile",
+      "name": "EnableFirewall",
+      "value": 0
+    },
+    {
+      "hive": "HKLM",
+      "path": "SYSTEM\\CurrentControlSet\\Services\\SharedAccess\\Parameters\\FirewallPolicy\\PublicProfile",
+      "name": "LogDroppedPackets",
+      "value": 1
+    },
+    {
+      "hive": "HKLM",
+      "path": "SYSTEM\\CurrentControlSet\\Services\\SharedAccess\\Parameters\\FirewallPolicy\\StandardProfile",
+      "name": "EnableFirewall",
+      "value": 1
+    },
+    {
+      "hive": "HKLM",
+      "path": "SYSTEM\\CurrentControlSet\\Services\\SharedAccess\\Parameters\\FirewallPolicy\\StandardProfile",
+      "name": "LogDroppedPackets",
+      "value": 1
+    },
+    {
+      "hive": "HKLM",
+      "path": "SYSTEM\\CurrentControlSet\\Services\\Tcpip6\\Parameters",
+      "name": "DisableIPSourceRouting",
+      "value": 2
+    },
+    {
+      "hive": "HKLM",
+      "path": "SYSTEM\\CurrentControlSet\\Services\\Tcpip\\Parameters",
+      "name": "DisableIPSourceRouting",
+      "value": 2
+    }
+  ],
+  "secedit": [
+    {
+      "section": "System Access",
+      "key": "EnableGuestAccount",
+      "value": "0"
+    },
+    {
+      "section": "System Access",
+      "key": "LockoutBadCount",
+      "value": "10"
+    },
+    {
+      "section": "System Access",
+      "key": "LockoutDuration",
+      "value": "15"
+    },
+    {
+      "section": "System Access",
+      "key": "MaximumPasswordAge",
+      "value": "90"
+    },
+    {
+      "section": "System Access",
+      "key": "MinimumPasswordAge",
+      "value": "1"
+    },
+    {
+      "section": "System Access",
+      "key": "MinimumPasswordLength",
+      "value": "14"
+    },
+    {
+      "section": "System Access",
+      "key": "PasswordHistorySize",
+      "value": "24"
+    },
+    {
+      "section": "System Access",
+      "key": "ResetLockoutCount",
+      "value": "15"
+    }
+  ],
+  "services": [
+    {
+      "name": "DiagTrack",
+      "start_type": "Automatic",
+      "status": "Running"
+    },
+    {
+      "name": "RemoteRegistry",
+      "start_type": "Manual",
+      "status": "Stopped"
+    },
+    {
+      "name": "WinDefend",
+      "start_type": "Automatic",
+      "status": "Running"
+    }
+  ],
+  "defender": {
+    "DisableRealtimeMonitoring": false,
+    "DisableBehaviorMonitoring": false,
+    "DisableIOAVProtection": false,
+    "PUAProtection": 0
+  },
+  "features": [
+    {
+      "name": "MicrosoftWindowsPowerShellV2Root",
+      "state": "Enabled"
+    }
+  ],
+  "secureboot": true,
+  "bitlocker": [
+    {
+      "mount": "C:",
+      "volume_type": "OperatingSystem",
+      "protection_status": "Off"
+    }
+  ],
+  "auditpol": [
+    {
+      "subcategory": "Logon",
+      "subcategory_guid": "{0CCE9215-69AE-11D9-BED3-505054503030}",
+      "setting": "Success"
+    },
+    {
+      "subcategory": "Credential Validation",
+      "subcategory_guid": "{0CCE923F-69AE-11D9-BED3-505054503030}",
+      "setting": "Success and Failure"
+    },
+    {
+      "subcategory": "Logoff",
+      "subcategory_guid": "{0CCE9216-69AE-11D9-BED3-505054503030}",
+      "setting": "Success"
+    }
+  ]
+}

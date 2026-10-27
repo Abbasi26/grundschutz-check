@@ -1,0 +1,10 @@
+out/
+grundschutzcheck-out/
+testResults/
+testResults.xml
+*.nupkg
+__pycache__/
+.pytest_cache/
+uploads/
+agent-tools/
+examples/ansible/collected/

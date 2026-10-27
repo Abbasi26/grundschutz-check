@@ -1,0 +1,59 @@
+name: test
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install PowerShell 7.5.4
+        run: |
+          curl -fsSL -o /tmp/pwsh.tar.gz https://github.com/PowerShell/PowerShell/releases/download/v7.5.4/powershell-7.5.4-linux-x64.tar.gz
+          sudo mkdir -p /opt/pwsh
+          sudo tar -xzf /tmp/pwsh.tar.gz -C /opt/pwsh
+          sudo chmod +x /opt/pwsh/pwsh
+          echo /opt/pwsh >> "$GITHUB_PATH"
+      - name: Pester
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          Install-Module Pester -RequiredVersion 5.7.1 -Force -Scope CurrentUser
+          Invoke-Pester -CI ./tests
+      - name: Catalog builder
+        run: |
+          python3 -m pip install --user pytest jsonschema
+          python3 tools/build_catalog.py --check
+          python3 -m pytest tests/test_catalog.py -q
+      - name: Demo
+        shell: bash
+        run: |
+          set +e
+          pwsh -NoProfile -File ./Invoke-GrundschutzCheck.ps1 -Demo -OutputDirectory "$PWD/out" -Timestamp 2026-10-21T12:00:00Z
+          status=$?
+          set -e
+          test -f "$PWD/out/grundschutzcheck-report.html"
+          test -f "$PWD/out/grundschutzcheck-report.md"
+          test -f "$PWD/out/grundschutzcheck-report.json"
+          test -f "$PWD/out/grundschutzcheck-findings.csv"
+          test "$status" -eq 1
+
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Pester on PowerShell 7
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          Install-Module Pester -RequiredVersion 5.7.1 -Force -Scope CurrentUser
+          Invoke-Pester -CI ./tests
+      - name: Pester on Windows PowerShell 5.1
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force | Out-Null
+          Install-Module Pester -RequiredVersion 5.7.1 -Force -Scope CurrentUser
+          Invoke-Pester -CI ./tests

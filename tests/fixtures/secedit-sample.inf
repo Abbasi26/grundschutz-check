@@ -1,0 +1,11 @@
+[Unicode]
+Unicode=yes
+
+[System Access]
+PasswordHistorySize = 24
+MinimumPasswordLength = 14
+NewAdministratorName = "LocalAdmin"
+MaximumPasswordAge = 90
+
+[Event Audit]
+AuditSystemEvents = 0
