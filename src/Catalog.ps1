@@ -110,7 +110,7 @@ function Test-GsEvaluationShape {
         return
     }
     if ($method -eq 'all_of' -or $method -eq 'any_of') {
-        $children = ConvertTo-GsArray (Get-GsProperty $Evaluation 'evaluations')
+        $children = @(ConvertTo-GsArray (Get-GsProperty $Evaluation 'evaluations'))
         if ($children.Count -lt 1) {
             $Errors.Add("$CheckId $method has no child evaluations.")
         }
@@ -191,7 +191,7 @@ function Test-GsCatalog {
             $errors.Add("catalog.$field is required.")
         }
     }
-    $checks = ConvertTo-GsArray (Get-GsProperty $Catalog 'checks')
+    $checks = @(ConvertTo-GsArray (Get-GsProperty $Catalog 'checks'))
     if ($checks.Count -lt 40) {
         $errors.Add("Catalog has $($checks.Count) checks; v0.1 expects at least 40.")
     }
@@ -234,7 +234,7 @@ function Test-GsCatalog {
         if ([string]::IsNullOrWhiteSpace([string](Get-GsProperty $module 'id'))) {
             $errors.Add("$id is missing module.id.")
         }
-        $refs = ConvertTo-GsArray (Get-GsProperty $check 'references')
+        $refs = @(ConvertTo-GsArray (Get-GsProperty $check 'references'))
         if ($refs.Count -lt 1) {
             $errors.Add("$id has no references.")
         }

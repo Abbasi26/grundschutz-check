@@ -188,7 +188,7 @@ function Test-GsExpectation {
             $mask = ConvertTo-GsLong $Expected
             return (($current -band $mask) -eq $mask)
         }
-        $bounds = ConvertTo-GsArray $Expected
+        $bounds = @(ConvertTo-GsArray $Expected)
         if ($bounds.Count -lt 2) { return $false }
         $min = ConvertTo-GsLong $bounds[0]
         $max = ConvertTo-GsLong $bounds[1]
@@ -210,7 +210,7 @@ function Format-GsExpected {
     $operatorName = [string](Get-GsProperty $Evaluation 'operator')
     $expected = Get-GsProperty $Evaluation 'expected'
     if ($operatorName -eq 'in_range') {
-        $bounds = ConvertTo-GsArray $expected
+        $bounds = @(ConvertTo-GsArray $expected)
         return ('{0}..{1}' -f $bounds[0], $bounds[1])
     }
     if ($operatorName -eq 'one_of') {
@@ -303,7 +303,7 @@ function Invoke-GsEvaluation {
 function Invoke-GsCompositeEvaluation {
     param($Evaluation, $Evidence)
     $method = [string](Get-GsProperty $Evaluation 'method')
-    $children = ConvertTo-GsArray (Get-GsProperty $Evaluation 'evaluations')
+    $children = @(ConvertTo-GsArray (Get-GsProperty $Evaluation 'evaluations'))
     if ($children.Count -eq 0) {
         return New-GsEvalResult -Status 'error' -Expected '' -Actual '' -Message "$method has no child evaluations."
     }

@@ -14,7 +14,7 @@ function ConvertTo-GsMarkdownCell {
 
 function Get-GsPrimaryReference {
     param($Check)
-    $refs = ConvertTo-GsArray (Get-GsProperty $Check 'references')
+    $refs = @(ConvertTo-GsArray (Get-GsProperty $Check 'references'))
     if ($refs.Count -eq 0) { return $null }
     return $refs[0]
 }
