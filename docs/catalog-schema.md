@@ -100,7 +100,7 @@ A property named `registry_error`, `secedit_error`, `service_error`, `defender_e
 
 | Field | Meaning |
 | --- | --- |
-| `tool.name`, `tool.version` | `GrundschutzCheck` and `0.1.0`. |
+| `tool.name`, `tool.version` | `GrundschutzCheck` and `0.2.0`. |
 | `catalog.id`, `catalog.version`, `catalog.schema_version` | Catalog that was evaluated. |
 | `evidence.generated_at` | UTC timestamp `yyyy-MM-ddTHH:mm:ssZ`. |
 | `evidence.mode` | `demo` or `local`. |

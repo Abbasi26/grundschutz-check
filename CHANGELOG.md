@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.2.0 - 2026-10-28
 
 - `-ExceptionPath`: documented risk acceptances with reason, owner, expiry date, and optional ticket. Failing checks with a current exception are reported as `accepted` and do not set exit code 1. Expired exceptions keep the check at `fail`; exceptions never hide errors. New `accepted` count in the summary and per module.
 - `-BaselinePath`: compares the run with an earlier JSON report (newly failing, fixed, still failing, new and removed checks, host fingerprint match). Rendered in HTML and Markdown and stored under `comparison` in the JSON report.

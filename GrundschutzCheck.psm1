@@ -2,7 +2,7 @@ Set-StrictMode -Version 1.0
 
 $script:GsModuleRoot = $PSScriptRoot
 $script:GsToolName = 'GrundschutzCheck'
-$script:GsToolVersion = '0.1.0'
+$script:GsToolVersion = '0.2.0'
 
 . (Join-Path $PSScriptRoot 'src/Catalog.ps1')
 . (Join-Path $PSScriptRoot 'src/Evaluate.ps1')

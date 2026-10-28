@@ -1,6 +1,6 @@
 @{
     RootModule        = 'GrundschutzCheck.psm1'
-    ModuleVersion     = '0.1.0'
+    ModuleVersion     = '0.2.0'
     GUID              = 'f0c96ef7-6444-4d5a-97dc-fcd42672da59'
     Author            = 'Wasaf Abbasi'
     CompanyName       = 'Wasaf Abbasi'

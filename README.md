@@ -149,7 +149,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md). New checks start in `tools/build_catalog
 
 ## Status
 
-Version 0.1.0, early but usable. PowerShell module `GrundschutzCheck`. MIT licensed. Every push runs the test suite in GitHub Actions (`.github/workflows/test.yml`).
+Version 0.2.0, early but usable. PowerShell module `GrundschutzCheck`. MIT licensed. Every push runs the test suite in GitHub Actions (`.github/workflows/test.yml`).
 
 ## Install
 

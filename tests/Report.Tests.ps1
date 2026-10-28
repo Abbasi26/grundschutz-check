@@ -53,7 +53,7 @@ Describe 'Demo report' {
         $jsonText | Should -Match '"generated_at":\s*"2026-10-21T12:00:00Z"'
         $parsed = $jsonText | ConvertFrom-Json
         $parsed.evidence.mode | Should -Be 'demo'
-        $parsed.tool.version | Should -Be '0.1.0'
+        $parsed.tool.version | Should -Be '0.2.0'
         $parsed.catalog.version | Should -Be '0.1.0'
         @($parsed.summary.modules).Count | Should -BeGreaterThan 0
         @($parsed.summary.grundschutz_plus_plus).Count | Should -BeGreaterThan 0
