@@ -44,6 +44,38 @@ Invoke-GrundschutzCheck -OutputDirectory .\grundschutzcheck-out
 
 The remote example is `examples/ansible/`. It uses `ansible.windows` to copy the module, run the same script without `-Demo`, and fetch the JSON.
 
+## Documented exceptions (accepted risk)
+
+Grundschutz expects a deviation to be a decision, not an oversight. Put those decisions in a JSON file and pass it with `-ExceptionPath`:
+
+```json
+{
+  "exceptions": [
+    { "check_id": "GS-W11-004", "reason": "Passwords do not expire by policy; length and breach screening are enforced instead.",
+      "owner": "IT security officer", "expires": "2027-06-30", "ticket": "RISK-0001" }
+  ]
+}
+```
+
+```bash
+pwsh -NoProfile -File ./Invoke-GrundschutzCheck.ps1 -Demo -ExceptionPath examples/exceptions.example.json -OutputDirectory ./grundschutzcheck-out
+```
+
+- A failing check with a current exception is reported as `accepted`, with reason, owner, expiry, and ticket in every report format. Accepted checks do not set exit code 1.
+- `reason`, `owner`, and `expires` (`yyyy-MM-dd`) are required. Unknown check ids and duplicates stop the run.
+- An expired exception does not hide anything: the check stays `fail` and the report says the exception expired.
+- An exception never hides an `error`, and an exception for a check that now passes is listed as no longer needed.
+
+## Compare with an earlier run
+
+Keep the JSON report of a run and use it as a baseline next time:
+
+```bash
+pwsh -NoProfile -File ./Invoke-GrundschutzCheck.ps1 -BaselinePath ./last-month/grundschutzcheck-report.json -FailOnRegression
+```
+
+The reports get a "Changes since baseline" section: newly failing, fixed, still failing, new and removed checks, and a warning when the baseline comes from a different host fingerprint. The JSON report has the same data under `comparison`. With `-FailOnRegression` the script exits 1 only when a check newly fails, so you can adopt the catalog on an existing fleet and ratchet from there. Errors still exit 2.
+
 ## Permissions
 
 Live collection is read-only and stays on the machine that runs it. There is no telemetry.
@@ -99,7 +131,9 @@ BSI's own SiSyPHuS material for hardening recommendations is the Windows 10 work
 
 ## Roadmap
 
-Not in v0.1:
+Plan and good first issues: [ROADMAP.md](ROADMAP.md).
+
+Not yet built:
 
 - OSCAL Assessment Results export
 - A full SiSyPHuS AP10 audit-subcategory matrix with a citation for each row

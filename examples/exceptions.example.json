@@ -1,0 +1,26 @@
+{
+  "schema_version": "0.1",
+  "exceptions": [
+    {
+      "check_id": "GS-W11-004",
+      "reason": "Passwords do not expire by policy; length and breach screening are enforced instead. The Hilfsmittel and BER.6.5 disagree on password age.",
+      "owner": "IT security officer (example)",
+      "expires": "2027-06-30",
+      "ticket": "RISK-0001"
+    },
+    {
+      "check_id": "GS-W11-052",
+      "reason": "OneDrive for Business is the approved file store for this client group; a data-protection assessment exists.",
+      "owner": "Data protection officer (example)",
+      "expires": "2027-03-31",
+      "ticket": "RISK-0002"
+    },
+    {
+      "check_id": "GS-W11-008",
+      "reason": "Laptops used offline in the field needed more cached logons. Review was due and has not happened.",
+      "owner": "Client team lead (example)",
+      "expires": "2026-06-30",
+      "ticket": "RISK-0003"
+    }
+  ]
+}

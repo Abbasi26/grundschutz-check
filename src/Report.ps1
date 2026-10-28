@@ -25,6 +25,7 @@ function New-GsCountBag {
         fail           = 0
         error          = 0
         not_applicable = 0
+        accepted       = 0
         total          = 0
     }
 }
@@ -37,6 +38,7 @@ function Add-GsCount {
         'fail' { $Bag.fail += 1 }
         'error' { $Bag.error += 1 }
         'not_applicable' { $Bag.not_applicable += 1 }
+        'accepted' { $Bag.accepted += 1 }
     }
 }
 
@@ -49,6 +51,7 @@ function ConvertTo-GsCountObject {
         fail           = $Bag.fail
         error          = $Bag.error
         not_applicable = $Bag.not_applicable
+        accepted       = $Bag.accepted
         total          = $Bag.total
     }
 }
@@ -119,6 +122,7 @@ function New-GsReportDocument {
             rationale             = [string](Get-GsProperty $check 'rationale')
             conflict_note         = [string](Get-GsProperty $check 'conflict_note')
             applicability_note    = [string](Get-GsProperty $check 'applicability_note')
+            exception             = (Get-GsProperty $evaluation 'Exception')
             remediation           = [pscustomobject][ordered]@{
                 summary  = [string](Get-GsProperty $remediation 'summary')
                 gpo      = [string](Get-GsProperty $remediation 'gpo')
@@ -188,6 +192,7 @@ function New-GsReportDocument {
             fail           = $summary.fail
             error          = $summary.error
             not_applicable = $summary.not_applicable
+            accepted       = $summary.accepted
             total          = $summary.total
             modules        = $modules
             grundschutz_plus_plus = $practices
@@ -216,7 +221,8 @@ table { width:100%; border-collapse:collapse; background:#fff; }
 th, td { text-align:left; padding:8px 10px; border-bottom:1px solid var(--line); vertical-align:top; font-size:14px; }
 th { font-size:12px; letter-spacing:.04em; text-transform:uppercase; color:var(--muted); }
 .status { font-weight:650; text-transform:uppercase; font-size:12px; letter-spacing:.04em; }
-.status.fail { color:var(--fail); } .status.pass { color:var(--pass); } .status.error { color:var(--err); } .status.not_applicable { color:var(--na); }
+.status.fail { color:var(--fail); } .status.pass { color:var(--pass); } .status.error { color:var(--err); } .status.not_applicable { color:var(--na); } .status.accepted { color:#7c3aed; }
+.delta li { margin:2px 0; }
 .sev { font-size:12px; }
 .badge { display:inline-block; background:var(--chip); border-radius:99px; padding:1px 8px; font-size:12px; margin-right:4px; }
 .badge.unverified { background:#ffedd5; color:#9a3412; }
@@ -275,6 +281,25 @@ function ConvertTo-GsHtmlReport {
     [void]$b.AppendLine('<div class="card err"><div class="n">' + $s.error + '</div><span>Error</span></div>')
     [void]$b.AppendLine('<div class="card"><div class="n">' + $s.total + '</div><span>Checks</span></div>')
     [void]$b.AppendLine('</div>')
+    if ([int]$s.accepted -gt 0) {
+        [void]$b.AppendLine('<div class="banner"><strong>' + $s.accepted + ' accepted risk(s).</strong> These checks fail, but a documented exception with an owner and an expiry date covers them. They are listed with status ACCEPTED.</div>')
+    }
+    $cmp = Get-GsProperty $Document 'comparison'
+    if ($null -ne $cmp) {
+        [void]$b.AppendLine('<section class="card delta"><h2>Changes since baseline</h2>')
+        [void]$b.AppendLine('<p>Baseline generated ' + (ConvertTo-GsHtmlText $cmp.baseline_generated_at) + ', catalog ' + (ConvertTo-GsHtmlText $cmp.baseline_catalog_version) + '.' + $(if ($cmp.same_host -eq $false) { ' <strong>The baseline is from a different host.</strong>' } else { '' }) + '</p>')
+        [void]$b.AppendLine('<p>Newly failing: ' + @($cmp.newly_failing).Count + ' &middot; Fixed: ' + @($cmp.fixed).Count + ' &middot; Still failing: ' + @($cmp.still_failing).Count + '</p>')
+        foreach ($group in @(@('Newly failing', $cmp.newly_failing), @('Fixed', $cmp.fixed))) {
+            if (@($group[1]).Count -gt 0) {
+                [void]$b.AppendLine('<p><strong>' + $group[0] + '</strong></p><ul>')
+                foreach ($item in @($group[1])) {
+                    [void]$b.AppendLine('<li>' + (ConvertTo-GsHtmlText $item.id) + ' ' + (ConvertTo-GsHtmlText $item.title) + ' (' + (ConvertTo-GsHtmlText $item.before) + ' &rarr; ' + (ConvertTo-GsHtmlText $item.after) + ')</li>')
+                }
+                [void]$b.AppendLine('</ul>')
+            }
+        }
+        [void]$b.AppendLine('</section>')
+    }
     [void]$b.AppendLine('<section class="card"><h2>Evidence</h2><div class="meta">')
     [void]$b.AppendLine('<div>Generated (UTC)</div><div>' + (ConvertTo-GsHtmlText $e.generated_at) + '</div>')
     [void]$b.AppendLine('<div>Mode</div><div>' + (ConvertTo-GsHtmlText $e.mode) + '</div>')
@@ -301,6 +326,7 @@ function ConvertTo-GsHtmlReport {
     [void]$b.AppendLine('<p><button type="button" data-filter="all" class="active" onclick="gscFilter(''all'', this)">All</button>')
     [void]$b.AppendLine('<button type="button" data-filter="fail" onclick="gscFilter(''fail'', this)">Fail</button>')
     [void]$b.AppendLine('<button type="button" data-filter="error" onclick="gscFilter(''error'', this)">Error</button>')
+    [void]$b.AppendLine('<button type="button" data-filter="accepted" onclick="gscFilter(''accepted'', this)">Accepted</button>')
     [void]$b.AppendLine('<button type="button" data-filter="pass" onclick="gscFilter(''pass'', this)">Pass</button></p>')
     [void]$b.AppendLine('<table><thead><tr><th>Status</th><th>Check</th><th>Requirement</th><th>Observed</th></tr></thead><tbody>')
     foreach ($row in @($Document.results)) {
@@ -310,6 +336,10 @@ function ConvertTo-GsHtmlReport {
         [void]$b.AppendLine('<span class="badge ' + (ConvertTo-GsHtmlText $row.windows11_carryover) + '">Windows 11 carry-over ' + (ConvertTo-GsHtmlText $row.windows11_carryover) + '</span></div>')
         if (-not [string]::IsNullOrWhiteSpace([string]$row.conflict_note)) {
             [void]$b.AppendLine('<div class="banner">' + (ConvertTo-GsHtmlText $row.conflict_note) + '</div>')
+        }
+        $ex = Get-GsProperty $row 'exception'
+        if ($null -ne $ex) {
+            [void]$b.AppendLine('<div class="banner">Exception (' + (ConvertTo-GsHtmlText $ex.state) + '): ' + (ConvertTo-GsHtmlText $ex.reason) + ' Owner: ' + (ConvertTo-GsHtmlText $ex.owner) + '. Expires: ' + (ConvertTo-GsHtmlText $ex.expires) + '.</div>')
         }
         [void]$b.AppendLine('<details><summary>Rationale and remediation (not applied)</summary>')
         [void]$b.AppendLine('<p>' + (ConvertTo-GsHtmlText $row.rationale) + '</p>')
@@ -375,8 +405,37 @@ function ConvertTo-GsMarkdownReport {
     $lines.Add('- Fail: ' + $s.fail)
     $lines.Add('- Error: ' + $s.error)
     $lines.Add('- Not applicable: ' + $s.not_applicable)
+    if ([int]$s.accepted -gt 0) {
+        $lines.Add('- Accepted risk (documented exception): ' + $s.accepted)
+    }
     $lines.Add('- Total: ' + $s.total)
     $lines.Add('')
+    $cmp = Get-GsProperty $Document 'comparison'
+    if ($null -ne $cmp) {
+        $lines.Add('## Changes since baseline')
+        $lines.Add('')
+        $lines.Add('Baseline generated ' + $cmp.baseline_generated_at + ', catalog ' + $cmp.baseline_catalog_version + '.')
+        if ($cmp.same_host -eq $false) {
+            $lines.Add('')
+            $lines.Add('> The baseline is from a different host.')
+        }
+        $lines.Add('')
+        $lines.Add('| Change | Count |')
+        $lines.Add('| --- | --- |')
+        $lines.Add('| Newly failing | ' + @($cmp.newly_failing).Count + ' |')
+        $lines.Add('| Fixed | ' + @($cmp.fixed).Count + ' |')
+        $lines.Add('| Still failing | ' + @($cmp.still_failing).Count + ' |')
+        $lines.Add('| New checks | ' + @($cmp.new_checks).Count + ' |')
+        $lines.Add('| Removed checks | ' + @($cmp.removed_checks).Count + ' |')
+        $lines.Add('')
+        foreach ($item in @($cmp.newly_failing)) {
+            $lines.Add('- Newly failing: ' + $item.id + ' ' + (ConvertTo-GsMarkdownCell $item.title) + ' (' + $item.before + ' -> ' + $item.after + ')')
+        }
+        foreach ($item in @($cmp.fixed)) {
+            $lines.Add('- Fixed: ' + $item.id + ' ' + (ConvertTo-GsMarkdownCell $item.title) + ' (' + $item.before + ' -> ' + $item.after + ')')
+        }
+        $lines.Add('')
+    }
     $lines.Add('## Summary by BSI module')
     $lines.Add('')
     $lines.Add('| Module | Title | Pass | Fail | Error | N/A |')
@@ -407,6 +466,10 @@ function ConvertTo-GsMarkdownReport {
         $lines.Add('- Expected: ' + $row.expected)
         $lines.Add('- Actual: ' + $row.actual)
         $lines.Add('- ' + $row.message)
+        $ex = Get-GsProperty $row 'exception'
+        if ($null -ne $ex) {
+            $lines.Add('- Exception (' + $ex.state + '): ' + $ex.reason + ' Owner: ' + $ex.owner + '. Expires: ' + $ex.expires + '.')
+        }
         if (-not [string]::IsNullOrWhiteSpace([string]$row.conflict_note)) {
             $lines.Add('')
             $lines.Add('Conflict: ' + $row.conflict_note)

@@ -39,6 +39,13 @@ jobs:
           test -f "$PWD/out/grundschutzcheck-report.json"
           test -f "$PWD/out/grundschutzcheck-findings.csv"
           test "$status" -eq 1
+      - name: Demo with exceptions and a baseline
+        shell: bash
+        run: |
+          pwsh -NoProfile -File ./Invoke-GrundschutzCheck.ps1 -Demo -OutputDirectory "$PWD/out2" -Timestamp 2026-10-28T12:00:00Z \
+            -ExceptionPath examples/exceptions.example.json -BaselinePath "$PWD/out/grundschutzcheck-report.json" -FailOnRegression
+          grep -q "Changes since baseline" "$PWD/out2/grundschutzcheck-report.md"
+          grep -q "Accepted risk" "$PWD/out2/grundschutzcheck-report.md"
 
   windows:
     runs-on: windows-latest
