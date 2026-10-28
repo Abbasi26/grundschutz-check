@@ -8,6 +8,8 @@ $script:GsToolVersion = '0.1.0'
 . (Join-Path $PSScriptRoot 'src/Evaluate.ps1')
 . (Join-Path $PSScriptRoot 'src/Collect.ps1')
 . (Join-Path $PSScriptRoot 'src/Report.ps1')
+. (Join-Path $PSScriptRoot 'src/Exceptions.ps1')
+. (Join-Path $PSScriptRoot 'src/Compare.ps1')
 
 function Invoke-GrundschutzCheck {
     <#
@@ -16,6 +18,8 @@ function Invoke-GrundschutzCheck {
     .DESCRIPTION
         Read-only. Remediation text in the catalog is not applied.
         Use -Demo to render the bundled fictional evidence on any platform.
+        -ExceptionPath marks failing checks with a current, documented risk acceptance as 'accepted'.
+        -BaselinePath compares this run with an earlier grundschutzcheck-report.json.
     #>
     [CmdletBinding()]
     param(
@@ -25,13 +29,24 @@ function Invoke-GrundschutzCheck {
         [string]$OutputDirectory = (Join-Path (Get-Location).Path 'grundschutzcheck-out'),
         [ValidateSet('All', 'Html', 'Markdown', 'Json', 'Csv')]
         [string[]]$Format = @('All'),
-        [string]$Timestamp
+        [string]$Timestamp,
+        [string]$ExceptionPath,
+        [string]$BaselinePath
     )
 
     $catalog = Get-GsCatalog -Path $CatalogPath
     $problems = @(Test-GsCatalog -Catalog $catalog)
     if ($problems.Count -gt 0) {
         throw ('Catalog is not valid: ' + ($problems -join ' '))
+    }
+
+    $exceptions = $null
+    if (-not [string]::IsNullOrWhiteSpace($ExceptionPath)) {
+        $exceptions = Read-GsExceptionFile -Path $ExceptionPath -Catalog $catalog
+    }
+    $baseline = $null
+    if (-not [string]::IsNullOrWhiteSpace($BaselinePath)) {
+        $baseline = Read-GsJsonFile -Path $BaselinePath
     }
 
     if ($Demo) {
@@ -59,7 +74,15 @@ function Invoke-GrundschutzCheck {
         }
     }
 
+    $exceptionNotes = @(Set-GsExceptionStatus -Pairs $pairs -Exceptions $exceptions -Timestamp $Timestamp)
+
     $document = New-GsReportDocument -Catalog $catalog -Evidence $evidence -Evaluations $pairs -Timestamp $Timestamp -Mode $mode
+    if ($exceptionNotes.Count -gt 0) {
+        $document.evidence.notes = @($document.evidence.notes) + $exceptionNotes
+    }
+    if ($null -ne $baseline) {
+        Add-Member -InputObject $document -NotePropertyName comparison -NotePropertyValue (Compare-GsReport -Baseline $baseline -Document $document) -Force
+    }
     $files = Write-GsReportFiles -Document $document -Directory $OutputDirectory -Formats $Format
     Add-Member -InputObject $document -NotePropertyName outputs -NotePropertyValue $files -Force
     return $document

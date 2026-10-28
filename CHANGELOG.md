@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- `-ExceptionPath`: documented risk acceptances with reason, owner, expiry date, and optional ticket. Failing checks with a current exception are reported as `accepted` and do not set exit code 1. Expired exceptions keep the check at `fail`; exceptions never hide errors. New `accepted` count in the summary and per module.
+- `-BaselinePath`: compares the run with an earlier JSON report (newly failing, fixed, still failing, new and removed checks, host fingerprint match). Rendered in HTML and Markdown and stored under `comparison` in the JSON report.
+- `-FailOnRegression` on the script: exit 1 only for checks that newly fail against the baseline.
+- `examples/exceptions.example.json`, ROADMAP.md with good first issues, issue forms, and a pull request template.
+
 ## 0.1.0 - 2026-10-21
 
 - Audit checks query `auditpol /get /subcategory:{GUID} /r` and parse the CSV by column, so German-localized Windows does not return `error` for Logon or Credential Validation. If the GUID query fails, de-DE display names are accepted. Inclusion settings from a German `auditpol` CSV are normalized to English.
