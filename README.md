@@ -1,5 +1,7 @@
 # GrundschutzCheck
 
+[![CI](https://github.com/Abbasi26/grundschutz-check/actions/workflows/test.yml/badge.svg)](https://github.com/Abbasi26/grundschutz-check/actions/workflows/test.yml)
+
 Read-only checks of a Windows 11 client against published BSI IT-Grundschutz and Grundschutz++ recommendations, with an evidence report.
 
 A Windows 11 client can have diagnostic data left at "Required" (`AllowTelemetry = 1`). The BSI Hilfsmittel for Windows clients, under SYS.2.2.3.A4, recommends `0 - Security` where that value is honored, and Grundschutz++ KONF.2.4 names telemetry services as something to turn off when they are not needed. [HardeningKitty](https://github.com/scipag/HardeningKitty) ships BSI SiSyPHuS finding lists for Windows 10 1809, not a Windows 11 catalog tied to Grundschutz++ control ids. GrundschutzCheck scores that setting as `GS-W11-010`, cites both documents, and marks the Windows 11 carry-over `unverified` because BSI has not published a Windows 11 settings matrix and Microsoft does not honor value 0 on every edition.
@@ -110,6 +112,16 @@ Not in v0.1:
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md). New checks start in `tools/build_catalog.py`. Do not invent requirement ids.
+
+## Status
+
+Version 0.1.0, early but usable. PowerShell module `GrundschutzCheck`. MIT licensed. Every push runs the test suite in GitHub Actions (`.github/workflows/test.yml`).
+
+## Install
+
+```sh
+Import-Module ./GrundschutzCheck.psd1
+```
 
 ## License
 
