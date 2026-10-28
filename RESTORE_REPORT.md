@@ -1,7 +1,6 @@
 # Restore report — grundschutz-check (project name: GrundschutzCheck)
 
 ## Mapping
-- Cursor transcript: `bc-50cd5d21-839b-5bea-97da-2706221693af.jsonl`
 - GitHub empty repo target: `grundschutz-check`
 - Project name inside the tree: **GrundschutzCheck** (module/scripts keep that name)
 
