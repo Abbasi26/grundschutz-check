@@ -105,11 +105,36 @@ Sources, read for the ids that are cited:
 
 The Grundschutz++ file is not vendored. Ids and short titles are stored, with a link.
 
+The importer was tested against the 2026-10-22 catalog at pinned commit `160c177db6c84d3c621fff614559943b1de8c600`.
+
 Audit policy in v0.1 scores two advanced-audit subcategories, Logon (`{0CCE9215-69AE-11D9-BED3-505054503030}`) and Credential Validation (`{0CCE923F-69AE-11D9-BED3-505054503030}`), because DET.3.1.1 says to log authentication success and failure. Those GUIDs are Windows identifiers from MS-GPAC, not BSI requirement ids. Live collection runs `auditpol /get /subcategory:{GUID} /r` for each scored subcategory and reads the CSV by column, so a German display name does not hide a pass or a fail. Inclusion settings such as `Erfolg und Fehler` and `Keine Überwachung` are stored as English. It also runs `auditpol /get /category:* /r` when that command succeeds, so the evidence section can still list subcategories that are not scored. That category-wide CSV is the fallback when a GUID query fails. The fallback accepts these de-DE names: Anmelden, Abmelden, Kontosperrung, Spezielle Anmeldung, Prozesserstellung, Benutzerkontenverwaltung, Sicherheitsgruppenverwaltung, and Anmeldeinformationen überprüfen (also Überprüfung der Anmeldeinformationen). A subcategory that is still missing is `error`, not `fail`.
 
 Names for languages other than English and German are not in the fallback table. Those systems still match when the CSV has the subcategory GUID. The offline fixtures cover one English CSV and one German CSV. CI does not run a live de-DE Windows session, so the German display names were not re-captured from a German install in this repository.
 
 Some Hilfsmittel rows are deliberately not scored. SmartScreen is set to Disabled there because data may leave the organisation, which is a trade-off, not a single safe expected value. MAPS has no recommended value. Password complexity is enabled for one password option and disabled for the passphrase option. "Disable all apps from Microsoft Store" is worded ambiguously in the Hilfsmittel. A firewall pass means the three profiles are on, not that an allow-list exists. A Defender pass does not prove that signatures are current, and a third-party antivirus product may turn Defender off.
+
+## Grundschutz++ catalog import
+
+BSI published Standard 300-1 on 26.10.2026. The requirements of the Anwenderkatalog Grundschutz++ are published as OSCAL JSON in the [Stand-der-Technik-Bibliothek](https://github.com/BSI-Bund/Stand-der-Technik-Bibliothek). This importer reads the file as published; it does not convert BSI content. The full file is not vendored because that repository is licensed CC BY-SA 4.0.
+
+The downloader defaults to pinned commit `160c177db6c84d3c621fff614559943b1de8c600`, catalog version `2026-10-22T12:58:16.507815+00:00`, and the SHA-256 of that file as downloaded on 2026-10-29 (BSI does not publish a checksum; the value pins the file):
+
+```powershell
+./tools/Get-GsppCatalog.ps1
+Import-Module ./GrundschutzCheck.psd1
+$gspp = Import-GsppCatalog -Path ./.cache/Grundschutz++-resolved_catalog.json
+Export-GsppControlIndex -Catalog $gspp -Path ./grundschutz-plus-plus-controls.csv
+```
+
+Pass `-GsppCatalogPath` to include catalog title, version, SHA-256, control count, missing references, and title drift in the JSON report and a summary line in the Markdown and HTML reports:
+
+```powershell
+pwsh -NoProfile -File ./Invoke-GrundschutzCheck.ps1 -Demo -GsppCatalogPath ./.cache/Grundschutz++-resolved_catalog.json -OutputDirectory ./grundschutzcheck-out
+```
+
+The importer does not map controls to Windows settings automatically. The 63 checks retain their manual mappings. It does not evaluate organisational requirements.
+
+The 2026-10-22 file has 20 practices (top-level groups) with 652 controls directly in groups and 348 more nested under other controls; the importer counts all 1000. That release is dated before the 26.10.2026 announcement; a newer file in the Stand-der-Technik-Bibliothek needs a new pin.
 
 ## Tests
 

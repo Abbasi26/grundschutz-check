@@ -22,6 +22,13 @@ jobs:
           $ErrorActionPreference = 'Stop'
           Install-Module Pester -RequiredVersion 5.7.1 -Force -Scope CurrentUser
           Invoke-Pester -CI ./tests
+      - name: Grundschutz++ catalog (pinned BSI release)
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          ./tools/Get-GsppCatalog.ps1
+          $env:GSPP_FULL_CATALOG = Join-Path $PWD '.cache/Grundschutz++-resolved_catalog.json'
+          Invoke-Pester -CI ./tests/GsppCatalog.Tests.ps1
       - name: Catalog builder
         run: |
           python3 -m pip install --user pytest jsonschema

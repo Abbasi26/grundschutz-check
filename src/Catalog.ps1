@@ -8,13 +8,23 @@ function ConvertTo-GsArray {
     return @($Value)
 }
 
+function Test-GsDictionaryKey {
+    # Dictionary[string,object] (JavaScriptSerializer on Windows PowerShell 5.1)
+    # implements IDictionary.Contains explicitly, so 5.1 cannot call it directly.
+    param($Object, [string]$Name)
+    if ($null -ne $Object.PSObject.Methods['ContainsKey']) {
+        return $Object.ContainsKey($Name)
+    }
+    return $Object.Contains($Name)
+}
+
 function Get-GsProperty {
     param($Object, [string]$Name)
     if ($null -eq $Object) {
         return $null
     }
     if ($Object -is [System.Collections.IDictionary]) {
-        if ($Object.Contains($Name)) {
+        if (Test-GsDictionaryKey $Object $Name) {
             return $Object[$Name]
         }
         return $null
@@ -32,7 +42,7 @@ function Test-GsHasProperty {
         return $false
     }
     if ($Object -is [System.Collections.IDictionary]) {
-        return $Object.Contains($Name)
+        return (Test-GsDictionaryKey $Object $Name)
     }
     return $null -ne $Object.PSObject.Properties[$Name]
 }
