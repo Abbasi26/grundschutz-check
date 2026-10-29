@@ -7,7 +7,7 @@
     Copyright         = '(c) 2026 Wasaf Abbasi'
     Description       = 'Read-only Windows 11 client hardening checks against BSI IT-Grundschutz and Grundschutz++, with an evidence report.'
     PowerShellVersion = '5.1'
-    FunctionsToExport = @('Invoke-GrundschutzCheck', 'Get-GsCatalog')
+    FunctionsToExport = @('Invoke-GrundschutzCheck', 'Get-GsCatalog', 'Import-GsppCatalog', 'Test-GsppReference', 'Export-GsppControlIndex')
     CmdletsToExport   = @()
     VariablesToExport = @()
     AliasesToExport   = @()
