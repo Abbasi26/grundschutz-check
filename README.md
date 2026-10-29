@@ -119,7 +119,7 @@ python3 tools/build_catalog.py --check
 python3 -m pytest tests/test_catalog.py -q
 ```
 
-Pester 5.7.1 is the version used in CI. Tests mock registry and secedit input. They do not need Windows.
+Pester 5.7.1 is the version used in CI. Tests mock registry and secedit input. They do not need Windows. CI runs PowerShell 7.6 LTS (7.6.9, SHA-256 pinned) via `.github/actions/install-pwsh-7-6`; PowerShell 7.4 and 7.5 reach end of support on 10 Nov 2026 ([support lifecycle](https://learn.microsoft.com/en-us/powershell/scripting/install/powershell-support-lifecycle)). Windows PowerShell 5.1 unchanged.
 
 ## How this differs from existing tools
 

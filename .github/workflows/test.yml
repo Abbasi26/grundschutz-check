@@ -9,13 +9,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Install PowerShell 7.5.4
-        run: |
-          curl -fsSL -o /tmp/pwsh.tar.gz https://github.com/PowerShell/PowerShell/releases/download/v7.5.4/powershell-7.5.4-linux-x64.tar.gz
-          sudo mkdir -p /opt/pwsh
-          sudo tar -xzf /tmp/pwsh.tar.gz -C /opt/pwsh
-          sudo chmod +x /opt/pwsh/pwsh
-          echo /opt/pwsh >> "$GITHUB_PATH"
+      - name: Install PowerShell 7.6 LTS
+        uses: ./.github/actions/install-pwsh-7-6
       - name: Pester
         shell: pwsh
         run: |
@@ -51,6 +46,8 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Install PowerShell 7.6 LTS
+        uses: ./.github/actions/install-pwsh-7-6
       - name: Pester on PowerShell 7
         shell: pwsh
         run: |
