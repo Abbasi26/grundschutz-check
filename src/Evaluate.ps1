@@ -188,7 +188,7 @@ function Test-GsExpectation {
             $mask = ConvertTo-GsLong $Expected
             return (($current -band $mask) -eq $mask)
         }
-        $bounds = @(ConvertTo-GsArray $Expected)
+        $bounds = ConvertTo-GsArray $Expected
         if ($bounds.Count -lt 2) { return $false }
         $min = ConvertTo-GsLong $bounds[0]
         $max = ConvertTo-GsLong $bounds[1]
@@ -210,7 +210,7 @@ function Format-GsExpected {
     $operatorName = [string](Get-GsProperty $Evaluation 'operator')
     $expected = Get-GsProperty $Evaluation 'expected'
     if ($operatorName -eq 'in_range') {
-        $bounds = @(ConvertTo-GsArray $expected)
+        $bounds = ConvertTo-GsArray $expected
         return ('{0}..{1}' -f $bounds[0], $bounds[1])
     }
     if ($operatorName -eq 'one_of') {
@@ -272,11 +272,16 @@ function Invoke-GsCompare {
     $expected = Get-GsProperty $Evaluation 'expected'
     $expectedText = Format-GsExpected $Evaluation
     $actualText = Format-GsValue $Actual
-    $ok = Test-GsExpectation -OperatorName $operatorName -Expected $expected -Actual $Actual
-    if ($ok) {
-        return New-GsEvalResult -Status 'pass' -Expected $expectedText -Actual $actualText -Message 'Observed value matches the catalog.'
+    $ok = $false
+    try {
+        $ok = Test-GsExpectation -OperatorName $operatorName -Expected $expected -Actual $Actual
+    } catch {
+        return New-GsEvalResult -Status 'error' -Expected $expectedText -Actual $actualText -Message "Operator $operatorName is not supported."
     }
-    return New-GsEvalResult -Status 'fail' -Expected $expectedText -Actual $actualText -Message 'Observed value does not match the catalog.'
+    if ($ok) {
+        return New-GsEvalResult -Status 'pass' -Expected $expectedText -Actual $actualText -Message ''
+    }
+    return New-GsEvalResult -Status 'fail' -Expected $expectedText -Actual $actualText -Message ''
 }
 
 function Invoke-GsEvaluation {
@@ -303,7 +308,7 @@ function Invoke-GsEvaluation {
 function Invoke-GsCompositeEvaluation {
     param($Evaluation, $Evidence)
     $method = [string](Get-GsProperty $Evaluation 'method')
-    $children = @(ConvertTo-GsArray (Get-GsProperty $Evaluation 'evaluations'))
+    $children = ConvertTo-GsArray (Get-GsProperty $Evaluation 'evaluations')
     if ($children.Count -eq 0) {
         return New-GsEvalResult -Status 'error' -Expected '' -Actual '' -Message "$method has no child evaluations."
     }
@@ -339,11 +344,11 @@ function Invoke-GsCompositeEvaluation {
         if ($pass -gt 0) {
             return New-GsEvalResult -Status 'pass' -Expected $expectedText -Actual $actualText -Message 'At least one alternative matched. '
         }
-        if ($fail -gt 0) {
-            return New-GsEvalResult -Status 'fail' -Expected $expectedText -Actual $actualText -Message $detail
-        }
         if ($errorCount -gt 0) {
             return New-GsEvalResult -Status 'error' -Expected $expectedText -Actual $actualText -Message $detail
+        }
+        if ($fail -gt 0) {
+            return New-GsEvalResult -Status 'fail' -Expected $expectedText -Actual $actualText -Message $detail
         }
         return New-GsEvalResult -Status 'not_applicable' -Expected $expectedText -Actual $actualText -Message $detail
     }
@@ -593,19 +598,16 @@ function ConvertFrom-GsAuditpolText {
     [CmdletBinding()]
     param([Parameter(Mandatory = $true)][string]$Text)
     $rows = @()
-    $noAudit = [regex]::Escape((Get-GsGermanNoAuditing))
-    $pattern = '(?i)^(?<name>.+?)\s{2,}(?<setting>Success and Failure|No Auditing|Success|Failure|Erfolg und Fehler|' + $noAudit + '|Erfolg|Fehler)\s*$'
-    $regex = New-Object System.Text.RegularExpressions.Regex $pattern
     foreach ($line in ($Text -split "`r?`n")) {
-        $match = $regex.Match($line.Trim())
-        if (-not $match.Success) {
-            continue
-        }
-        $resolved = Resolve-GsAuditSubcategory -Name $match.Groups['name'].Value.Trim() -Guid ''
+        $trim = $line.Trim()
+        if ($trim.Length -eq 0) { continue }
+        $parts = $trim -split '\s{2,}'
+        if ($parts.Count -lt 2) { continue }
+        $subcategory = $parts[0].Trim()
+        $setting = $parts[1].Trim()
         $rows += [pscustomobject]@{
-            subcategory      = [string]$resolved.Name
-            subcategory_guid = [string]$resolved.Guid
-            setting          = (ConvertTo-GsAuditSetting $match.Groups['setting'].Value)
+            subcategory = $subcategory
+            setting     = ConvertTo-GsAuditSetting -Setting $setting
         }
     }
     return $rows
@@ -613,75 +615,50 @@ function ConvertFrom-GsAuditpolText {
 
 function Split-GsCsvLine {
     param([string]$Line)
-    $cols = New-Object System.Collections.Generic.List[string]
-    foreach ($part in $Line.Split(',')) {
-        [void]$cols.Add($part.Trim().Trim('"'))
+    # Splits a CSV line into fields, handling quoted commas.
+    $pattern = '("(?:[^"]|"")*"|[^,]*)(,|$)'
+    $matches = [regex]::Matches($Line, $pattern)
+    $fields = @()
+    foreach ($m in $matches) {
+        $field = $m.Groups[1].Value
+        if ($field.StartsWith('"') -and $field.EndsWith('"')) {
+            $field = $field.Substring(1, $field.Length - 2).Replace('""', '"')
+        }
+        $fields += $field
     }
-    Write-Output -NoEnumerate $cols.ToArray()
+    return $fields
 }
 
 function ConvertFrom-GsAuditpolCsv {
     [CmdletBinding()]
     param([Parameter(Mandatory = $true)][string]$Text)
     $rows = @()
-    $lines = @($Text -split "`r?`n" | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
-    if ($lines.Count -lt 1) {
-        return $rows
-    }
-    $header = Split-GsCsvLine -Line $lines[0]
-    $subIndex = -1
-    $setIndex = -1
-    $guidIndex = -1
-    for ($i = 0; $i -lt $header.Count; $i++) {
-        $name = [string]$header[$i]
-        if ($name -eq 'Subcategory' -or $name -eq 'Unterkategorie') {
-            $subIndex = $i
+    $header = $null
+    foreach ($line in ($Text -split "`r?`n")) {
+        $trim = $line.Trim()
+        if ($trim.Length -eq 0) { continue }
+        if ($null -eq $header) {
+            $header = Split-GsCsvLine $trim
+            continue
         }
-        elseif ($name -eq 'Inclusion Setting' -or $name -eq 'Einschlusseinstellung') {
-            $setIndex = $i
+        $fields = Split-GsCsvLine $trim
+        if ($fields.Count -ne $header.Count) { continue }
+        $row = @{}
+        for ($i = 0; $i -lt $header.Count; ++$i) {
+            $row[$header[$i]] = $fields[$i]
         }
-        elseif ($name -eq 'Subcategory GUID' -or $name -eq 'Unterkategorie-GUID' -or $name -eq 'Unterkategorie GUID') {
-            $guidIndex = $i
-        }
-    }
-    $start = 1
-    if ($subIndex -lt 0 -or $setIndex -lt 0) {
-        # auditpol /r keeps this column order in every display language:
-        # machine, policy target, subcategory, subcategory GUID, inclusion, exclusion.
-        if ($header.Count -ge 5) {
-            $subIndex = 2
-            $guidIndex = 3
-            $setIndex = 4
-            $headerGuid = ''
-            if ($header.Count -gt 3) {
-                $headerGuid = ConvertTo-GsAuditGuid -Value ([string]$header[3])
-            }
-            if (-not [string]::IsNullOrWhiteSpace($headerGuid)) {
-                $start = 0
-            }
-        }
-        else {
-            throw 'auditpol CSV is missing Subcategory or Inclusion Setting.'
-        }
-    }
-    if ($lines.Count -le $start) {
-        return $rows
-    }
-    for ($n = $start; $n -lt $lines.Count; $n++) {
-        $cols = Split-GsCsvLine -Line $lines[$n]
-        if ($cols.Count -le $setIndex) { continue }
-        $name = [string]$cols[$subIndex]
-        $setting = [string]$cols[$setIndex]
-        $guid = ''
-        if ($guidIndex -ge 0 -and $cols.Count -gt $guidIndex) {
-            $guid = [string]$cols[$guidIndex]
-        }
-        if ([string]::IsNullOrWhiteSpace($name) -and [string]::IsNullOrWhiteSpace($guid)) { continue }
-        $resolved = Resolve-GsAuditSubcategory -Name $name -Guid $guid
+        # Accept both English and German headers.
+        $subcategory = $row['Subcategory']
+        if (-not $subcategory -and $row['Unterkategorie']) { $subcategory = $row['Unterkategorie'] }
+        $guid = $row['Subcategory GUID']
+        if (-not $guid -and $row['Unterkategorie-GUID']) { $guid = $row['Unterkategorie-GUID'] }
+        $setting = $row['Setting']
+        if (-not $setting -and $row['Einstellung']) { $setting = $row['Einstellung'] }
+        if ([string]::IsNullOrWhiteSpace($subcategory)) { continue }
         $rows += [pscustomobject]@{
-            subcategory      = [string]$resolved.Name
-            subcategory_guid = [string]$resolved.Guid
-            setting          = (ConvertTo-GsAuditSetting $setting)
+            subcategory      = $subcategory.Trim()
+            subcategory_guid = $guid.Trim()
+            setting          = ConvertTo-GsAuditSetting -Setting $setting
         }
     }
     return $rows

@@ -73,7 +73,7 @@ Operators: `equals`, `not_equals`, `greater_or_equal`, `less_or_equal`, `in_rang
 
 `when_absent` is `fail` (default), `pass`, or `not_applicable`. A missing collection is `error`. A missing value inside a collected collection uses `when_absent`. An audit subcategory that is not in the captured list is `error`. Audit checks match the subcategory GUID first (MS-GPAC), then the English name, then a de-DE display name. A miss is `error`, not `fail`. A missing feature row is the actual state `NotFound`. A missing BitLocker volume type is `error`.
 
-`all_of`: any `fail` wins, then any `error`, then all `not_applicable`, otherwise `pass`. `any_of`: any `pass` wins, then any `fail`, then any `error`, otherwise `not_applicable`.
+`all_of`: any `fail` wins, then any `error`, then all `not_applicable`, otherwise `pass`. `any_of`: any `pass` wins, then any `error`, then any `fail`, otherwise `not_applicable`.
 
 Numeric strings compare as integers. Booleans accept `true`, `false`, `0`, and `1`. String equality is case-insensitive.
 
@@ -100,7 +100,7 @@ A property named `registry_error`, `secedit_error`, `service_error`, `defender_e
 
 | Field | Meaning |
 | --- | --- |
-| `tool.name`, `tool.version` | `GrundschutzCheck` and `0.2.0`. |
+| `tool.name`, `tool.version` | `GrundschutzCheck` and `0.1.0`. |
 | `catalog.id`, `catalog.version`, `catalog.schema_version` | Catalog that was evaluated. |
 | `evidence.generated_at` | UTC timestamp `yyyy-MM-ddTHH:mm:ssZ`. |
 | `evidence.mode` | `demo` or `local`. |
