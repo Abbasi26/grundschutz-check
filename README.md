@@ -1,3 +1,17 @@
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/assets/logo-dark.svg">
+    <source media="(prefers-color-scheme: light)" srcset="docs/assets/logo-light.svg">
+    <img src="docs/assets/logo-light.svg" alt="grundschutz-check" height="64">
+  </picture>
+</p>
+
+<p align="center">Checks a Windows 11 client against BSI IT-Grundschutz and writes an evidence report.</p>
+
+<p align="center">
+  <img src="docs/assets/readme-hero.png" width="800" alt="Terminal output of Invoke-GrundschutzCheck.ps1 -Demo: pass=44 fail=19 of 63 checks on fictional evidence, with failing checks, their BSI requirement, expected and actual values.">
+</p>
+
 # GrundschutzCheck
 
 [![CI](https://github.com/Abbasi26/grundschutz-check/actions/workflows/test.yml/badge.svg)](https://github.com/Abbasi26/grundschutz-check/actions/workflows/test.yml)
