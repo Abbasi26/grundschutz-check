@@ -6,7 +6,7 @@
   </picture>
 </p>
 
-<p align="center">Checks a Windows 11 client against BSI IT-Grundschutz and writes an evidence report.</p>
+<p align="center">Windows 11 hardening evidence mapped to BSI Grundschutz requirements.</p>
 
 <p align="center">
   <img src="docs/assets/readme-hero.png" width="800" alt="Terminal output of Invoke-GrundschutzCheck.ps1 -Demo: pass=44 fail=19 of 63 checks on fictional evidence, with failing checks, their BSI requirement, expected and actual values.">
