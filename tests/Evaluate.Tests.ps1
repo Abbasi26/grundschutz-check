@@ -1,7 +1,14 @@
-BeforeAll {
-    Import-Module GrundschutzCheck -Force
+BeforeDiscovery {
+    # InModuleScope below runs during discovery, so the module must be loaded here.
+    Import-Module (Join-Path (Split-Path -Parent $PSScriptRoot) 'GrundschutzCheck.psd1') -Force
 }
 
+BeforeAll {
+    $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
+    Import-Module (Join-Path $repoRoot 'GrundschutzCheck.psd1') -Force
+}
+
+InModuleScope GrundschutzCheck {
 Describe 'Invoke-GsEvaluation - registry' {
     It 'returns pass when value matches' {
         $eval = @{
@@ -234,6 +241,7 @@ Describe 'any_of status precedence' {
             }
         }
     }
+}
 }
 # Not checked: full suites or live Windows collection; no repository files were changed.
 # Risk: custom fail/error alternatives become error and can change CLI exit code to 2.
