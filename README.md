@@ -6,6 +6,14 @@ Read-only checks of a Windows 11 client against published BSI IT-Grundschutz and
 
 A Windows 11 client can have diagnostic data left at "Required" (`AllowTelemetry = 1`). The BSI Hilfsmittel for Windows clients, under SYS.2.2.3.A4, recommends `0 - Security` where that value is honored, and Grundschutz++ KONF.2.4 names telemetry services as something to turn off when they are not needed. [HardeningKitty](https://github.com/scipag/HardeningKitty) ships BSI SiSyPHuS finding lists for Windows 10 1809, not a Windows 11 catalog tied to Grundschutz++ control ids. GrundschutzCheck scores that setting as `GS-W11-010`, cites both documents, and marks the Windows 11 carry-over `unverified` because BSI has not published a Windows 11 settings matrix and Microsoft does not honor value 0 on every edition.
 
+## Demo video
+
+[![Demo video for grundschutz-check](docs/media/brag.jpg)](docs/media/brag.mp4)
+
+GrundschutzCheck runs read-only Windows 11 checks and writes evidence as HTML, Markdown, JSON, and CSV. The bundled demo is fictional, reproducible, and does not inspect the local computer. (Click the image to play the video.)
+
+Music: Sascha Ende ([ende.app](https://ende.app)), licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
+
 ## Quickstart
 
 The demo uses bundled fictional evidence. It does not read the local computer and it runs on Linux.
