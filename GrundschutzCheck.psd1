@@ -13,7 +13,10 @@
     AliasesToExport   = @()
     PrivateData       = @{
         PSData = @{
-            Tags = @('BSI', 'Grundschutz', 'Windows', 'hardening', 'audit')
+            Tags         = @('BSI', 'Grundschutz', 'ITGrundschutz', 'Windows', 'Windows11', 'Hardening', 'Audit', 'Compliance', 'Security', 'ReadOnly')
+            ProjectUri   = 'https://github.com/Abbasi26/grundschutz-check'
+            LicenseUri   = 'https://github.com/Abbasi26/grundschutz-check/blob/main/LICENSE'
+            ReleaseNotes = 'https://github.com/Abbasi26/grundschutz-check/blob/main/CHANGELOG.md'
         }
     }
 }
