@@ -7,11 +7,16 @@ Describe 'Demo report' {
     BeforeAll {
         $script:OutDir = Join-Path ([System.IO.Path]::GetTempPath()) ('gsc-pester-' + [guid]::NewGuid().ToString('n'))
         $script:Report = Invoke-GrundschutzCheck -Demo -OutputDirectory $script:OutDir -Timestamp '2026-10-21T12:00:00Z'
+        $script:ExceptionPath = Join-Path $script:RepoRoot 'examples/exceptions.example.json'
+        $script:ExOutDir = Join-Path ([System.IO.Path]::GetTempPath()) ('gsc-pester-ex-' + [guid]::NewGuid().ToString('n'))
+        $script:ExReport = Invoke-GrundschutzCheck -Demo -OutputDirectory $script:ExOutDir -Timestamp '2026-10-21T12:00:00Z' -ExceptionPath $script:ExceptionPath
     }
 
     AfterAll {
-        if (Test-Path -LiteralPath $script:OutDir) {
-            Remove-Item -LiteralPath $script:OutDir -Recurse -Force
+        foreach ($d in @($script:OutDir, $script:ExOutDir)) {
+            if (Test-Path -LiteralPath $d) {
+                Remove-Item -LiteralPath $d -Recurse -Force
+            }
         }
     }
 
@@ -70,6 +75,24 @@ Describe 'Demo report' {
         $parsed.evidence.host_fingerprint_sha256 | Should -Be $expected
         $csv = [System.IO.File]::ReadAllText($script:Report.outputs.csv)
         @($csv -split "`n" | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }).Count | Should -Be ($script:Report.summary.total + 1)
+    }
+
+    It 'adds an Accepted column to the per-module summary tables' {
+        $html = [System.IO.File]::ReadAllText($script:ExReport.outputs.html)
+        $html | Should -Match '<th>Module</th><th>Title</th><th>Pass</th><th>Fail</th><th>Error</th><th>N/A</th><th>Accepted</th>'
+        $md = [System.IO.File]::ReadAllText($script:ExReport.outputs.markdown)
+        $md | Should -Match '\| Module \| Title \| Pass \| Fail \| Error \| N/A \| Accepted \|'
+    }
+
+    It 'reports the per-module accepted count matching the global summary' {
+        $html = [System.IO.File]::ReadAllText($script:ExReport.outputs.html)
+        $md = [System.IO.File]::ReadAllText($script:ExReport.outputs.markdown)
+        $acceptedModuleId = 'SYS.2.1'
+        $module = @($script:ExReport.summary.modules | Where-Object { $_.id -eq $acceptedModuleId })[0]
+        $module.accepted | Should -Be 1
+        $html | Should -Match ('<td>SYS.2.1</td><td>Allgemeiner Client</td><td>' + $module.pass + '</td><td>' + $module.fail + '</td><td>0</td><td>0</td><td>1</td>')
+        $md | Should -Match ('\| SYS.2.1 \| Allgemeiner Client \| ' + $module.pass + ' \| ' + $module.fail + ' \| 0 \| 0 \| 1 \|')
+        $script:ExReport.summary.accepted | Should -Be 2
     }
 }
 
