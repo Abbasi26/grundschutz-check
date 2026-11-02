@@ -310,16 +310,16 @@ function ConvertTo-GsHtmlReport {
     [void]$b.AppendLine('<div>Platform</div><div>' + (ConvertTo-GsHtmlText $e.platform.os_caption) + ' / ' + (ConvertTo-GsHtmlText $e.platform.os_version) + ' / build ' + (ConvertTo-GsHtmlText $e.platform.os_build) + '</div>')
     [void]$b.AppendLine('</div></section>')
     [void]$b.AppendLine('<h2>Summary by BSI module</h2>')
-    [void]$b.AppendLine('<table><thead><tr><th>Module</th><th>Title</th><th>Pass</th><th>Fail</th><th>Error</th><th>N/A</th></tr></thead><tbody>')
+    [void]$b.AppendLine('<table><thead><tr><th>Module</th><th>Title</th><th>Pass</th><th>Fail</th><th>Error</th><th>N/A</th><th>Accepted</th></tr></thead><tbody>')
     foreach ($module in @($s.modules)) {
-        [void]$b.AppendLine('<tr><td>' + (ConvertTo-GsHtmlText $module.id) + '</td><td>' + (ConvertTo-GsHtmlText $module.title) + '</td><td>' + $module.pass + '</td><td>' + $module.fail + '</td><td>' + $module.error + '</td><td>' + $module.not_applicable + '</td></tr>')
+        [void]$b.AppendLine('<tr><td>' + (ConvertTo-GsHtmlText $module.id) + '</td><td>' + (ConvertTo-GsHtmlText $module.title) + '</td><td>' + $module.pass + '</td><td>' + $module.fail + '</td><td>' + $module.error + '</td><td>' + $module.not_applicable + '</td><td>' + $module.accepted + '</td></tr>')
     }
     [void]$b.AppendLine('</tbody></table>')
     [void]$b.AppendLine('<h2>Summary by Grundschutz++ practice</h2>')
     [void]$b.AppendLine('<p>Counts include every check that cites a control in that practice, including citations marked unverified.</p>')
-    [void]$b.AppendLine('<table><thead><tr><th>Practice</th><th>Title</th><th>Pass</th><th>Fail</th><th>Error</th></tr></thead><tbody>')
+    [void]$b.AppendLine('<table><thead><tr><th>Practice</th><th>Title</th><th>Pass</th><th>Fail</th><th>Error</th><th>Accepted</th></tr></thead><tbody>')
     foreach ($practice in @($s.grundschutz_plus_plus)) {
-        [void]$b.AppendLine('<tr><td>' + (ConvertTo-GsHtmlText $practice.id) + '</td><td>' + (ConvertTo-GsHtmlText $practice.title) + '</td><td>' + $practice.pass + '</td><td>' + $practice.fail + '</td><td>' + $practice.error + '</td></tr>')
+        [void]$b.AppendLine('<tr><td>' + (ConvertTo-GsHtmlText $practice.id) + '</td><td>' + (ConvertTo-GsHtmlText $practice.title) + '</td><td>' + $practice.pass + '</td><td>' + $practice.fail + '</td><td>' + $practice.error + '</td><td>' + $practice.accepted + '</td></tr>')
     }
     [void]$b.AppendLine('</tbody></table>')
     [void]$b.AppendLine('<h2>Checks</h2>')
@@ -438,18 +438,18 @@ function ConvertTo-GsMarkdownReport {
     }
     $lines.Add('## Summary by BSI module')
     $lines.Add('')
-    $lines.Add('| Module | Title | Pass | Fail | Error | N/A |')
-    $lines.Add('| --- | --- | --- | --- | --- | --- |')
+    $lines.Add('| Module | Title | Pass | Fail | Error | N/A | Accepted |')
+    $lines.Add('| --- | --- | --- | --- | --- | --- | --- |')
     foreach ($module in @($s.modules)) {
-        $lines.Add('| ' + (ConvertTo-GsMarkdownCell $module.id) + ' | ' + (ConvertTo-GsMarkdownCell $module.title) + ' | ' + $module.pass + ' | ' + $module.fail + ' | ' + $module.error + ' | ' + $module.not_applicable + ' |')
+        $lines.Add('| ' + (ConvertTo-GsMarkdownCell $module.id) + ' | ' + (ConvertTo-GsMarkdownCell $module.title) + ' | ' + $module.pass + ' | ' + $module.fail + ' | ' + $module.error + ' | ' + $module.not_applicable + ' | ' + $module.accepted + ' |')
     }
     $lines.Add('')
     $lines.Add('## Summary by Grundschutz++ practice')
     $lines.Add('')
-    $lines.Add('| Practice | Title | Pass | Fail | Error |')
-    $lines.Add('| --- | --- | --- | --- | --- |')
+    $lines.Add('| Practice | Title | Pass | Fail | Error | Accepted |')
+    $lines.Add('| --- | --- | --- | --- | --- | --- |')
     foreach ($practice in @($s.grundschutz_plus_plus)) {
-        $lines.Add('| ' + (ConvertTo-GsMarkdownCell $practice.id) + ' | ' + (ConvertTo-GsMarkdownCell $practice.title) + ' | ' + $practice.pass + ' | ' + $practice.fail + ' | ' + $practice.error + ' |')
+        $lines.Add('| ' + (ConvertTo-GsMarkdownCell $practice.id) + ' | ' + (ConvertTo-GsMarkdownCell $practice.title) + ' | ' + $practice.pass + ' | ' + $practice.fail + ' | ' + $practice.error + ' | ' + $practice.accepted + ' |')
     }
     $lines.Add('')
     $lines.Add('## Checks')
