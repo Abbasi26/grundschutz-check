@@ -50,12 +50,41 @@ The schema version is `0.1.0`. The catalog version is independent and is `0.1.0`
 
 | Field | Meaning |
 | --- | --- |
-| `framework` | `it-grundschutz-kompendium` or `grundschutz-plus-plus`. |
+| `framework` | `it-grundschutz-kompendium`, `grundschutz-plus-plus`, or `disa-stig`. |
 | `requirement_id` | Published id. Never invented. |
 | `title` | Official short title. German titles are kept as published. |
 | `mapping` | `verified` or `unverified` for this citation, which can differ from the check. |
 | `source_id` | Id in `catalog.sources`. |
 | `note` | What was and was not confirmed. A verified reference can still say that a number comes from the Hilfsmittel while the Grundschutz++ control is parameterized. |
+| `group_id` | `disa-stig` only, required there: the STIG group id (`V-…`). |
+| `rule_id` | `disa-stig` only, required there: the STIG rule id with revision (`SV-…r…_rule`). |
+
+### DISA STIG references
+
+`disa-stig` references cite the DISA Microsoft Windows 11 STIG. `requirement_id` is the STIG id (`WN11-…`), `title` is the rule title, and `source_id` points to the source entry that holds the STIG version (`V2R11`) and the download URL. They are never the primary reference, so the summary column still shows the BSI citation. The STIG is not bundled. Only ids and rule titles are stored.
+
+A STIG reference is added only after the XCCDF rule was read and compared: same setting, and every value the check accepts also passes the STIG rule. The current subset covers 8 checks and 11 rules from V2R11:
+
+| Check | STIG ids |
+| --- | --- |
+| `GS-W11-001` | `WN11-AC-000020` |
+| `GS-W11-006` | `WN11-SO-000010` |
+| `GS-W11-023` | `WN11-CC-000020`, `WN11-CC-000025` |
+| `GS-W11-024` | `WN11-SO-000100` |
+| `GS-W11-025` | `WN11-SO-000120` |
+| `GS-W11-041` | `WN11-CC-000326` |
+| `GS-W11-060` | `WN11-AU-000070`, `WN11-AU-000075` |
+| `GS-W11-061` | `WN11-AU-000005`, `WN11-AU-000010` |
+
+Compared and left without a STIG reference for now:
+
+- `GS-W11-022` Autoplay: the check covers only part of the three STIG Autoplay rules.
+- `GS-W11-028` LDAP client signing: the check expects 2, `WN11-SO-000210` expects 1.
+- `GS-W11-046` Firewall profiles: `WN11-00-000135` asks for any host-based firewall, not the per-profile setting.
+- `GS-W11-058` PowerShell 2.0: the check reads only `MicrosoftWindowsPowerShellV2Root`, `WN11-00-000155` also looks at `MicrosoftWindowsPowerShellV2`.
+- `GS-W11-062` WinRM: the check passes when the value is absent, the STIG treats a missing value as a finding.
+
+To re-check the ids after a new STIG release, download the ZIP from https://www.cyber.mil/stigs/downloads/, extract it, and run `python3 tools/verify_stig.py <path>/U_MS_Windows_11_STIG_V2R11_Manual-xccdf.xml`. It reports a different release, a changed rule revision, a changed title, or a missing rule. It does not judge whether values still match. That stays a manual review.
 
 Known unverified citations in v0.1:
 

@@ -27,6 +27,13 @@
         "title": "Anwenderkatalog Grundschutz++",
         "version": "2026-09-24T07:12:39.131983+00:00",
         "url": "https://github.com/BSI-Bund/Stand-der-Technik-Bibliothek/blob/main/control_layer/Grundschutz%2B%2B/Grundschutz%2B%2B-resolved_catalog.json"
+      },
+      {
+        "id": "disa-stig-windows-11-v2r11",
+        "title": "DISA Microsoft Windows 11 Security Technical Implementation Guide",
+        "version": "V2R11",
+        "released": "2026-09-30",
+        "url": "https://dl.dod.cyber.mil/wp-content/uploads/stigs/zip/U_MS_Windows_11_V2R11_STIG.zip"
       }
     ]
   },
@@ -70,6 +77,16 @@
           "mapping": "verified",
           "source_id": "grundschutz-plus-plus-2026-09-24",
           "note": "The control requires blocking reuse and does not fix a history depth. Depth 24 is the Hilfsmittel value."
+        },
+        {
+          "framework": "disa-stig",
+          "requirement_id": "WN11-AC-000020",
+          "title": "The password history must be configured to 24 passwords remembered.",
+          "mapping": "verified",
+          "source_id": "disa-stig-windows-11-v2r11",
+          "note": "STIG finding below 24 remembered passwords. The check requires exactly 24.",
+          "group_id": "V-253300",
+          "rule_id": "SV-253300r1256653_rule"
         }
       ],
       "rationale": "The Hilfsmittel sets Enforce password history to 24 passwords remembered. The concrete value is carried over from the Windows 10 Hilfsmittel (from Windows 10 version 21H2). BSI has not published a Windows 11 settings matrix. SYS.2.2.3 Edition 2023 applies to Windows 10 and Windows 11.",
@@ -301,6 +318,16 @@
           "mapping": "verified",
           "source_id": "grundschutz-plus-plus-2026-09-24",
           "note": "Guidance names unneeded identities as an example of a function to disable."
+        },
+        {
+          "framework": "disa-stig",
+          "requirement_id": "WN11-SO-000010",
+          "title": "The built-in guest account must be disabled.",
+          "mapping": "verified",
+          "source_id": "disa-stig-windows-11-v2r11",
+          "note": "Same setting: Accounts: Guest account status = Disabled (EnableGuestAccount = 0).",
+          "group_id": "V-253433",
+          "rule_id": "SV-253433r958504_rule"
         }
       ],
       "rationale": "The Hilfsmittel disables the Guest account under SYS.2.1.A16. The concrete value is carried over from the Windows 10 Hilfsmittel (from Windows 10 version 21H2). BSI has not published a Windows 11 settings matrix. SYS.2.2.3 Edition 2023 applies to Windows 10 and Windows 11.",
@@ -1065,6 +1092,26 @@
           "mapping": "verified",
           "source_id": "bsi-hilfsmittel-windows-client-1.0",
           "note": "Requirement from the IT-Grundschutz-Kompendium, Edition 2023. The setting value is taken from the BSI Hilfsmittel for Windows clients, version 1.0 (20 February 2025)."
+        },
+        {
+          "framework": "disa-stig",
+          "requirement_id": "WN11-CC-000020",
+          "title": "IPv6 source routing must be configured to highest protection.",
+          "mapping": "verified",
+          "source_id": "disa-stig-windows-11-v2r11",
+          "note": "Same registry value: Tcpip6\\Parameters DisableIpSourceRouting = 2.",
+          "group_id": "V-253353",
+          "rule_id": "SV-253353r1268251_rule"
+        },
+        {
+          "framework": "disa-stig",
+          "requirement_id": "WN11-CC-000025",
+          "title": "The system must be configured to prevent IP source routing.",
+          "mapping": "verified",
+          "source_id": "disa-stig-windows-11-v2r11",
+          "note": "Same registry value: Tcpip\\Parameters DisableIPSourceRouting = 2.",
+          "group_id": "V-253354",
+          "rule_id": "SV-253354r1268251_rule"
         }
       ],
       "rationale": "The Hilfsmittel sets both MSS DisableIPSourceRouting policies to the highest protection, which is registry value 2. No Grundschutz++ id is attached because none of the confirmed controls names source routing. The concrete value is carried over from the Windows 10 Hilfsmittel (from Windows 10 version 21H2). BSI has not published a Windows 11 settings matrix. SYS.2.2.3 Edition 2023 applies to Windows 10 and Windows 11.",
@@ -1115,6 +1162,16 @@
           "mapping": "verified",
           "source_id": "bsi-hilfsmittel-windows-client-1.0",
           "note": "Requirement from the IT-Grundschutz-Kompendium, Edition 2023. The setting value is taken from the BSI Hilfsmittel for Windows clients, version 1.0 (20 February 2025)."
+        },
+        {
+          "framework": "disa-stig",
+          "requirement_id": "WN11-SO-000100",
+          "title": "The Windows SMB client must be configured to always perform SMB packet signing.",
+          "mapping": "verified",
+          "source_id": "disa-stig-windows-11-v2r11",
+          "note": "Same registry value: LanmanWorkstation\\Parameters RequireSecuritySignature = 1.",
+          "group_id": "V-253449",
+          "rule_id": "SV-253449r958908_rule"
         }
       ],
       "rationale": "The Hilfsmittel enables Microsoft network client: Digitally sign communications (always). The weaker 'if server agrees' setting is not scored. The concrete value is carried over from the Windows 10 Hilfsmittel (from Windows 10 version 21H2). BSI has not published a Windows 11 settings matrix. SYS.2.2.3 Edition 2023 applies to Windows 10 and Windows 11.",
@@ -1152,6 +1209,16 @@
           "mapping": "verified",
           "source_id": "bsi-hilfsmittel-windows-client-1.0",
           "note": "Requirement from the IT-Grundschutz-Kompendium, Edition 2023. The setting value is taken from the BSI Hilfsmittel for Windows clients, version 1.0 (20 February 2025)."
+        },
+        {
+          "framework": "disa-stig",
+          "requirement_id": "WN11-SO-000120",
+          "title": "The Windows SMB server must be configured to always perform SMB packet signing.",
+          "mapping": "verified",
+          "source_id": "disa-stig-windows-11-v2r11",
+          "note": "Same registry value: LanManServer\\Parameters RequireSecuritySignature = 1.",
+          "group_id": "V-253451",
+          "rule_id": "SV-253451r958908_rule"
         }
       ],
       "rationale": "The Hilfsmittel enables Microsoft network server: Digitally sign communications (always). The concrete value is carried over from the Windows 10 Hilfsmittel (from Windows 10 version 21H2). BSI has not published a Windows 11 settings matrix. SYS.2.2.3 Edition 2023 applies to Windows 10 and Windows 11.",
@@ -1913,6 +1980,16 @@
           "mapping": "verified",
           "source_id": "grundschutz-plus-plus-2026-09-24",
           "note": "The control says to log executed command lines and names Windows PowerShell in the guidance. Script block logging is the Hilfsmittel setting for the script content."
+        },
+        {
+          "framework": "disa-stig",
+          "requirement_id": "WN11-CC-000326",
+          "title": "PowerShell script block logging must be enabled on Windows 11.",
+          "mapping": "verified",
+          "source_id": "disa-stig-windows-11-v2r11",
+          "note": "Same registry value: PowerShell\\ScriptBlockLogging EnableScriptBlockLogging = 1.",
+          "group_id": "V-253414",
+          "rule_id": "SV-253414r958422_rule"
         }
       ],
       "rationale": "The Hilfsmittel enables Turn on PowerShell Script Block Logging. The invocation start/stop option should stay off and is not scored. The concrete value is carried over from the Windows 10 Hilfsmittel (from Windows 10 version 21H2). BSI has not published a Windows 11 settings matrix. SYS.2.2.3 Edition 2023 applies to Windows 10 and Windows 11.",
@@ -2824,6 +2901,26 @@
           "mapping": "unverified",
           "source_id": "it-grundschutz-kompendium-2023",
           "note": "DER.1.A5 says to use built-in detection and points at the SiSyPHuS logging study. It does not name this subcategory, so the citation is unverified."
+        },
+        {
+          "framework": "disa-stig",
+          "requirement_id": "WN11-AU-000070",
+          "title": "The system must be configured to audit Logon/Logoff - Logon failures.",
+          "mapping": "verified",
+          "source_id": "disa-stig-windows-11-v2r11",
+          "note": "Success and Failure covers this rule. The STIG also requires WN11-SO-000030 (force audit policy subcategory settings), which this check does not evaluate.",
+          "group_id": "V-253316",
+          "rule_id": "SV-253316r991581_rule"
+        },
+        {
+          "framework": "disa-stig",
+          "requirement_id": "WN11-AU-000075",
+          "title": "The system must be configured to audit Logon/Logoff - Logon successes.",
+          "mapping": "verified",
+          "source_id": "disa-stig-windows-11-v2r11",
+          "note": "Success and Failure covers this rule. The STIG also requires WN11-SO-000030 (force audit policy subcategory settings), which this check does not evaluate.",
+          "group_id": "V-253317",
+          "rule_id": "SV-253317r991581_rule"
         }
       ],
       "rationale": "auditpol subcategory Logon ({0CCE9215-69AE-11D9-BED3-505054503030}) must be Success and Failure. Collection queries that GUID. If the GUID query fails, the de-DE display name Anmelden is accepted. A subcategory that is still missing is error, not fail. The concrete value is carried over from the Windows 10 Hilfsmittel (from Windows 10 version 21H2). BSI has not published a Windows 11 settings matrix. SYS.2.2.3 Edition 2023 applies to Windows 10 and Windows 11.",
@@ -2868,6 +2965,26 @@
           "mapping": "unverified",
           "source_id": "it-grundschutz-kompendium-2023",
           "note": "DER.1.A5 does not name this subcategory. The citation is unverified."
+        },
+        {
+          "framework": "disa-stig",
+          "requirement_id": "WN11-AU-000005",
+          "title": "The system must be configured to audit Account Logon - Credential Validation failures.",
+          "mapping": "verified",
+          "source_id": "disa-stig-windows-11-v2r11",
+          "note": "Success and Failure covers this rule. The STIG also requires WN11-SO-000030 (force audit policy subcategory settings), which this check does not evaluate.",
+          "group_id": "V-253306",
+          "rule_id": "SV-253306r991570_rule"
+        },
+        {
+          "framework": "disa-stig",
+          "requirement_id": "WN11-AU-000010",
+          "title": "The system must be configured to audit Account Logon - Credential Validation successes.",
+          "mapping": "verified",
+          "source_id": "disa-stig-windows-11-v2r11",
+          "note": "Success and Failure covers this rule. The STIG also requires WN11-SO-000030 (force audit policy subcategory settings), which this check does not evaluate.",
+          "group_id": "V-253307",
+          "rule_id": "SV-253307r991570_rule"
         }
       ],
       "rationale": "auditpol subcategory Credential Validation ({0CCE923F-69AE-11D9-BED3-505054503030}) must be Success and Failure. Collection queries that GUID. If the GUID query fails, the de-DE display names Anmeldeinformationen überprüfen and Überprüfung der Anmeldeinformationen are accepted. The concrete value is carried over from the Windows 10 Hilfsmittel (from Windows 10 version 21H2). BSI has not published a Windows 11 settings matrix. SYS.2.2.3 Edition 2023 applies to Windows 10 and Windows 11.",

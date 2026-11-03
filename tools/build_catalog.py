@@ -24,6 +24,7 @@ EVIDENCE_PATH = ROOT / "demo" / "evidence.json"
 HILF = "bsi-hilfsmittel-windows-client-1.0"
 KOMP_SRC = "it-grundschutz-kompendium-2023"
 GSPP_SRC = "grundschutz-plus-plus-2026-09-24"
+STIG_SRC = "disa-stig-windows-11-v2r11"
 
 ABSENT = object()
 
@@ -185,6 +186,72 @@ DEF_OV = {"PUAProtection": 0}
 FEAT_OV = {"MicrosoftWindowsPowerShellV2Root": "Enabled"}
 BL_OV = "Off"
 AUD_OV = {"Logon": "Success"}
+
+
+# DISA Microsoft Windows 11 STIG, Version 2, Release 11 (benchmark date 30 Sep 2026).
+# Each entry was compared by hand with the rule in
+# U_MS_Windows_11_STIG_V2R11_Manual-xccdf.xml: same setting, and a value the check
+# accepts never fails the STIG rule. Only ids and the short rule title are kept.
+# tools/verify_stig.py re-checks ids and titles against a downloaded XCCDF file.
+# STIG id -> (group id, rule id, rule title)
+STIG_RULES = {
+    "WN11-AC-000020": ("V-253300", "SV-253300r1256653_rule", "The password history must be configured to 24 passwords remembered."),
+    "WN11-SO-000010": ("V-253433", "SV-253433r958504_rule", "The built-in guest account must be disabled."),
+    "WN11-CC-000020": ("V-253353", "SV-253353r1268251_rule", "IPv6 source routing must be configured to highest protection."),
+    "WN11-CC-000025": ("V-253354", "SV-253354r1268251_rule", "The system must be configured to prevent IP source routing."),
+    "WN11-SO-000100": ("V-253449", "SV-253449r958908_rule", "The Windows SMB client must be configured to always perform SMB packet signing."),
+    "WN11-SO-000120": ("V-253451", "SV-253451r958908_rule", "The Windows SMB server must be configured to always perform SMB packet signing."),
+    "WN11-CC-000326": ("V-253414", "SV-253414r958422_rule", "PowerShell script block logging must be enabled on Windows 11."),
+    "WN11-AU-000070": ("V-253316", "SV-253316r991581_rule", "The system must be configured to audit Logon/Logoff - Logon failures."),
+    "WN11-AU-000075": ("V-253317", "SV-253317r991581_rule", "The system must be configured to audit Logon/Logoff - Logon successes."),
+    "WN11-AU-000005": ("V-253306", "SV-253306r991570_rule", "The system must be configured to audit Account Logon - Credential Validation failures."),
+    "WN11-AU-000010": ("V-253307", "SV-253307r991570_rule", "The system must be configured to audit Account Logon - Credential Validation successes."),
+}
+
+_AUDIT_NOTE = (
+    "Success and Failure covers this rule. The STIG also requires WN11-SO-000030 (force audit policy "
+    "subcategory settings), which this check does not evaluate."
+)
+
+# Check id -> [(STIG id, note)]. Checks without an entry have no STIG reference yet.
+# Compared but left out on purpose (see docs/catalog-schema.md):
+# GS-W11-022, GS-W11-028, GS-W11-046, GS-W11-058, GS-W11-062.
+STIG_MAP = {
+    "GS-W11-001": [("WN11-AC-000020", "STIG finding below 24 remembered passwords. The check requires exactly 24.")],
+    "GS-W11-006": [("WN11-SO-000010", "Same setting: Accounts: Guest account status = Disabled (EnableGuestAccount = 0).")],
+    "GS-W11-023": [
+        ("WN11-CC-000020", "Same registry value: Tcpip6\\Parameters DisableIpSourceRouting = 2."),
+        ("WN11-CC-000025", "Same registry value: Tcpip\\Parameters DisableIPSourceRouting = 2."),
+    ],
+    "GS-W11-024": [("WN11-SO-000100", "Same registry value: LanmanWorkstation\\Parameters RequireSecuritySignature = 1.")],
+    "GS-W11-025": [("WN11-SO-000120", "Same registry value: LanManServer\\Parameters RequireSecuritySignature = 1.")],
+    "GS-W11-041": [("WN11-CC-000326", "Same registry value: PowerShell\\ScriptBlockLogging EnableScriptBlockLogging = 1.")],
+    "GS-W11-060": [("WN11-AU-000070", _AUDIT_NOTE), ("WN11-AU-000075", _AUDIT_NOTE)],
+    "GS-W11-061": [("WN11-AU-000005", _AUDIT_NOTE), ("WN11-AU-000010", _AUDIT_NOTE)],
+}
+
+
+def stig(stig_id: str, note: str) -> dict:
+    group_id, rule_id, title = STIG_RULES[stig_id]
+    return {
+        "framework": "disa-stig",
+        "requirement_id": stig_id,
+        "title": title,
+        "mapping": "verified",
+        "source_id": STIG_SRC,
+        "note": note,
+        "group_id": group_id,
+        "rule_id": rule_id,
+    }
+
+
+def add_stig_references(checks: list) -> None:
+    by_id = {check["id"]: check for check in checks}
+    for check_id, entries in STIG_MAP.items():
+        if check_id not in by_id:
+            raise SystemExit("STIG_MAP names unknown check " + check_id)
+        for stig_id, note in entries:
+            by_id[check_id]["references"].append(stig(stig_id, note))
 
 
 def komp(req: str, note: str = "") -> dict:
@@ -1241,6 +1308,11 @@ def lint(catalog: dict) -> None:
                 allowed = VERIFIED_KOMP if ref["mapping"] == "verified" else UNVERIFIED_KOMP
             elif ref["framework"] == "grundschutz-plus-plus":
                 allowed = VERIFIED_GSPP if ref["mapping"] == "verified" else UNVERIFIED_GSPP
+            elif ref["framework"] == "disa-stig":
+                rule = STIG_RULES.get(req)
+                if rule is None or (ref.get("group_id"), ref.get("rule_id"), ref["title"]) != rule:
+                    raise SystemExit(f"{check['id']} STIG reference {req} does not match STIG_RULES")
+                allowed = set(STIG_RULES)
             else:
                 raise SystemExit("unknown framework on " + check["id"])
             if req not in allowed:
@@ -1357,6 +1429,7 @@ def build_evidence(catalog: dict) -> dict:
 
 def build_catalog() -> dict:
     checks = build_checks()
+    add_stig_references(checks)
     seen = []
     modules = []
     for check in checks:
@@ -1403,6 +1476,13 @@ def build_catalog() -> dict:
                     "title": "Anwenderkatalog Grundschutz++",
                     "version": "2026-09-24T07:12:39.131983+00:00",
                     "url": "https://github.com/BSI-Bund/Stand-der-Technik-Bibliothek/blob/main/control_layer/Grundschutz%2B%2B/Grundschutz%2B%2B-resolved_catalog.json",
+                },
+                {
+                    "id": STIG_SRC,
+                    "title": "DISA Microsoft Windows 11 Security Technical Implementation Guide",
+                    "version": "V2R11",
+                    "released": "2026-09-30",
+                    "url": "https://dl.dod.cyber.mil/wp-content/uploads/stigs/zip/U_MS_Windows_11_V2R11_STIG.zip",
                 },
             ],
         },
