@@ -12,7 +12,7 @@ The schema version is `0.1.0`. The catalog version is independent and is `0.1.0`
 - `windows11_carryover` means whether BSI has published this exact value for Windows 11. In catalog 0.1.0 every check is `unverified`, because the values come from the Windows 10 Hilfsmittel (version 1.0, 20 February 2025, from Windows 10 21H2). SYS.2.2.3 Edition 2023 applies to Windows 10 and Windows 11, and that is not the same thing as a Windows 11 settings matrix.
 - You may ignore an `evaluation.method` you cannot run. Report that row as `not_applicable` or omit it. Do not turn a skipped method into `pass`.
 - Remediation strings are text. Running them is a different product decision and needs its own preview. v0.1 never runs them.
-- The Grundschutz++ catalog is CC-BY-SA. This repository stores ids and short titles only, and links the [resolved catalog](https://github.com/BSI-Bund/Stand-der-Technik-Bibliothek/blob/main/control_layer/Grundschutz%2B%2B/Grundschutz%2B%2B-resolved_catalog.json). Do not vendor that file here.
+- The Grundschutz++ catalog is CC-BY-SA. This repository stores ids and short titles only, and links the [resolved catalog](https://github.com/BSI-Bund/Stand-der-Technik-Bibliothek/blob/main/control_layer/Grundschutz%2B%2B/Grundschutz%2B%2B-resolved_catalog.json). Do not vendor that file here. To check the cited ids against a newer download, use `Import-GsGrundschutzPlusPlus` and `Test-GsGrundschutzPlusPlusReference` (see the README).
 
 ## Catalog document
 

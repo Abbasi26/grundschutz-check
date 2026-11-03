@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- `Import-GsGrundschutzPlusPlus`: reads a user-downloaded Grundschutz++ OSCAL catalog (BSI, CC BY-SA 4.0, not bundled) into control rows without prose. `Test-GsGrundschutzPlusPlusReference` marks each Grundschutz++ reference in the check catalog as `ok`, `title_changed`, or `missing` and flags a different catalog version. Tests use a self-made fixture.
+
 ## 0.2.0 - 2026-10-28
 
 - `-ExceptionPath`: documented risk acceptances with reason, owner, expiry date, and optional ticket. Failing checks with a current exception are reported as `accepted` and do not set exit code 1. Expired exceptions keep the check at `fail`; exceptions never hide errors. New `accepted` count in the summary and per module.
