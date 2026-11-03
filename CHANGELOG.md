@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Import, compare, and export the machine-readable Grundschutz++ OSCAL catalog without vendoring the BSI catalog. Optional report metadata identifies missing control references and title drift.
+- Tests: `tests/Evaluate.Tests.ps1` loads the module before discovery, so `InModuleScope` finds it (the test job on `main` failed at discovery since 020c9d5).
+
 ## 0.2.0 - 2026-10-28
 
 - `-ExceptionPath`: documented risk acceptances with reason, owner, expiry date, and optional ticket. Failing checks with a current exception are reported as `accepted` and do not set exit code 1. Expired exceptions keep the check at `fail`; exceptions never hide errors. New `accepted` count in the summary and per module.

@@ -7,5 +7,6 @@ __pycache__/
 .pytest_cache/
 uploads/
 agent-tools/
+.cache/
 examples/ansible/collected/
 .tmp/

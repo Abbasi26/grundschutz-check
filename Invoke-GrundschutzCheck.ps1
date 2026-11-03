@@ -19,6 +19,7 @@ param(
     [string]$Timestamp,
     [string]$ExceptionPath,
     [string]$BaselinePath,
+    [string]$GsppCatalogPath,
     [switch]$FailOnRegression,
     [switch]$PassThru
 )
@@ -35,6 +36,7 @@ if ($PSBoundParameters.ContainsKey('OutputDirectory')) { $params.OutputDirectory
 if ($PSBoundParameters.ContainsKey('Timestamp')) { $params.Timestamp = $Timestamp }
 if ($PSBoundParameters.ContainsKey('ExceptionPath')) { $params.ExceptionPath = $ExceptionPath }
 if ($PSBoundParameters.ContainsKey('BaselinePath')) { $params.BaselinePath = $BaselinePath }
+if ($PSBoundParameters.ContainsKey('GsppCatalogPath')) { $params.GsppCatalogPath = $GsppCatalogPath }
 if ($FailOnRegression -and -not $PSBoundParameters.ContainsKey('BaselinePath')) {
     throw '-FailOnRegression needs -BaselinePath.'
 }

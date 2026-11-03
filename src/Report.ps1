@@ -275,6 +275,10 @@ function ConvertTo-GsHtmlReport {
         [void]$b.AppendLine('<div class="banner demo"><strong>Demo.</strong> These results were rendered from bundled fictional evidence. They are not an audit of a real computer.</div>')
     }
     [void]$b.AppendLine('<div class="banner"><strong>Read-only.</strong> Remediation snippets are text. This run did not change the system. A pass is an indicator, not a certificate that the whole BSI requirement is met.</div>')
+    $gsppCatalog = Get-GsProperty $Document 'grundschutz_plus_plus_catalog'
+    if ($null -ne $gsppCatalog) {
+        [void]$b.AppendLine('<div class="banner">Grundschutz++ catalog: ' + (ConvertTo-GsHtmlText $gsppCatalog.title) + ', version ' + (ConvertTo-GsHtmlText $gsppCatalog.version) + ', ' + $gsppCatalog.control_count + ' controls. Missing references: ' + @($gsppCatalog.missing_references).Count + '; title drift: ' + @($gsppCatalog.title_drift).Count + '.</div>')
+    }
     [void]$b.AppendLine('<div class="grid">')
     [void]$b.AppendLine('<div class="card pass"><div class="n">' + $s.pass + '</div><span>Pass</span></div>')
     [void]$b.AppendLine('<div class="card fail"><div class="n">' + $s.fail + '</div><span>Fail</span></div>')
@@ -389,6 +393,11 @@ function ConvertTo-GsMarkdownReport {
     }
     $lines.Add('Read-only run. Remediation snippets were not applied.')
     $lines.Add('')
+    $gsppCatalog = Get-GsProperty $Document 'grundschutz_plus_plus_catalog'
+    if ($null -ne $gsppCatalog) {
+        $lines.Add('Grundschutz++ catalog: ' + $gsppCatalog.title + ', version ' + $gsppCatalog.version + ', ' + $gsppCatalog.control_count + ' controls. Missing references: ' + @($gsppCatalog.missing_references).Count + '; title drift: ' + @($gsppCatalog.title_drift).Count + '.')
+        $lines.Add('')
+    }
     $lines.Add('## Evidence')
     $lines.Add('')
     $lines.Add('- Generated (UTC): ' + $e.generated_at)

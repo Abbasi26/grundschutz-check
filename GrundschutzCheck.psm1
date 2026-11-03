@@ -10,6 +10,7 @@ $script:GsToolVersion = '0.2.0'
 . (Join-Path $PSScriptRoot 'src/Report.ps1')
 . (Join-Path $PSScriptRoot 'src/Exceptions.ps1')
 . (Join-Path $PSScriptRoot 'src/Compare.ps1')
+. (Join-Path $PSScriptRoot 'src/GsppCatalog.ps1')
 
 function Invoke-GrundschutzCheck {
     <#
@@ -31,7 +32,8 @@ function Invoke-GrundschutzCheck {
         [string[]]$Format = @('All'),
         [string]$Timestamp,
         [string]$ExceptionPath,
-        [string]$BaselinePath
+        [string]$BaselinePath,
+        [string]$GsppCatalogPath
     )
 
     $catalog = Get-GsCatalog -Path $CatalogPath
@@ -83,9 +85,23 @@ function Invoke-GrundschutzCheck {
     if ($null -ne $baseline) {
         Add-Member -InputObject $document -NotePropertyName comparison -NotePropertyValue (Compare-GsReport -Baseline $baseline -Document $document) -Force
     }
+    if (-not [string]::IsNullOrWhiteSpace($GsppCatalogPath)) {
+        $gsppCatalog = Import-GsppCatalog -Path $GsppCatalogPath
+        $references = @(Test-GsppReference -Catalog $gsppCatalog -CheckCatalogPath $catalog.SourcePath)
+        $missing = @($references | Where-Object { -not $_.Found })
+        $drift = @($references | Where-Object { $_.Found -and -not $_.TitleMatches })
+        Add-Member -InputObject $document -NotePropertyName grundschutz_plus_plus_catalog -NotePropertyValue ([pscustomobject][ordered]@{
+            title              = $gsppCatalog.Title
+            version            = $gsppCatalog.Version
+            sha256             = $gsppCatalog.Sha256
+            control_count      = $gsppCatalog.ControlCount
+            missing_references = $missing
+            title_drift        = $drift
+        }) -Force
+    }
     $files = Write-GsReportFiles -Document $document -Directory $OutputDirectory -Formats $Format
     Add-Member -InputObject $document -NotePropertyName outputs -NotePropertyValue $files -Force
     return $document
 }
 
-Export-ModuleMember -Function Invoke-GrundschutzCheck, Get-GsCatalog
+Export-ModuleMember -Function Invoke-GrundschutzCheck, Get-GsCatalog, Import-GsppCatalog, Test-GsppReference, Export-GsppControlIndex
