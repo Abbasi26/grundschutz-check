@@ -10,6 +10,7 @@ $script:GsToolVersion = '0.2.0'
 . (Join-Path $PSScriptRoot 'src/Report.ps1')
 . (Join-Path $PSScriptRoot 'src/Exceptions.ps1')
 . (Join-Path $PSScriptRoot 'src/Compare.ps1')
+. (Join-Path $PSScriptRoot 'src/GrundschutzPlusPlus.ps1')
 
 function Invoke-GrundschutzCheck {
     <#
@@ -88,4 +89,4 @@ function Invoke-GrundschutzCheck {
     return $document
 }
 
-Export-ModuleMember -Function Invoke-GrundschutzCheck, Get-GsCatalog
+Export-ModuleMember -Function Invoke-GrundschutzCheck, Get-GsCatalog, Import-GsGrundschutzPlusPlus, Test-GsGrundschutzPlusPlusReference

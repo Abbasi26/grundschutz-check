@@ -1,0 +1,77 @@
+{
+  "catalog": {
+    "uuid": "00000000-0000-4000-8000-000000000001",
+    "metadata": {
+      "title": "GrundschutzCheck test fixture in the shape of the Grundschutz++ OSCAL catalog",
+      "last-modified": "2026-11-01T00:00:00Z",
+      "version": "fixture-2026-11-01",
+      "oscal-version": "1.1.3",
+      "remarks": "Self-made fixture for tests. It copies the OSCAL structure only. Ids and titles are placeholders for lookups; no BSI prose is included."
+    },
+    "groups": [
+      {
+        "id": "BER",
+        "title": "Fixture practice BER",
+        "groups": [
+          {
+            "id": "BER.6",
+            "title": "Fixture group BER.6",
+            "controls": [
+              {
+                "id": "BER.6.2",
+                "class": "fixture",
+                "title": "Blockieren von Passwort Recycling",
+                "props": [
+                  { "name": "sec_level", "value": "normal-SdT" },
+                  { "name": "effort_level", "value": "3" }
+                ],
+                "parts": [
+                  {
+                    "id": "BER.6.2_stm",
+                    "name": "statement",
+                    "props": [ { "name": "modal_verb", "value": "MUSS" } ],
+                    "prose": "Fixture statement."
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "KONF",
+        "title": "Fixture practice KONF",
+        "groups": [
+          {
+            "id": "KONF.2",
+            "title": "Fixture group KONF.2",
+            "controls": [
+              {
+                "id": "KONF.2.4",
+                "class": "fixture",
+                "title": "Fixture title that differs on purpose",
+                "props": [ { "name": "sec_level", "value": "normal-SdT" } ],
+                "parts": [
+                  {
+                    "id": "KONF.2.4_stm",
+                    "name": "statement",
+                    "props": [ { "name": "modal_verb", "value": "SOLLTE" } ],
+                    "prose": "Fixture statement."
+                  }
+                ],
+                "controls": [
+                  {
+                    "id": "KONF.2.4.2",
+                    "class": "fixture",
+                    "title": "Fixture nested control",
+                    "props": [ { "name": "sec_level", "value": "erhöht" } ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}
