@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Test fixture: ids and rule titles only, copied from the DISA Microsoft Windows 11 STIG V2R11 XCCDF. No check or fix text. -->
+<Benchmark xmlns="http://checklists.nist.gov/xccdf/1.1" id="Microsoft_Windows_11_STIG">
+  <version>2</version>
+  <plain-text id="release-info">Release: 11 Benchmark Date: 30 Sep 2026</plain-text>
+  <Group id="V-253300"><Rule id="SV-253300r1256653_rule"><version>WN11-AC-000020</version><title>The password history must be configured to 24 passwords remembered.</title></Rule></Group>
+  <Group id="V-253306"><Rule id="SV-253306r991570_rule"><version>WN11-AU-000005</version><title>The system must be configured to audit Account Logon - Credential Validation failures.</title></Rule></Group>
+  <Group id="V-253307"><Rule id="SV-253307r991570_rule"><version>WN11-AU-000010</version><title>The system must be configured to audit Account Logon - Credential Validation successes.</title></Rule></Group>
+  <Group id="V-253316"><Rule id="SV-253316r991581_rule"><version>WN11-AU-000070</version><title>The system must be configured to audit Logon/Logoff - Logon failures.</title></Rule></Group>
+  <Group id="V-253317"><Rule id="SV-253317r991581_rule"><version>WN11-AU-000075</version><title>The system must be configured to audit Logon/Logoff - Logon successes.</title></Rule></Group>
+  <Group id="V-253353"><Rule id="SV-253353r1268251_rule"><version>WN11-CC-000020</version><title>IPv6 source routing must be configured to highest protection.</title></Rule></Group>
+  <Group id="V-253354"><Rule id="SV-253354r1268251_rule"><version>WN11-CC-000025</version><title>The system must be configured to prevent IP source routing.</title></Rule></Group>
+  <Group id="V-253414"><Rule id="SV-253414r958422_rule"><version>WN11-CC-000326</version><title>PowerShell script block logging must be enabled on Windows 11.</title></Rule></Group>
+  <Group id="V-253433"><Rule id="SV-253433r958504_rule"><version>WN11-SO-000010</version><title>The built-in guest account must be disabled.</title></Rule></Group>
+  <Group id="V-253449"><Rule id="SV-253449r958908_rule"><version>WN11-SO-000100</version><title>The Windows SMB client must be configured to always perform SMB packet signing.</title></Rule></Group>
+  <Group id="V-253451"><Rule id="SV-253451r958908_rule"><version>WN11-SO-000120</version><title>The Windows SMB server must be configured to always perform SMB packet signing.</title></Rule></Group>
+</Benchmark>

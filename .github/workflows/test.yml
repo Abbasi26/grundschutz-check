@@ -31,7 +31,7 @@ jobs:
         run: |
           python3 -m pip install --user pytest jsonschema
           python3 tools/build_catalog.py --check
-          python3 -m pytest tests/test_catalog.py -q
+          python3 -m pytest tests/test_catalog.py tests/test_verify_stig.py -q
       - name: Demo
         shell: bash
         run: |

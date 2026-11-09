@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- First DISA Windows 11 STIG references (V2R11, `framework: disa-stig`) on 8 checks and 11 rules, each compared by hand with the XCCDF rule. New optional `group_id` and `rule_id` fields, required for `disa-stig`. `tools/verify_stig.py` re-checks ids and titles against a downloaded XCCDF file. The STIG is not bundled. Refs #14.
 - `Import-GsGrundschutzPlusPlus`: reads a user-downloaded Grundschutz++ OSCAL catalog (BSI, CC BY-SA 4.0, not bundled) into control rows without prose. `Test-GsGrundschutzPlusPlusReference` marks each Grundschutz++ reference in the check catalog as `ok`, `title_changed`, or `missing` and flags a different catalog version. Tests use a self-made fixture.
 
 ## 0.2.0 - 2026-10-28
