@@ -1,3 +1,17 @@
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/assets/logo-dark.svg">
+    <source media="(prefers-color-scheme: light)" srcset="docs/assets/logo-light.svg">
+    <img src="docs/assets/logo-light.svg" alt="grundschutz-check" height="64">
+  </picture>
+</p>
+
+<p align="center">Windows 11 hardening evidence mapped to BSI Grundschutz requirements.</p>
+
+<p align="center">
+  <img src="docs/assets/readme-hero.png" width="800" alt="Terminal output of Invoke-GrundschutzCheck.ps1 -Demo: pass=44 fail=19 of 63 checks on fictional evidence, with failing checks, their BSI requirement, expected and actual values.">
+</p>
+
 # GrundschutzCheck
 
 [![CI](https://github.com/Abbasi26/grundschutz-check/actions/workflows/test.yml/badge.svg)](https://github.com/Abbasi26/grundschutz-check/actions/workflows/test.yml)
@@ -5,6 +19,14 @@
 Read-only checks of a Windows 11 client against published BSI IT-Grundschutz and Grundschutz++ recommendations, with an evidence report.
 
 A Windows 11 client can have diagnostic data left at "Required" (`AllowTelemetry = 1`). The BSI Hilfsmittel for Windows clients, under SYS.2.2.3.A4, recommends `0 - Security` where that value is honored, and Grundschutz++ KONF.2.4 names telemetry services as something to turn off when they are not needed. [HardeningKitty](https://github.com/scipag/HardeningKitty) ships BSI SiSyPHuS finding lists for Windows 10 1809, not a Windows 11 catalog tied to Grundschutz++ control ids. GrundschutzCheck scores that setting as `GS-W11-010`, cites both documents, and marks the Windows 11 carry-over `unverified` because BSI has not published a Windows 11 settings matrix and Microsoft does not honor value 0 on every edition.
+
+## Demo video
+
+[![Demo video for grundschutz-check](docs/media/brag.jpg)](docs/media/brag.mp4)
+
+GrundschutzCheck runs read-only Windows 11 checks and writes evidence as HTML, Markdown, JSON, and CSV. The bundled demo is fictional, reproducible, and does not inspect the local computer. (Click the image to play the video.)
+
+Music: Sascha Ende ([ende.app](https://ende.app)), licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
 
 ## Quickstart
 
@@ -105,6 +127,20 @@ Sources, read for the ids that are cited:
 
 The Grundschutz++ file is not vendored. Ids and short titles are stored, with a link.
 
+### Check the references against a current Grundschutz++ download
+
+BSI publishes Grundschutz++ as an OSCAL 1.1 catalog in the [Stand-der-Technik-Bibliothek](https://github.com/BSI-Bund/Stand-der-Technik-Bibliothek/tree/main/control_layer/Grundschutz%2B%2B) under [CC BY-SA 4.0](https://github.com/BSI-Bund/Stand-der-Technik-Bibliothek/blob/main/LICENSE). ShareAlike would put any bundled copy under that license, so this repository does not ship it. Download `Grundschutz++-resolved_catalog.json` yourself and import it:
+
+```powershell
+Import-Module ./GrundschutzCheck.psd1
+$gspp = Import-GsGrundschutzPlusPlus -Path ./Grundschutz++-resolved_catalog.json
+$result = Test-GsGrundschutzPlusPlusReference -Catalog (Get-GsCatalog) -Library $gspp
+$result | Select-Object library_version, catalog_source_version, version_differs, total, ok, title_changed, missing
+$result.references | Where-Object status -ne 'ok'
+```
+
+`Import-GsGrundschutzPlusPlus` reads the file only. It returns the catalog version and one row per control: id, title, practice, group, parent control, class, `sec_level`, `effort_level`, and the modal verb of the statement. Prose is not copied. `Test-GsGrundschutzPlusPlusReference` marks every Grundschutz++ reference in the check catalog as `ok`, `title_changed`, or `missing`, and says whether the catalog cites another Grundschutz++ version than the file you imported. ISO timestamps are normalized to UTC so Windows PowerShell 5.1 and PowerShell 7 report the same version string. The tests use a self-made fixture in the same OSCAL shape (`tests/fixtures/grundschutzplusplus-mini.json`), not BSI content.
+
 Audit policy in v0.1 scores two advanced-audit subcategories, Logon (`{0CCE9215-69AE-11D9-BED3-505054503030}`) and Credential Validation (`{0CCE923F-69AE-11D9-BED3-505054503030}`), because DET.3.1.1 says to log authentication success and failure. Those GUIDs are Windows identifiers from MS-GPAC, not BSI requirement ids. Live collection runs `auditpol /get /subcategory:{GUID} /r` for each scored subcategory and reads the CSV by column, so a German display name does not hide a pass or a fail. Inclusion settings such as `Erfolg und Fehler` and `Keine Überwachung` are stored as English. It also runs `auditpol /get /category:* /r` when that command succeeds, so the evidence section can still list subcategories that are not scored. That category-wide CSV is the fallback when a GUID query fails. The fallback accepts these de-DE names: Anmelden, Abmelden, Kontosperrung, Spezielle Anmeldung, Prozesserstellung, Benutzerkontenverwaltung, Sicherheitsgruppenverwaltung, and Anmeldeinformationen überprüfen (also Überprüfung der Anmeldeinformationen). A subcategory that is still missing is `error`, not `fail`.
 
 Names for languages other than English and German are not in the fallback table. Those systems still match when the CSV has the subcategory GUID. The offline fixtures cover one English CSV and one German CSV. CI does not run a live de-DE Windows session, so the German display names were not re-captured from a German install in this repository.
@@ -163,4 +199,4 @@ MIT. Copyright (c) 2026 Wasaf Abbasi.
 
 ## Kurzfassung
 
-GrundschutzCheck prüft einen Windows-11-Client nur lesend gegen ausgewählte Empfehlungen des BSI: das Hilfsmittel für Windows-Clients 1.0, das IT-Grundschutz-Kompendium Edition 2023 und bestätigte Kontrollen aus Grundschutz++. Der Demo-Befehl lautet `pwsh -NoProfile -File ./Invoke-GrundschutzCheck.ps1 -Demo -OutputDirectory ./grundschutzcheck-out`. Er erzeugt einen Bericht aus fiktiven Daten. Die konkreten Werte stammen aus dem Windows-10-Hilfsmittel und sind für Windows 11 als `windows11_carryover: unverified` gekennzeichnet. Das Werkzeug ändert keine Einstellungen und sendet keine Daten.
+GrundschutzCheck prüft einen Windows-11-Client nur lesend gegen ausgewählte Empfehlungen des BSI: das Hilfsmittel für Windows-Clients 1.0, das IT-Grundschutz-Kompendium Edition 2023 und bestätigte Kontrollen aus Grundschutz++. Der Demo-Befehl lautet `pwsh -NoProfile -File ./Invoke-GrundschutzCheck.ps1 -Demo -OutputDirectory ./grundschutzcheck-out`. Er erzeugt einen Bericht aus fiktiven Daten. Die konkreten Werte stammen aus dem Windows-10-Hilfsmittel und sind für Windows 11 als `windows11_carryover: unverified` gekennzeichnet. Das Werkzeug ändert keine Einstellungen und sendet keine Daten. `Import-GsGrundschutzPlusPlus` liest einen selbst heruntergeladenen Grundschutz++-OSCAL-Katalog (CC BY-SA 4.0, daher nicht im Repository), und `Test-GsGrundschutzPlusPlusReference` prüft, ob alle zitierten Grundschutz++-Anforderungen dort noch mit gleichem Titel vorkommen.

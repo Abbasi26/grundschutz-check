@@ -7,13 +7,16 @@
     Copyright         = '(c) 2026 Wasaf Abbasi'
     Description       = 'Read-only Windows 11 client hardening checks against BSI IT-Grundschutz and Grundschutz++, with an evidence report.'
     PowerShellVersion = '5.1'
-    FunctionsToExport = @('Invoke-GrundschutzCheck', 'Get-GsCatalog')
+    FunctionsToExport = @('Invoke-GrundschutzCheck', 'Get-GsCatalog', 'Import-GsGrundschutzPlusPlus', 'Test-GsGrundschutzPlusPlusReference')
     CmdletsToExport   = @()
     VariablesToExport = @()
     AliasesToExport   = @()
     PrivateData       = @{
         PSData = @{
-            Tags = @('BSI', 'Grundschutz', 'Windows', 'hardening', 'audit')
+            Tags         = @('BSI', 'Grundschutz', 'ITGrundschutz', 'Windows', 'Windows11', 'Hardening', 'Audit', 'Compliance', 'Security', 'ReadOnly')
+            ProjectUri   = 'https://github.com/Abbasi26/grundschutz-check'
+            LicenseUri   = 'https://github.com/Abbasi26/grundschutz-check/blob/main/LICENSE'
+            ReleaseNotes = 'https://github.com/Abbasi26/grundschutz-check/blob/main/CHANGELOG.md'
         }
     }
 }

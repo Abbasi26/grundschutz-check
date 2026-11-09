@@ -62,6 +62,13 @@ Describe 'Windows 11 catalog' {
                         $allowed = $UnverifiedGrundschutz
                         if ($mapping -eq 'verified') { $allowed = $VerifiedGrundschutz }
                     }
+                    elseif ($framework -eq 'disa-stig') {
+                        $requirementId | Should -Match '^WN11-[A-Z0-9]+-[0-9]{6}$'
+                        [string](Get-GsProperty $ref 'group_id') | Should -Match '^V-[0-9]+$'
+                        [string](Get-GsProperty $ref 'rule_id') | Should -Match '^SV-[0-9]+r[0-9]+_rule$'
+                        $mapping | Should -Be 'verified'
+                        continue
+                    }
                     else {
                         throw "Unexpected framework $framework"
                     }
@@ -93,6 +100,18 @@ Describe 'Windows 11 catalog' {
             $ref = @($check.references | Where-Object { $_.requirement_id -eq 'BER.6.5' })[0]
             [string]$ref.mapping | Should -Be 'unverified'
             [string]$check.severity | Should -Be 'low'
+        }
+    }
+
+    It 'rejects a STIG reference without a rule id' {
+        InModuleScope GrundschutzCheck {
+            $catalog = Get-GsCatalog
+            $check = @((ConvertTo-GsArray (Get-GsProperty $catalog 'checks')) | Where-Object { $_.id -eq 'GS-W11-024' })[0]
+            $ref = @($check.references | Where-Object { $_.framework -eq 'disa-stig' })[0]
+            $ref.requirement_id | Should -Be 'WN11-SO-000100'
+            $ref.PSObject.Properties.Remove('rule_id')
+            $errors = @(Test-GsCatalog -Catalog $catalog)
+            ($errors -join "`n") | Should -Match 'missing an SV- rule id'
         }
     }
 }

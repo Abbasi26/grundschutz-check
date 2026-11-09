@@ -8,3 +8,4 @@ __pycache__/
 uploads/
 agent-tools/
 examples/ansible/collected/
+.tmp/
