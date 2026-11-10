@@ -15,6 +15,7 @@
 # GrundschutzCheck
 
 [![CI](https://github.com/Abbasi26/grundschutz-check/actions/workflows/test.yml/badge.svg)](https://github.com/Abbasi26/grundschutz-check/actions/workflows/test.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 Read-only checks of a Windows 11 client against published BSI IT-Grundschutz and Grundschutz++ recommendations, with an evidence report.
 
