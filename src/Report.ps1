@@ -163,6 +163,14 @@ function New-GsReportDocument {
             setting     = [string](Get-GsProperty $row 'setting')
         }
     }
+    $limits = @()
+    foreach ($limit in (ConvertTo-GsArray (Get-GsProperty $meta 'limits'))) {
+        $limits += [pscustomobject][ordered]@{
+            id    = [string](Get-GsProperty $limit 'id')
+            title = [string](Get-GsProperty $limit 'title')
+            note  = [string](Get-GsProperty $limit 'note')
+        }
+    }
     return [pscustomobject][ordered]@{
         tool     = [pscustomobject][ordered]@{
             name    = $script:GsToolName
@@ -173,6 +181,7 @@ function New-GsReportDocument {
             title          = [string](Get-GsProperty $meta 'title')
             version        = [string](Get-GsProperty $meta 'version')
             schema_version = [string](Get-GsProperty $Catalog 'schema_version')
+            limits         = $limits
         }
         evidence = [pscustomobject][ordered]@{
             generated_at             = $Timestamp
@@ -309,6 +318,13 @@ function ConvertTo-GsHtmlReport {
     [void]$b.AppendLine('<div>Fingerprint note</div><div>' + (ConvertTo-GsHtmlText $e.host_fingerprint_note) + '</div>')
     [void]$b.AppendLine('<div>Platform</div><div>' + (ConvertTo-GsHtmlText $e.platform.os_caption) + ' / ' + (ConvertTo-GsHtmlText $e.platform.os_version) + ' / build ' + (ConvertTo-GsHtmlText $e.platform.os_build) + '</div>')
     [void]$b.AppendLine('</div></section>')
+    if (@($Document.catalog.limits).Count -gt 0) {
+        [void]$b.AppendLine('<section class="card"><h2>Grenzen eines Pass</h2><ul>')
+        foreach ($limit in @($Document.catalog.limits)) {
+            [void]$b.AppendLine('<li><strong>' + (ConvertTo-GsHtmlText $limit.title) + '.</strong> ' + (ConvertTo-GsHtmlText $limit.note) + '</li>')
+        }
+        [void]$b.AppendLine('</ul></section>')
+    }
     [void]$b.AppendLine('<h2>Summary by BSI module</h2>')
     [void]$b.AppendLine('<table><thead><tr><th>Module</th><th>Title</th><th>Pass</th><th>Fail</th><th>Error</th><th>N/A</th></tr></thead><tbody>')
     foreach ($module in @($s.modules)) {
@@ -410,6 +426,14 @@ function ConvertTo-GsMarkdownReport {
     }
     $lines.Add('- Total: ' + $s.total)
     $lines.Add('')
+    if (@($Document.catalog.limits).Count -gt 0) {
+        $lines.Add('## Grenzen eines Pass')
+        $lines.Add('')
+        foreach ($limit in @($Document.catalog.limits)) {
+            $lines.Add('- **' + (ConvertTo-GsMarkdownCell $limit.title) + '.** ' + (ConvertTo-GsMarkdownCell $limit.note))
+        }
+        $lines.Add('')
+    }
     $cmp = Get-GsProperty $Document 'comparison'
     if ($null -ne $cmp) {
         $lines.Add('## Changes since baseline')

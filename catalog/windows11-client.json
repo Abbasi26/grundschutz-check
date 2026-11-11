@@ -8,6 +8,48 @@
     "description": "Read-only checks for a Windows 11 client. Requirement ids are copied from published BSI documents. Every windows11_carryover value is unverified because the setting values come from the Windows 10 Hilfsmittel.",
     "target": "Windows 11 client",
     "applicability_note": "Concrete values are carried over from Hilfsmittel zur Umsetzung der Anforderungen des IT-Grundschutz-Kompendiums fuer Windows-Clients, version 1.0, 20 February 2025, written for Windows 10 version 21H2 and later. BSI has not published a Windows 11 settings matrix. SYS.2.2.3 in the IT-Grundschutz-Kompendium Edition 2023 applies to Windows 10 and Windows 11. SiSyPHuS hardening checklists published by BSI address Windows 10 LTSC 2019 (1809). There is no published BSI Windows 11 SiSyPHuS matrix, so v0.1 does not score one.",
+    "limits": [
+      {
+        "id": "smartscreen",
+        "title": "SmartScreen",
+        "note": "SmartScreen wird nicht bewertet, weil die Datenübertragung eine Abwägung erfordert und keinen eindeutigen sicheren Sollwert ergibt."
+      },
+      {
+        "id": "maps",
+        "title": "MAPS",
+        "note": "MAPS wird nicht bewertet, weil kein empfohlener Sollwert vorliegt."
+      },
+      {
+        "id": "password-complexity",
+        "title": "Passwortkomplexität",
+        "note": "Passwortkomplexität wird nicht bewertet, weil sich die Vorgaben für Kennwort- und Passphrase-Optionen widersprechen."
+      },
+      {
+        "id": "store-wording",
+        "title": "Store-Formulierung",
+        "note": "Die mehrdeutige Formulierung zum Deaktivieren aller Store-Apps wird nicht bewertet."
+      },
+      {
+        "id": "firewall-profile-status",
+        "title": "Firewall-Profilstatus",
+        "note": "Ein Firewall-Pass belegt keine Allow-List. Ein Defender-Pass belegt keine aktuellen Signaturen."
+      },
+      {
+        "id": "defender-signatures",
+        "title": "Defender-Signaturen",
+        "note": "Der Defender-Pass bewertet den Echtzeitschutz; der Signaturstand wird nicht erhoben."
+      },
+      {
+        "id": "third-party-antivirus",
+        "title": "Drittanbieter-Antivirus",
+        "note": "Ein Drittanbieter-Antivirus kann Defender deaktivieren; ein Defender-Fail belegt deshalb nicht, dass kein anderer Schutz aktiv ist."
+      },
+      {
+        "id": "domain-accounts",
+        "title": "Domänenkonten",
+        "note": "Ein Pass bei lokalen Passwortregeln belegt keine Regeln für Domänenkonten."
+      }
+    ],
     "sources": [
       {
         "id": "bsi-hilfsmittel-windows-client-1.0",
