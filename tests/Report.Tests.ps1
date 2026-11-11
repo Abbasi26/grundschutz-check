@@ -5,7 +5,7 @@ BeforeAll {
 
 Describe 'Demo report' {
     BeforeAll {
-        $script:OutDir = Join-Path ([System.IO.Path]::GetTempPath()) ('gsc-pester-' + [guid]::NewGuid().ToString('n'))
+        $script:OutDir = Join-Path (Join-Path $script:RepoRoot '.oc-tmp') ('gsc-pester-' + [guid]::NewGuid().ToString('n'))
         $script:Report = Invoke-GrundschutzCheck -Demo -OutputDirectory $script:OutDir -Timestamp '2026-10-21T12:00:00Z'
     }
 
@@ -70,6 +70,31 @@ Describe 'Demo report' {
         $parsed.evidence.host_fingerprint_sha256 | Should -Be $expected
         $csv = [System.IO.File]::ReadAllText($script:Report.outputs.csv)
         @($csv -split "`n" | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }).Count | Should -Be ($script:Report.summary.total + 1)
+    }
+
+    It 'renders the limits of a pass in HTML, Markdown, and JSON' {
+        $html = [System.IO.File]::ReadAllText($script:Report.outputs.html)
+        $markdown = [System.IO.File]::ReadAllText($script:Report.outputs.markdown)
+        $parsed = [System.IO.File]::ReadAllText($script:Report.outputs.json) | ConvertFrom-Json
+        $sentences = @(
+            'Ein Firewall-Pass belegt keine Allow-List.'
+            'Ein Defender-Pass belegt keine aktuellen Signaturen.'
+        )
+        foreach ($text in @($html, $markdown)) {
+            $text | Should -Match 'Grenzen eines Pass'
+            foreach ($sentence in $sentences) {
+                $text.Contains($sentence) | Should -BeTrue
+            }
+        }
+        @($parsed.catalog.limits).Count | Should -Be 8
+        $parsed.summary.total | Should -Be 63
+        $notes = @($parsed.catalog.limits | ForEach-Object { $_.note }) -join ' '
+        foreach ($sentence in $sentences) {
+            $notes.Contains($sentence) | Should -BeTrue
+        }
+        foreach ($limit in @($parsed.catalog.limits)) {
+            @($limit.PSObject.Properties.Name) | Should -Not -Contain 'requirement_id'
+        }
     }
 }
 

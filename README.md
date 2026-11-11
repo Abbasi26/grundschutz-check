@@ -46,7 +46,7 @@ Reports land in `grundschutzcheck-out/`:
 - `grundschutzcheck-report.json`
 - `grundschutzcheck-findings.csv`
 
-The HTML report says the data is fictional. A pass is an indicator for that setting, not a certificate that the whole BSI requirement is met.
+The HTML report says the data is fictional. HTML, Markdown, and JSON also include "Grenzen eines Pass": catalog-defined notes explaining what a pass does not prove. CSV remains findings-only.
 
 ## Check a Windows computer
 

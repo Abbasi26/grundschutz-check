@@ -19,7 +19,8 @@ The schema version is `0.1.0`. The catalog version is independent and is `0.1.0`
 | Field | Meaning |
 | --- | --- |
 | `schema_version` | `0.1.0` for this document shape. |
-| `catalog` | Id, title, version, release date, description, target, applicability note, and `sources`. |
+| `catalog` | Id, title, version, release date, description, target, applicability note, `limits`, and `sources`. |
+| `catalog.limits[]` | Informational boundaries of a pass, with stable `id`, `title`, and `note`. Limits have no `requirement_id` and do not affect check status. |
 | `catalog.sources[].id` | Stable source id cited by `references[].source_id`. |
 | `modules` | Display names for summary tables. A check points at `module.id`. |
 | `checks` | One object per check. |
@@ -131,6 +132,7 @@ A property named `registry_error`, `secedit_error`, `service_error`, `defender_e
 | --- | --- |
 | `tool.name`, `tool.version` | `GrundschutzCheck` and `0.1.0`. |
 | `catalog.id`, `catalog.version`, `catalog.schema_version` | Catalog that was evaluated. |
+| `catalog.limits` | Informational pass boundaries copied from the catalog and rendered in HTML and Markdown. Older catalogs without limits produce an empty array. |
 | `evidence.generated_at` | UTC timestamp `yyyy-MM-ddTHH:mm:ssZ`. |
 | `evidence.mode` | `demo` or `local`. |
 | `evidence.host_fingerprint_sha256` | Lowercase hex SHA-256 of the v1 canonical host string (LF endings): `computer_name`, `domain`, `os_caption`, `os_version`, `os_build`. |

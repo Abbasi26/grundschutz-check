@@ -84,6 +84,49 @@ MODULE_TITLES = {
     "DET.3": "Detektion (Grundschutz++ practice DET.3, not a Kompendium Baustein)",
 }
 
+LIMITS = [
+    {
+        "id": "smartscreen",
+        "title": "SmartScreen",
+        "note": "SmartScreen wird nicht bewertet, weil die Datenübertragung eine Abwägung erfordert und keinen eindeutigen sicheren Sollwert ergibt.",
+    },
+    {
+        "id": "maps",
+        "title": "MAPS",
+        "note": "MAPS wird nicht bewertet, weil kein empfohlener Sollwert vorliegt.",
+    },
+    {
+        "id": "password-complexity",
+        "title": "Passwortkomplexität",
+        "note": "Passwortkomplexität wird nicht bewertet, weil sich die Vorgaben für Kennwort- und Passphrase-Optionen widersprechen.",
+    },
+    {
+        "id": "store-wording",
+        "title": "Store-Formulierung",
+        "note": "Die mehrdeutige Formulierung zum Deaktivieren aller Store-Apps wird nicht bewertet.",
+    },
+    {
+        "id": "firewall-profile-status",
+        "title": "Firewall-Profilstatus",
+        "note": "Ein Firewall-Pass belegt keine Allow-List. Ein Defender-Pass belegt keine aktuellen Signaturen.",
+    },
+    {
+        "id": "defender-signatures",
+        "title": "Defender-Signaturen",
+        "note": "Der Defender-Pass bewertet den Echtzeitschutz; der Signaturstand wird nicht erhoben.",
+    },
+    {
+        "id": "third-party-antivirus",
+        "title": "Drittanbieter-Antivirus",
+        "note": "Ein Drittanbieter-Antivirus kann Defender deaktivieren; ein Defender-Fail belegt deshalb nicht, dass kein anderer Schutz aktiv ist.",
+    },
+    {
+        "id": "domain-accounts",
+        "title": "Domänenkonten",
+        "note": "Ein Pass bei lokalen Passwortregeln belegt keine Regeln für Domänenkonten.",
+    },
+]
+
 TITLES = {
     "SYS.2.1.A1": "Sichere Authentisierung von Benutzenden",
     "SYS.2.1.A3": "Aktivieren von Autoupdate-Mechanismen",
@@ -1457,6 +1500,7 @@ def build_catalog() -> dict:
                 "SiSyPHuS hardening checklists published by BSI address Windows 10 LTSC 2019 (1809). "
                 "There is no published BSI Windows 11 SiSyPHuS matrix, so v0.1 does not score one."
             ),
+            "limits": LIMITS,
             "sources": [
                 {
                     "id": HILF,
