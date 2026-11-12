@@ -15,7 +15,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Install PowerShell 7.6 LTS
-        uses: ./.github/actions/install-pwsh
+        uses: $/.github/actions/install-pwsh
       - name: Pester
         shell: pwsh
         run: |
@@ -54,7 +54,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Install PowerShell 7.6 LTS
-        uses: ./.github/actions/install-pwsh
+        uses: $/.github/actions/install-pwsh
       - name: Pester on PowerShell 7
         shell: pwsh
         run: |
@@ -85,7 +85,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Install PowerShell 7.7
-        uses: ./.github/actions/install-pwsh
+        uses: $/.github/actions/install-pwsh
         with:
           version: '7.7.0'
           sha256-linux: c89d9c682d2c403dfe726f3df948e359675235a5bd6fab535776de69729ca0cb

@@ -34,7 +34,7 @@ jobs:
           persist-credentials: false
 
       - name: Install PowerShell 7.6 LTS
-        uses: ./.github/actions/install-pwsh
+        uses: $/.github/actions/install-pwsh
 
       - name: Stage module folder
         shell: pwsh
