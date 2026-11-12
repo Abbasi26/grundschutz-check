@@ -15,7 +15,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Install PowerShell 7.6 LTS
-        uses: $/.github/actions/install-pwsh-7-6
+        uses: $/.github/actions/install-pwsh
       - name: Pester
         shell: pwsh
         run: |
@@ -54,7 +54,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Install PowerShell 7.6 LTS
-        uses: $/.github/actions/install-pwsh-7-6
+        uses: $/.github/actions/install-pwsh
       - name: Pester on PowerShell 7
         shell: pwsh
         run: |
@@ -69,10 +69,9 @@ jobs:
           Install-Module Pester -RequiredVersion 5.7.1 -Force -Scope CurrentUser
           Invoke-Pester -CI ./tests
 
-  pester-optional:
+  pester-7-7:
     name: Pester (${{ matrix.name }})
     runs-on: ${{ matrix.os }}
-    continue-on-error: true
     strategy:
       fail-fast: false
       matrix:
@@ -85,55 +84,12 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           persist-credentials: false
-      - name: Install PowerShell 7.7.0-rc.1 (Linux)
-        if: runner.os == 'Linux'
-        shell: bash
-        env:
-          PWSH_VERSION: 7.7.0-rc.1
-          PWSH_SHA256: 3819c69168db599685893f296dca6d2c8c0d67e5109528aff275421bb67afdc8
-        run: |
-          set -euo pipefail
-          asset="powershell-${PWSH_VERSION}-linux-x64.tar.gz"
-          archive="${RUNNER_TEMP}/${asset}"
-          curl -fsSL --retry 3 -o "${archive}" "https://github.com/PowerShell/PowerShell/releases/download/v${PWSH_VERSION}/${asset}"
-          echo "${PWSH_SHA256}  ${archive}" | sha256sum -c -
-          dest="${RUNNER_TEMP}/pwsh"
-          mkdir -p "${dest}"
-          tar -xzf "${archive}" -C "${dest}"
-          chmod +x "${dest}/pwsh"
-      - name: Prepend the installed pwsh to PATH (Linux)
-        if: runner.os == 'Linux'
-        shell: bash
-        run: echo "${RUNNER_TEMP}/pwsh" >> "${GITHUB_PATH}" # zizmor: ignore[github-env]
-      - name: Install PowerShell 7.7.0-rc.1 (Windows)
-        if: runner.os == 'Windows'
-        shell: powershell
-        env:
-          PWSH_VERSION: 7.7.0-rc.1
-          PWSH_SHA256: 2bb33156e2acefe127a9a5e88583aec9835ee005a215c68280e346b6ebb44182
-        run: |
-          $ErrorActionPreference = 'Stop'
-          $ProgressPreference = 'SilentlyContinue'
-          [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-          $asset = "PowerShell-$env:PWSH_VERSION-win-x64.zip"
-          $archive = Join-Path $env:RUNNER_TEMP $asset
-          Invoke-WebRequest -UseBasicParsing -Uri "https://github.com/PowerShell/PowerShell/releases/download/v$env:PWSH_VERSION/$asset" -OutFile $archive
-          $actual = (Get-FileHash -LiteralPath $archive -Algorithm SHA256).Hash
-          if ($actual -ne $env:PWSH_SHA256) { throw "SHA-256 mismatch for ${asset}: expected $env:PWSH_SHA256, got $actual" }
-          $dest = Join-Path $env:RUNNER_TEMP "pwsh"
-          Expand-Archive -LiteralPath $archive -DestinationPath $dest -Force
-      - name: Prepend the installed pwsh to PATH (Windows)
-        if: runner.os == 'Windows'
-        shell: powershell
-        run: |
-          $ErrorActionPreference = 'Stop'
-          [System.IO.File]::AppendAllText($env:GITHUB_PATH, (Join-Path $env:RUNNER_TEMP "pwsh") + "`n")
-      - name: Assert pwsh is 7.7
-        shell: pwsh
-        run: |
-          $actual = $PSVersionTable.PSVersion.ToString()
-          Write-Host "pwsh $actual at $((Get-Process -Id $PID).Path)"
-          if ($actual -notlike '7.7.*') { throw "Expected pwsh 7.7.x, got $actual" }
+      - name: Install PowerShell 7.7
+        uses: $/.github/actions/install-pwsh
+        with:
+          version: '7.7.0'
+          sha256-linux: c89d9c682d2c403dfe726f3df948e359675235a5bd6fab535776de69729ca0cb
+          sha256-windows: 7c74e03b20a75b59715847439d046a6214b1863ee79b187872980f139bb4a05f
       - name: Pester
         shell: pwsh
         run: |

@@ -4,7 +4,7 @@
 
 - First DISA Windows 11 STIG references (V2R11, `framework: disa-stig`) on 8 checks and 11 rules, each compared by hand with the XCCDF rule. New optional `group_id` and `rule_id` fields, required for `disa-stig`. `tools/verify_stig.py` re-checks ids and titles against a downloaded XCCDF file. The STIG is not bundled. Refs #14.
 - `Import-GsGrundschutzPlusPlus`: reads a user-downloaded Grundschutz++ OSCAL catalog (BSI, CC BY-SA 4.0, not bundled) into control rows without prose. `Test-GsGrundschutzPlusPlusReference` marks each Grundschutz++ reference in the check catalog as `ok`, `title_changed`, or `missing` and flags a different catalog version. Tests use a self-made fixture.
-- CI: PowerShell 7.6 LTS (7.6.9, SHA-256 pinned) via `.github/actions/install-pwsh-7-6`; PowerShell 7.4 and 7.5 reach end of support on 10 Nov 2026 ([support lifecycle](https://learn.microsoft.com/en-us/powershell/scripting/install/powershell-support-lifecycle)). Windows PowerShell 5.1 remains required. An optional Pester job runs PowerShell 7.7.0-rc.1 with continue-on-error.
+- CI: Pester runs on PowerShell 7.6 LTS (7.6.10) and PowerShell 7.7 (7.7.0) on Linux and Windows, plus Windows PowerShell 5.1. All are required; the optional 7.7.0-rc.1 job is gone. Both releases are SHA-256 pinned via `.github/actions/install-pwsh`. PowerShell 7.4 and 7.5 reached end of support on 10 Nov 2026 ([support lifecycle](https://learn.microsoft.com/en-us/powershell/scripting/install/powershell-support-lifecycle)) and are no longer tested. Supported: Windows PowerShell 5.1, PowerShell 7.6 (LTS), PowerShell 7.7.
 - Tests: `tests/Evaluate.Tests.ps1` loads the module before discovery, so `InModuleScope` finds it (the test job on `main` failed at discovery since 020c9d5).
 
 ## 0.2.0 - 2026-10-28

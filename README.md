@@ -50,7 +50,7 @@ The HTML report says the data is fictional. A pass is an indicator for that sett
 
 ## Check a Windows computer
 
-On Windows PowerShell 5.1 or PowerShell 7:
+On Windows PowerShell 5.1, PowerShell 7.6 (LTS), or PowerShell 7.7:
 
 ```powershell
 pwsh -NoProfile -File .\Invoke-GrundschutzCheck.ps1 -OutputDirectory .\grundschutzcheck-out
@@ -156,7 +156,7 @@ python3 tools/build_catalog.py --check
 python3 -m pytest tests/test_catalog.py -q
 ```
 
-Pester 5.7.1 is the version used in CI. Tests mock registry and secedit input. They do not need Windows. CI runs PowerShell 7.6 LTS (7.6.9, SHA-256 pinned) via `.github/actions/install-pwsh-7-6`; PowerShell 7.4 and 7.5 reach end of support on 10 Nov 2026 ([support lifecycle](https://learn.microsoft.com/en-us/powershell/scripting/install/powershell-support-lifecycle)). Windows PowerShell 5.1 unchanged.
+Pester 5.7.1 is the version used in CI. Tests mock registry and secedit input. They do not need Windows. CI runs the tests on PowerShell 7.6 LTS (7.6.10) and PowerShell 7.7 (7.7.0), both SHA-256 pinned via `.github/actions/install-pwsh`, and on Windows PowerShell 5.1. PowerShell 7.4 and 7.5 reached end of support on 10 Nov 2026 ([support lifecycle](https://learn.microsoft.com/en-us/powershell/scripting/install/powershell-support-lifecycle)) and are no longer tested.
 
 ## How this differs from existing tools
 
