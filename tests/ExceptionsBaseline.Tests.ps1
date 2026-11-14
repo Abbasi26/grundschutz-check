@@ -1,15 +1,21 @@
 BeforeAll {
     $script:RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
     Import-Module (Join-Path $script:RepoRoot 'GrundschutzCheck.psd1') -Force
-    $script:Work = Join-Path ([System.IO.Path]::GetTempPath()) ('gsc-v02-' + [guid]::NewGuid().ToString('n'))
-    New-Item -ItemType Directory -Path $script:Work | Out-Null
+    $script:Work = Join-Path $script:RepoRoot ('.oc-tmp/gsc-v02-' + [guid]::NewGuid().ToString('n'))
+    New-Item -ItemType Directory -Path $script:Work -Force | Out-Null
     $script:ExampleExceptions = Join-Path $script:RepoRoot 'examples/exceptions.example.json'
+    $script:ExampleExceptionsCsv = Join-Path $script:RepoRoot 'examples/exceptions.example.csv'
     $script:Stamp = '2026-10-21T12:00:00Z'
-    function script:Write-TestJson {
+    function script:Write-TestFile {
         param([string]$Name, [string]$Text)
         $path = Join-Path $script:Work $Name
-        [System.IO.File]::WriteAllText($path, $Text)
+        $utf8 = New-Object System.Text.UTF8Encoding $false
+        [System.IO.File]::WriteAllText($path, $Text, $utf8)
         return $path
+    }
+    function script:Write-TestJson {
+        param([string]$Name, [string]$Text)
+        return (Write-TestFile -Name $Name -Text $Text)
     }
     function script:Get-Row {
         param($Report, [string]$Id)
@@ -84,6 +90,75 @@ Describe 'Exceptions (accepted risk)' {
     It 'requires an exceptions array' {
         $path = Write-TestJson 'no-array.json' '{"items":[]}'
         { Invoke-GrundschutzCheck -Demo -OutputDirectory (Join-Path $script:Work 'noarr') -ExceptionPath $path -Format Json } | Should -Throw "*'exceptions' array*"
+    }
+
+    It 'accepts CSV exceptions like JSON in demo mode' {
+        $jsonReport = Invoke-GrundschutzCheck -Demo -OutputDirectory (Join-Path $script:Work 'ex-json') -Timestamp $script:Stamp -ExceptionPath $script:ExampleExceptions
+        $csvReport = Invoke-GrundschutzCheck -Demo -OutputDirectory (Join-Path $script:Work 'ex-csv') -Timestamp $script:Stamp -ExceptionPath $script:ExampleExceptionsCsv
+        $csvReport.summary.accepted | Should -Be $jsonReport.summary.accepted
+        $csvReport.summary.fail | Should -Be $jsonReport.summary.fail
+        $csvReport.summary.total | Should -Be $jsonReport.summary.total
+        foreach ($id in @('GS-W11-004', 'GS-W11-008', 'GS-W11-052')) {
+            $j = Get-Row $jsonReport $id
+            $c = Get-Row $csvReport $id
+            $c.status | Should -Be $j.status
+            $c.exception.state | Should -Be $j.exception.state
+            $c.exception.reason | Should -Be $j.exception.reason
+            $c.exception.owner | Should -Be $j.exception.owner
+            $c.exception.expires | Should -Be $j.exception.expires
+            $c.exception.ticket | Should -Be $j.exception.ticket
+        }
+    }
+
+    It 'accepts a CSV with only a header as an empty exception list' {
+        $path = Write-TestFile 'header-only.csv' "check_id,reason,owner,expires,ticket`n"
+        $r = Invoke-GrundschutzCheck -Demo -OutputDirectory (Join-Path $script:Work 'header-only') -Timestamp $script:Stamp -ExceptionPath $path -Format Json
+        $r.summary.accepted | Should -Be 0
+        $r.summary.fail | Should -Be $script:Plain.summary.fail
+    }
+
+    It 'accepts CSV with an empty ticket and quoted commas' {
+        $path = Write-TestFile 'quoted.csv' "check_id,reason,owner,expires,ticket`nGS-W11-048,""Grund, mit Komma"",Beauftragte Müller,2030-01-01,"
+        $r = Invoke-GrundschutzCheck -Demo -OutputDirectory (Join-Path $script:Work 'quoted') -Timestamp $script:Stamp -ExceptionPath $path -Format Json
+        (Get-Row $r 'GS-W11-048').status | Should -Be 'pass'
+        (Get-Row $r 'GS-W11-048').exception.ticket | Should -Be ''
+        (Get-Row $r 'GS-W11-048').exception.reason | Should -Be 'Grund, mit Komma'
+        (Get-Row $r 'GS-W11-048').exception.owner | Should -Be 'Beauftragte Müller'
+    }
+
+    It 'rejects a CSV missing required columns' {
+        foreach ($case in @(
+            @{ name = 'no-check.csv'; text = "reason,owner,expires,ticket`nr,o,2030-01-01,t" },
+            @{ name = 'no-reason.csv'; text = "check_id,owner,expires,ticket`nGS-W11-048,o,2030-01-01,t" },
+            @{ name = 'no-owner.csv'; text = "check_id,reason,expires,ticket`nGS-W11-048,r,2030-01-01,t" },
+            @{ name = 'no-expires.csv'; text = "check_id,reason,owner,ticket`nGS-W11-048,r,o,t" },
+            @{ name = 'no-ticket.csv'; text = "check_id,reason,owner,expires`nGS-W11-048,r,o,2030-01-01" }
+        )) {
+            $path = Write-TestFile $case.name $case.text
+            { Invoke-GrundschutzCheck -Demo -OutputDirectory (Join-Path $script:Work $case.name) -ExceptionPath $path -Format Json } | Should -Throw '*missing required CSV column*'
+        }
+    }
+
+    It 'rejects unknown checks, missing values, bad dates, and duplicates in CSV' {
+        $path = Write-TestFile 'bad-ex.csv' (@(
+            'check_id,reason,owner,expires,ticket'
+            'GS-W11-999,r,o,2030-01-01,t'
+            'GS-W11-010,,o,next year,t'
+            'GS-W11-010,r,o,2030-01-01,t'
+            'GS-W11-011,r,o,2026-02-30,t'
+        ) -join "`n")
+        $err = $null
+        try { Invoke-GrundschutzCheck -Demo -OutputDirectory (Join-Path $script:Work 'bad-csv') -ExceptionPath $path -Format Json | Out-Null } catch { $err = $_.Exception.Message }
+        $err | Should -Match 'CSV row 1 names unknown check GS-W11-999'
+        $err | Should -Match 'CSV row 2 \(GS-W11-010\) has no reason'
+        $err | Should -Match 'CSV row 2 \(GS-W11-010\) needs expires as yyyy-MM-dd'
+        $err | Should -Match 'CSV row 3 repeats check GS-W11-010'
+        $err | Should -Match 'CSV row 4 \(GS-W11-011\) needs expires as yyyy-MM-dd'
+    }
+
+    It 'rejects an empty or headerless CSV file' {
+        $empty = Write-TestFile 'empty.csv' ''
+        { Invoke-GrundschutzCheck -Demo -OutputDirectory (Join-Path $script:Work 'empty-csv') -ExceptionPath $empty -Format Json } | Should -Throw '*empty or has no header*'
     }
 }
 
