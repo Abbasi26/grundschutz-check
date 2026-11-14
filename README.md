@@ -69,7 +69,9 @@ The remote example is `examples/ansible/`. It uses `ansible.windows` to copy the
 
 ## Documented exceptions (accepted risk)
 
-Grundschutz expects a deviation to be a decision, not an oversight. Put those decisions in a JSON file and pass it with `-ExceptionPath`:
+Grundschutz expects a deviation to be a decision, not an oversight. Put those decisions in a JSON or CSV file and pass it with `-ExceptionPath`.
+
+JSON (`examples/exceptions.example.json`):
 
 ```json
 {
@@ -84,8 +86,19 @@ Grundschutz expects a deviation to be a decision, not an oversight. Put those de
 pwsh -NoProfile -File ./Invoke-GrundschutzCheck.ps1 -Demo -ExceptionPath examples/exceptions.example.json -OutputDirectory ./grundschutzcheck-out
 ```
 
+CSV (`examples/exceptions.example.csv`), UTF-8 with a comma as delimiter and the header `check_id,reason,owner,expires,ticket`:
+
+```csv
+check_id,reason,owner,expires,ticket
+GS-W11-004,"Passwords do not expire by policy; length and breach screening are enforced instead.","IT security officer",2027-06-30,RISK-0001
+```
+
+```bash
+pwsh -NoProfile -File ./Invoke-GrundschutzCheck.ps1 -Demo -ExceptionPath examples/exceptions.example.csv -OutputDirectory ./grundschutzcheck-out
+```
+
 - A failing check with a current exception is reported as `accepted`, with reason, owner, expiry, and ticket in every report format. Accepted checks do not set exit code 1.
-- `reason`, `owner`, and `expires` (`yyyy-MM-dd`) are required. Unknown check ids and duplicates stop the run.
+- `check_id`, `reason`, `owner`, and `expires` (`yyyy-MM-dd`) are required. `ticket` may be empty. Unknown check ids and duplicates stop the run.
 - An expired exception does not hide anything: the check stays `fail` and the report says the exception expired.
 - An exception never hides an `error`, and an exception for a check that now passes is listed as no longer needed.
 

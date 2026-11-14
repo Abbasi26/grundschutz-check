@@ -1,0 +1,4 @@
+check_id,reason,owner,expires,ticket
+GS-W11-004,"Passwords do not expire by policy; length and breach screening are enforced instead. The Hilfsmittel and BER.6.5 disagree on password age.","IT security officer (example)",2027-06-30,RISK-0001
+GS-W11-052,"OneDrive for Business is the approved file store for this client group; a data-protection assessment exists.","Data protection officer (example)",2027-03-31,RISK-0002
+GS-W11-008,"Laptops used offline in the field needed more cached logons. Review was due and has not happened.","Client team lead (example)",2026-06-30,RISK-0003

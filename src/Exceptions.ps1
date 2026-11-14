@@ -18,29 +18,95 @@ function ConvertTo-GsDateOnly {
     return $null
 }
 
+function Read-GsCsvExceptionFile {
+    param(
+        [Parameter(Mandatory = $true)][string]$Path
+    )
+    if (-not (Test-Path -LiteralPath $Path)) {
+        throw "File not found: $Path"
+    }
+    $utf8 = New-Object System.Text.UTF8Encoding $false
+    $raw = [System.IO.File]::ReadAllText($Path, $utf8)
+    if ($raw.Length -gt 0 -and [int][char]$raw[0] -eq 0xFEFF) {
+        $raw = $raw.Substring(1)
+    }
+    if ($raw.Trim().Length -eq 0) {
+        throw "Exception file $Path is empty or has no header."
+    }
+    $records = @($raw | ConvertFrom-Csv -Delimiter ',')
+    $required = @('check_id', 'reason', 'owner', 'expires', 'ticket')
+    $headerNames = @()
+    if ($records.Count -gt 0) {
+        $headerNames = @($records[0].PSObject.Properties.Name)
+    }
+    else {
+        $firstLine = (($raw -split "\r?\n") | Where-Object { $null -ne $_ } | Select-Object -First 1)
+        if ($null -eq $firstLine -or $firstLine.Trim().Length -eq 0) {
+            throw "Exception file $Path is empty or has no header."
+        }
+        $headerNames = @($firstLine.Split(',') | ForEach-Object { $_.Trim().Trim('"') })
+    }
+    foreach ($col in $required) {
+        if ($headerNames -notcontains $col) {
+            throw "Exception file $Path is missing required CSV column '$col'."
+        }
+    }
+    $items = New-Object System.Collections.Generic.List[object]
+    $row = 1
+    foreach ($record in $records) {
+        $items.Add([pscustomobject][ordered]@{
+            where    = "CSV row $row"
+            check_id = [string](Get-GsProperty $record 'check_id')
+            reason   = [string](Get-GsProperty $record 'reason')
+            owner    = [string](Get-GsProperty $record 'owner')
+            expires  = [string](Get-GsProperty $record 'expires')
+            ticket   = [string](Get-GsProperty $record 'ticket')
+        }) | Out-Null
+        $row += 1
+    }
+    return $items.ToArray()
+}
+
 function Read-GsExceptionFile {
     param(
         [Parameter(Mandatory = $true)][string]$Path,
         $Catalog
     )
-    $doc = Read-GsJsonFile -Path $Path
     $known = @{}
     foreach ($check in (ConvertTo-GsArray (Get-GsProperty $Catalog 'checks'))) {
         $known[[string](Get-GsProperty $check 'id')] = $true
     }
     $problems = New-Object System.Collections.Generic.List[string]
-    $items = Get-GsProperty $doc 'exceptions'
-    if ($null -eq $items) {
-        throw "Exception file $Path needs an 'exceptions' array."
+    $items = @()
+    if ([System.IO.Path]::GetExtension($Path) -ieq '.csv') {
+        $items = @(Read-GsCsvExceptionFile -Path $Path)
+    }
+    else {
+        $doc = Read-GsJsonFile -Path $Path
+        $rawItems = Get-GsProperty $doc 'exceptions'
+        if ($null -eq $rawItems) {
+            throw "Exception file $Path needs an 'exceptions' array."
+        }
+        $index = 0
+        foreach ($item in (ConvertTo-GsArray $rawItems)) {
+            $items += [pscustomobject][ordered]@{
+                where    = "exceptions[$index]"
+                check_id = [string](Get-GsProperty $item 'check_id')
+                reason   = [string](Get-GsProperty $item 'reason')
+                owner    = [string](Get-GsProperty $item 'owner')
+                expires  = Get-GsProperty $item 'expires'
+                ticket   = [string](Get-GsProperty $item 'ticket')
+            }
+            $index += 1
+        }
     }
     $byId = @{}
-    $index = 0
-    foreach ($item in (ConvertTo-GsArray $items)) {
-        $where = "exceptions[$index]"
-        $id = [string](Get-GsProperty $item 'check_id')
-        $reason = [string](Get-GsProperty $item 'reason')
-        $owner = [string](Get-GsProperty $item 'owner')
-        $expiresRaw = Get-GsProperty $item 'expires'
+    foreach ($item in $items) {
+        $where = [string]$item.where
+        $id = [string]$item.check_id
+        $reason = [string]$item.reason
+        $owner = [string]$item.owner
+        $expiresRaw = $item.expires
         $expires = ConvertTo-GsDateOnly $expiresRaw
         if ([string]::IsNullOrWhiteSpace($id)) {
             $problems.Add("$where has no check_id.")
@@ -60,10 +126,9 @@ function Read-GsExceptionFile {
                 reason   = $reason
                 owner    = $owner
                 expires  = $(if ($null -ne $expires) { $expires.ToString('yyyy-MM-dd') } else { '' })
-                ticket   = [string](Get-GsProperty $item 'ticket')
+                ticket   = [string]$item.ticket
             }
         }
-        $index += 1
     }
     if ($problems.Count -gt 0) {
         throw ('Exception file is not valid: ' + ($problems -join ' '))
