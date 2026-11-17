@@ -35,9 +35,10 @@ The demo uses bundled fictional evidence. It does not read the local computer an
 
 ```bash
 pwsh -NoProfile -File ./Invoke-GrundschutzCheck.ps1 -Demo -OutputDirectory ./grundschutzcheck-out -Timestamp 2026-10-21T12:00:00Z
+pwsh -NoProfile -File ./Invoke-GrundschutzCheck.ps1 -Demo -FailOnSeverity high -OutputDirectory ./grundschutzcheck-out
 ```
 
-Exit code 1 is expected: the fictional host fails checks on purpose. Exit code 2 means a check could not be evaluated. Exit code 0 means every check passed.
+Exit code 1 is expected: the fictional host fails checks on purpose. Exit code 2 means a check could not be evaluated. Exit code 0 means every check passed. With `-FailOnSeverity critical` the script exits 1 only when a failing check is critical or higher, so CI can ignore lower findings:
 
 Reports land in `grundschutzcheck-out/`:
 
@@ -98,6 +99,8 @@ pwsh -NoProfile -File ./Invoke-GrundschutzCheck.ps1 -BaselinePath ./last-month/g
 ```
 
 The reports get a "Changes since baseline" section: newly failing, fixed, still failing, new and removed checks, and a warning when the baseline comes from a different host fingerprint. The JSON report has the same data under `comparison`. With `-FailOnRegression` the script exits 1 only when a check newly fails, so you can adopt the catalog on an existing fleet and ratchet from there. Errors still exit 2.
+
+`-FailOnSeverity` filters the exit code by severity instead of regressions. The threshold is inclusive and the order is `informational < low < medium < high < critical`. With `-FailOnSeverity high` the script exits 1 only when a failing check is high or critical; accepted risks and errors never count as blocking. Errors still exit 2. The two gates cannot be combined: `-FailOnSeverity` and `-FailOnRegression` are conflicting rules for exit code 1.
 
 ## Permissions
 

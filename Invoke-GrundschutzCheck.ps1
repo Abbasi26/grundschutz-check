@@ -7,6 +7,8 @@
     Exit 0: every check passed (accepted risks count as passed for the exit code).
     Exit 1: at least one check failed. Exit 2: at least one check errored.
     With -BaselinePath and -FailOnRegression, exit 1 only when a check newly fails compared with the baseline.
+    With -FailOnSeverity, exit 1 only when a failing check reaches the given severity or higher (informational < low < medium < high < critical).
+    -FailOnSeverity and -FailOnRegression are conflicting exit-code gates and cannot be combined.
 #>
 [CmdletBinding()]
 param(
@@ -20,6 +22,8 @@ param(
     [string]$ExceptionPath,
     [string]$BaselinePath,
     [switch]$FailOnRegression,
+    [ValidateSet('critical', 'high', 'medium', 'low', 'informational')]
+    [string]$FailOnSeverity,
     [switch]$PassThru
 )
 
@@ -35,6 +39,9 @@ if ($PSBoundParameters.ContainsKey('OutputDirectory')) { $params.OutputDirectory
 if ($PSBoundParameters.ContainsKey('Timestamp')) { $params.Timestamp = $Timestamp }
 if ($PSBoundParameters.ContainsKey('ExceptionPath')) { $params.ExceptionPath = $ExceptionPath }
 if ($PSBoundParameters.ContainsKey('BaselinePath')) { $params.BaselinePath = $BaselinePath }
+if ($FailOnRegression -and $PSBoundParameters.ContainsKey('FailOnSeverity')) {
+    throw '-FailOnSeverity and -FailOnRegression cannot be combined. They are conflicting exit-code gates.'
+}
 if ($FailOnRegression -and -not $PSBoundParameters.ContainsKey('BaselinePath')) {
     throw '-FailOnRegression needs -BaselinePath.'
 }
@@ -57,9 +64,20 @@ if ($PassThru) {
     $result
 }
 
+$blocking = @()
+if ($PSBoundParameters.ContainsKey('FailOnSeverity')) {
+    $blocking = @(Get-GsBlockingFailures -Document $result -MinimumSeverity $FailOnSeverity)
+    $failing = @($result.results | Where-Object { $_.status -eq 'fail' }).Count
+    Write-Host ('FailOnSeverity=' + $FailOnSeverity + ': ' + $blocking.Count + ' of ' + $failing + ' failing checks at or above ' + $FailOnSeverity)
+}
+
 if ($summary.error -gt 0) { exit 2 }
 if ($FailOnRegression) {
     if (@($result.comparison.newly_failing).Count -gt 0) { exit 1 }
+    exit 0
+}
+if ($PSBoundParameters.ContainsKey('FailOnSeverity')) {
+    if ($blocking.Count -gt 0) { exit 1 }
     exit 0
 }
 if ($summary.fail -gt 0) { exit 1 }

@@ -143,4 +143,4 @@ A property named `registry_error`, `secedit_error`, `service_error`, `defender_e
 
 Status is `pass`, `fail`, `error`, or `not_applicable`. A pass is an indicator for that setting. It is not a certificate that the whole BSI requirement is met. The rationale says so when the setting is only part of the requirement (firewall enabled, Defender real-time protection).
 
-The script exit code is 2 when any result is `error`, 1 when any result is `fail`, and 0 otherwise. `-Demo` exits 1 because the fictional host fails checks on purpose.
+The script exit code is 2 when any result is `error`, 1 when any result is `fail`, and 0 otherwise. `-Demo` exits 1 because the fictional host fails checks on purpose. `-FailOnSeverity` (`informational`, `low`, `medium`, `high`, `critical`) narrows exit 1 to failing checks at or above the given severity; the threshold is inclusive, and `accepted` or `error` rows never count as blocking. Errors still exit 2, and `-FailOnSeverity` cannot be combined with `-FailOnRegression`.

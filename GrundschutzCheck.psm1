@@ -89,4 +89,4 @@ function Invoke-GrundschutzCheck {
     return $document
 }
 
-Export-ModuleMember -Function Invoke-GrundschutzCheck, Get-GsCatalog, Import-GsGrundschutzPlusPlus, Test-GsGrundschutzPlusPlusReference
+Export-ModuleMember -Function Invoke-GrundschutzCheck, Get-GsCatalog, Import-GsGrundschutzPlusPlus, Test-GsGrundschutzPlusPlusReference, Get-GsSeverityRank, Get-GsBlockingFailures

@@ -256,6 +256,30 @@ function gscFilter(kind, button) {
 '@
 }
 
+function Get-GsSeverityRank {
+    param([string]$Severity)
+    switch ($Severity) {
+        'informational' { return 0 }
+        'low' { return 1 }
+        'medium' { return 2 }
+        'high' { return 3 }
+        'critical' { return 4 }
+        default { return -1 }
+    }
+}
+
+function Get-GsBlockingFailures {
+    param($Document, [string]$MinimumSeverity)
+    $minimum = Get-GsSeverityRank -Severity $MinimumSeverity
+    $blocking = @()
+    foreach ($row in @($Document.results)) {
+        if ($row.status -ne 'fail') { continue }
+        $rank = Get-GsSeverityRank -Severity ([string]$row.severity)
+        if ($rank -ge $minimum) { $blocking += $row }
+    }
+    return $blocking
+}
+
 function ConvertTo-GsHtmlReport {
     param($Document)
     $e = $Document.evidence

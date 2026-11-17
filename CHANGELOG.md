@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- `-FailOnSeverity` (`informational`, `low`, `medium`, `high`, `critical`) on the script: exit 1 only when a failing check reaches the given severity or higher. Accepted risks and errors never count as blocking; errors still exit 2. The two gates `-FailOnSeverity` and `-FailOnRegression` cannot be combined. New helpers `Get-GsSeverityRank` and `Get-GsBlockingFailures` in `src/Report.ps1`, exported with the module.
 - First DISA Windows 11 STIG references (V2R11, `framework: disa-stig`) on 8 checks and 11 rules, each compared by hand with the XCCDF rule. New optional `group_id` and `rule_id` fields, required for `disa-stig`. `tools/verify_stig.py` re-checks ids and titles against a downloaded XCCDF file. The STIG is not bundled. Refs #14.
 - `Import-GsGrundschutzPlusPlus`: reads a user-downloaded Grundschutz++ OSCAL catalog (BSI, CC BY-SA 4.0, not bundled) into control rows without prose. `Test-GsGrundschutzPlusPlusReference` marks each Grundschutz++ reference in the check catalog as `ok`, `title_changed`, or `missing` and flags a different catalog version. Tests use a self-made fixture.
 - CI: PowerShell 7.6 LTS (7.6.9, SHA-256 pinned) via `.github/actions/install-pwsh-7-6`; PowerShell 7.4 and 7.5 reach end of support on 10 Nov 2026 ([support lifecycle](https://learn.microsoft.com/en-us/powershell/scripting/install/powershell-support-lifecycle)). Windows PowerShell 5.1 remains required. An optional Pester job runs PowerShell 7.7.0-rc.1 with continue-on-error.
