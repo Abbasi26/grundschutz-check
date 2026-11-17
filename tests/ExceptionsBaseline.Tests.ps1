@@ -152,4 +152,46 @@ Describe 'Script exit codes with -FailOnRegression' {
         & $script:Pwsh -NoProfile -File $script:Script -Demo -OutputDirectory (Join-Path $script:Work 'x2') -Timestamp $script:Stamp -BaselinePath $script:EditedBase -FailOnRegression | Out-Null
         $LASTEXITCODE | Should -Be 1
     }
+
+    It 'with -FailOnRegression and -FailOnSeverity counts only regressions at that severity or above' {
+        # GS-W11-010 (high) newly fails against the edited baseline.
+        & $script:Pwsh -NoProfile -File $script:Script -Demo -OutputDirectory (Join-Path $script:Work 'x3') -Timestamp $script:Stamp -BaselinePath $script:EditedBase -FailOnRegression -FailOnSeverity critical | Out-Null
+        $LASTEXITCODE | Should -Be 0
+        & $script:Pwsh -NoProfile -File $script:Script -Demo -OutputDirectory (Join-Path $script:Work 'x4') -Timestamp $script:Stamp -BaselinePath $script:EditedBase -FailOnRegression -FailOnSeverity high | Out-Null
+        $LASTEXITCODE | Should -Be 1
+    }
+}
+
+Describe 'Script exit codes with -FailOnSeverity' {
+    BeforeAll {
+        $script:Script = Join-Path $script:RepoRoot 'Invoke-GrundschutzCheck.ps1'
+        $script:Pwsh = (Get-Process -Id $PID).Path
+    }
+
+    It 'exits 1 without the switch because the demo has failures' {
+        & $script:Pwsh -NoProfile -File $script:Script -Demo -OutputDirectory (Join-Path $script:Work 's0') -Timestamp $script:Stamp | Out-Null
+        $LASTEXITCODE | Should -Be 1
+    }
+
+    It 'exits 0 at critical because no critical check fails in the demo' {
+        & $script:Pwsh -NoProfile -File $script:Script -Demo -OutputDirectory (Join-Path $script:Work 's1') -Timestamp $script:Stamp -FailOnSeverity critical | Out-Null
+        $LASTEXITCODE | Should -Be 0
+    }
+
+    It 'exits 1 at high because high checks fail in the demo' {
+        & $script:Pwsh -NoProfile -File $script:Script -Demo -OutputDirectory (Join-Path $script:Work 's2') -Timestamp $script:Stamp -FailOnSeverity high | Out-Null
+        $LASTEXITCODE | Should -Be 1
+    }
+
+    It 'does not count accepted risks' {
+        $demo = Invoke-GrundschutzCheck -Demo -OutputDirectory (Join-Path $script:Work 's3') -Timestamp $script:Stamp -Format Json
+        $ids = @($demo.results | Where-Object { $_.status -eq 'fail' -and @('critical', 'high') -contains $_.severity } | ForEach-Object { $_.id })
+        $ids.Count | Should -BeGreaterThan 0
+        $exceptions = @{ schema_version = '0.1'; exceptions = @($ids | ForEach-Object { @{ check_id = $_; reason = 'Test'; owner = 'Test owner (example)'; expires = '2099-01-01' } }) }
+        $path = Write-TestJson 'high-ex.json' ($exceptions | ConvertTo-Json -Depth 5)
+        & $script:Pwsh -NoProfile -File $script:Script -Demo -OutputDirectory (Join-Path $script:Work 's4') -Timestamp $script:Stamp -FailOnSeverity high -ExceptionPath $path | Out-Null
+        $LASTEXITCODE | Should -Be 0
+        & $script:Pwsh -NoProfile -File $script:Script -Demo -OutputDirectory (Join-Path $script:Work 's5') -Timestamp $script:Stamp -FailOnSeverity medium -ExceptionPath $path | Out-Null
+        $LASTEXITCODE | Should -Be 1
+    }
 }
