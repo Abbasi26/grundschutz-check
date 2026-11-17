@@ -55,7 +55,14 @@ Describe 'Script exit codes with -FailOnSeverity' {
     }
 
     It 'rejects -FailOnSeverity together with -FailOnRegression before the baseline check' {
-        $out = & $script:Pwsh -NoProfile -File $script:Script -Demo -OutputDirectory (Join-Path $script:Work 'both') -Timestamp $script:Stamp -FailOnRegression -FailOnSeverity high 2>&1
+        # Windows PowerShell 5.1 turns native stderr into a terminating error when
+        # $ErrorActionPreference is Stop (Pester's default). The child pwsh writes
+        # the rejection message to stderr, so lower the preference inside the scope
+        # that captures it. PowerShell 7 keeps native stderr non-terminating.
+        $out = & {
+            $ErrorActionPreference = 'Continue'
+            & $script:Pwsh -NoProfile -File $script:Script -Demo -OutputDirectory (Join-Path $script:Work 'both') -Timestamp $script:Stamp -FailOnRegression -FailOnSeverity high 2>&1
+        }
         $LASTEXITCODE | Should -Not -Be 0
         ($out -join ' ') | Should -Match 'FailOnSeverity.*FailOnRegression|cannot.*both'
     }
