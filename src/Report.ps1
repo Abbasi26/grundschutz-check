@@ -317,9 +317,9 @@ function ConvertTo-GsHtmlReport {
     [void]$b.AppendLine('</tbody></table>')
     [void]$b.AppendLine('<h2>Summary by Grundschutz++ practice</h2>')
     [void]$b.AppendLine('<p>Counts include every check that cites a control in that practice, including citations marked unverified.</p>')
-    [void]$b.AppendLine('<table><thead><tr><th>Practice</th><th>Title</th><th>Pass</th><th>Fail</th><th>Error</th></tr></thead><tbody>')
+    [void]$b.AppendLine('<table><thead><tr><th>Practice</th><th>Title</th><th>Pass</th><th>Fail</th><th>Error</th><th>N/A</th></tr></thead><tbody>')
     foreach ($practice in @($s.grundschutz_plus_plus)) {
-        [void]$b.AppendLine('<tr><td>' + (ConvertTo-GsHtmlText $practice.id) + '</td><td>' + (ConvertTo-GsHtmlText $practice.title) + '</td><td>' + $practice.pass + '</td><td>' + $practice.fail + '</td><td>' + $practice.error + '</td></tr>')
+        [void]$b.AppendLine('<tr><td>' + (ConvertTo-GsHtmlText $practice.id) + '</td><td>' + (ConvertTo-GsHtmlText $practice.title) + '</td><td>' + $practice.pass + '</td><td>' + $practice.fail + '</td><td>' + $practice.error + '</td><td>' + $practice.not_applicable + '</td></tr>')
     }
     [void]$b.AppendLine('</tbody></table>')
     [void]$b.AppendLine('<h2>Checks</h2>')
@@ -446,10 +446,10 @@ function ConvertTo-GsMarkdownReport {
     $lines.Add('')
     $lines.Add('## Summary by Grundschutz++ practice')
     $lines.Add('')
-    $lines.Add('| Practice | Title | Pass | Fail | Error |')
-    $lines.Add('| --- | --- | --- | --- | --- |')
+    $lines.Add('| Practice | Title | Pass | Fail | Error | N/A |')
+    $lines.Add('| --- | --- | --- | --- | --- | --- |')
     foreach ($practice in @($s.grundschutz_plus_plus)) {
-        $lines.Add('| ' + (ConvertTo-GsMarkdownCell $practice.id) + ' | ' + (ConvertTo-GsMarkdownCell $practice.title) + ' | ' + $practice.pass + ' | ' + $practice.fail + ' | ' + $practice.error + ' |')
+        $lines.Add('| ' + (ConvertTo-GsMarkdownCell $practice.id) + ' | ' + (ConvertTo-GsMarkdownCell $practice.title) + ' | ' + $practice.pass + ' | ' + $practice.fail + ' | ' + $practice.error + ' | ' + $practice.not_applicable + ' |')
     }
     $lines.Add('')
     $lines.Add('## Checks')
