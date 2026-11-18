@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- CI: the catalog builder job installs `pytest` and `jsonschema` from the hash-pinned `requirements-ci.txt` (`--require-hashes`, direct pins in `requirements.in`) instead of the newest release on PyPI. Prompted by the malicious `agent-framework` 1.26.1/1.26.2 releases ([MAL-2026-20101](https://osv.dev/vulnerability/MAL-2026-20101)); this project does not depend on it.
 - `-FailOnSeverity` on `Invoke-GrundschutzCheck.ps1`: only failures at the given catalog severity or above set exit code 1; combines with `-FailOnRegression`. Reports unchanged, errors still exit 2.
 - First DISA Windows 11 STIG references (V2R11, `framework: disa-stig`) on 8 checks and 11 rules, each compared by hand with the XCCDF rule. New optional `group_id` and `rule_id` fields, required for `disa-stig`. `tools/verify_stig.py` re-checks ids and titles against a downloaded XCCDF file. The STIG is not bundled. Refs #14.
 - `Import-GsGrundschutzPlusPlus`: reads a user-downloaded Grundschutz++ OSCAL catalog (BSI, CC BY-SA 4.0, not bundled) into control rows without prose. `Test-GsGrundschutzPlusPlusReference` marks each Grundschutz++ reference in the check catalog as `ok`, `title_changed`, or `missing` and flags a different catalog version. Tests use a self-made fixture.
