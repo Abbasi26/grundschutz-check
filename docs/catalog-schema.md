@@ -7,6 +7,9 @@ The schema version is `0.1.0`. The catalog version is independent and is `0.1.0`
 ## Rules for every consumer
 
 - Keep `mapping` and `windows11_carryover` on every check, and `mapping` on every reference. Do not drop them when you copy a check.
+- `module.id` on a check must match an `id` in the top-level `modules` list. An unknown module id is a catalog error, because the summary table would render an empty module title.
+- `source_id` on every reference must match an `id` in `catalog.sources`. A missing or unknown `source_id` is a catalog error, because the citation would point at a source that does not exist.
+- Registry evaluations read only `HKLM`. A registry node with any other `hive` (including nodes nested under `all_of` or `any_of`) is a catalog error, because the collector silently skips it and the check would only surface the problem as a runtime `error`.
 - Do not invent requirement ids. A Kompendium id has the shape `SYS.2.2.3.A4`. A Grundschutz++ id has the shape `KONF.2.4` or `DET.3.1.1`. If you cannot point at the published sentence, set `mapping` to `unverified` or leave the check out.
 - `mapping` means the link from that requirement to this setting was checked against the cited document. It does not mean the Windows 11 value was published by BSI.
 - `windows11_carryover` means whether BSI has published this exact value for Windows 11. In catalog 0.1.0 every check is `unverified`, because the values come from the Windows 10 Hilfsmittel (version 1.0, 20 February 2025, from Windows 10 21H2). SYS.2.2.3 Edition 2023 applies to Windows 10 and Windows 11, and that is not the same thing as a Windows 11 settings matrix.

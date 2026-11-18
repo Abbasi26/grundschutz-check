@@ -137,6 +137,10 @@ function Test-GsEvaluationShape {
                 $Errors.Add("$CheckId registry evaluation is missing $field.")
             }
         }
+        $hive = [string](Get-GsProperty $Evaluation 'hive')
+        if (-not [string]::IsNullOrWhiteSpace($hive) -and $hive -ne 'HKLM') {
+            $Errors.Add("$CheckId registry hive '$hive' is not HKLM.")
+        }
     }
     if ($method -eq 'secedit') {
         foreach ($field in @('section', 'key')) {
@@ -198,6 +202,20 @@ function Test-GsCatalog {
     $seen = @{}
     $severities = @('critical', 'high', 'medium', 'low', 'informational')
     $mappings = @('verified', 'unverified')
+    $moduleIds = @{}
+    foreach ($m in @(ConvertTo-GsArray (Get-GsProperty $Catalog 'modules'))) {
+        $mid = [string](Get-GsProperty $m 'id')
+        if (-not [string]::IsNullOrWhiteSpace($mid)) {
+            $moduleIds[$mid] = $true
+        }
+    }
+    $sourceIds = @{}
+    foreach ($s in @(ConvertTo-GsArray (Get-GsProperty $meta 'sources'))) {
+        $sid = [string](Get-GsProperty $s 'id')
+        if (-not [string]::IsNullOrWhiteSpace($sid)) {
+            $sourceIds[$sid] = $true
+        }
+    }
     foreach ($check in $checks) {
         $id = [string](Get-GsProperty $check 'id')
         if ([string]::IsNullOrWhiteSpace($id)) {
@@ -231,8 +249,12 @@ function Test-GsCatalog {
             $errors.Add("$id windows11_carryover '$carry' is not verified or unverified.")
         }
         $module = Get-GsProperty $check 'module'
-        if ([string]::IsNullOrWhiteSpace([string](Get-GsProperty $module 'id'))) {
+        $moduleId = [string](Get-GsProperty $module 'id')
+        if ([string]::IsNullOrWhiteSpace($moduleId)) {
             $errors.Add("$id is missing module.id.")
+        }
+        elseif (-not $moduleIds.ContainsKey($moduleId)) {
+            $errors.Add("$id uses unknown module.id '$moduleId'.")
         }
         $refs = @(ConvertTo-GsArray (Get-GsProperty $check 'references'))
         if ($refs.Count -lt 1) {
@@ -243,6 +265,13 @@ function Test-GsCatalog {
             $refMapping = [string](Get-GsProperty $ref 'mapping')
             if ($mappings -notcontains $refMapping) {
                 $errors.Add("$id reference mapping '$refMapping' is invalid.")
+            }
+            $sourceId = [string](Get-GsProperty $ref 'source_id')
+            if ([string]::IsNullOrWhiteSpace($sourceId)) {
+                $errors.Add("$id reference is missing source_id.")
+            }
+            elseif (-not $sourceIds.ContainsKey($sourceId)) {
+                $errors.Add("$id reference uses unknown source_id '$sourceId'.")
             }
             $framework = [string](Get-GsProperty $ref 'framework')
             if ([string]::IsNullOrWhiteSpace($framework)) {
