@@ -1,0 +1,4 @@
+# Direct CI dependencies for the catalog builder tests.
+# requirements-ci.txt is compiled from this file with uv; Dependabot (uv ecosystem) updates both.
+pytest==9.2.0
+jsonschema==4.26.0
