@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+- Dependabot: weekly Python updates (uv ecosystem) for `requirements-ci.in` and the hash-pinned `requirements-ci.txt`. `requirements-ci.txt` is now compiled from `requirements-ci.in` so Dependabot can recompile it with hashes.
+- CI: the catalog builder job installs `pytest` and `jsonschema` from the hash-pinned `requirements-ci.txt` (`--require-hashes`, direct pins in `requirements-ci.in`) instead of the newest release on PyPI. Prompted by the malicious `agent-framework` 1.26.1/1.26.2 releases ([MAL-2026-20101](https://osv.dev/vulnerability/MAL-2026-20101)); this project does not depend on it.
+- `-FailOnSeverity` on `Invoke-GrundschutzCheck.ps1`: only failures at the given catalog severity or above set exit code 1; combines with `-FailOnRegression`. Reports unchanged, errors still exit 2.
+- First DISA Windows 11 STIG references (V2R11, `framework: disa-stig`) on 8 checks and 11 rules, each compared by hand with the XCCDF rule. New optional `group_id` and `rule_id` fields, required for `disa-stig`. `tools/verify_stig.py` re-checks ids and titles against a downloaded XCCDF file. The STIG is not bundled. Refs #14.
+- `Import-GsGrundschutzPlusPlus`: reads a user-downloaded Grundschutz++ OSCAL catalog (BSI, CC BY-SA 4.0, not bundled) into control rows without prose. `Test-GsGrundschutzPlusPlusReference` marks each Grundschutz++ reference in the check catalog as `ok`, `title_changed`, or `missing` and flags a different catalog version. Tests use a self-made fixture.
+- CI: PowerShell 7.6 LTS (7.6.9, SHA-256 pinned) via `.github/actions/install-pwsh-7-6`; PowerShell 7.4 and 7.5 reach end of support on 10 Nov 2026 ([support lifecycle](https://learn.microsoft.com/en-us/powershell/scripting/install/powershell-support-lifecycle)). Windows PowerShell 5.1 remains required. An optional Pester job runs PowerShell 7.7.0-rc.1 with continue-on-error.
+- Tests: `tests/Evaluate.Tests.ps1` loads the module before discovery, so `InModuleScope` finds it (the test job on `main` failed at discovery since 020c9d5).
+
 ## 0.2.0 - 2026-10-28
 
 - `-ExceptionPath`: documented risk acceptances with reason, owner, expiry date, and optional ticket. Failing checks with a current exception are reported as `accepted` and do not set exit code 1. Expired exceptions keep the check at `fail`; exceptions never hide errors. New `accepted` count in the summary and per module.

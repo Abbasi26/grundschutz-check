@@ -267,6 +267,17 @@ function Test-GsCatalog {
                         $errors.Add("$id Grundschutz++ id '$idText' does not match the catalog id shape.")
                     }
                 }
+                if ($framework -eq 'disa-stig') {
+                    if ($idText -notmatch '^WN11-[A-Z0-9]+-[0-9]{6}$') {
+                        $errors.Add("$id STIG id '$idText' does not match the WN11 id shape.")
+                    }
+                    if ([string](Get-GsProperty $ref 'group_id') -notmatch '^V-[0-9]+$') {
+                        $errors.Add("$id STIG reference '$idText' is missing a V- group id.")
+                    }
+                    if ([string](Get-GsProperty $ref 'rule_id') -notmatch '^SV-[0-9]+r[0-9]+_rule$') {
+                        $errors.Add("$id STIG reference '$idText' is missing an SV- rule id.")
+                    }
+                }
             }
         }
         if ($mapping -eq 'verified' -and $verifiedRefs -lt 1) {

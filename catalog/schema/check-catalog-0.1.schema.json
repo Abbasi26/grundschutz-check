@@ -108,13 +108,21 @@
       "additionalProperties": false,
       "required": ["framework", "requirement_id", "title", "mapping", "source_id", "note"],
       "properties": {
-        "framework": { "enum": ["it-grundschutz-kompendium", "grundschutz-plus-plus"] },
+        "framework": { "enum": ["it-grundschutz-kompendium", "grundschutz-plus-plus", "disa-stig"] },
         "requirement_id": { "type": "string", "minLength": 1 },
         "title": { "type": "string", "minLength": 1 },
         "mapping": { "enum": ["verified", "unverified"] },
         "source_id": { "type": "string", "minLength": 1 },
-        "note": { "type": "string" }
-      }
+        "note": { "type": "string" },
+        "group_id": { "type": "string", "pattern": "^V-[0-9]+$" },
+        "rule_id": { "type": "string", "pattern": "^SV-[0-9]+r[0-9]+_rule$" }
+      },
+      "if": { "properties": { "framework": { "const": "disa-stig" } } },
+      "then": {
+        "required": ["group_id", "rule_id"],
+        "properties": { "requirement_id": { "pattern": "^WN11-[A-Z0-9]+-[0-9]{6}$" } }
+      },
+      "else": { "not": { "anyOf": [{ "required": ["group_id"] }, { "required": ["rule_id"] }] } }
     },
     "evaluation": {
       "type": "object",

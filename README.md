@@ -15,6 +15,7 @@
 # GrundschutzCheck
 
 [![CI](https://github.com/Abbasi26/grundschutz-check/actions/workflows/test.yml/badge.svg)](https://github.com/Abbasi26/grundschutz-check/actions/workflows/test.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 Read-only checks of a Windows 11 client against published BSI IT-Grundschutz and Grundschutz++ recommendations, with an evidence report.
 
@@ -98,6 +99,8 @@ pwsh -NoProfile -File ./Invoke-GrundschutzCheck.ps1 -BaselinePath ./last-month/g
 
 The reports get a "Changes since baseline" section: newly failing, fixed, still failing, new and removed checks, and a warning when the baseline comes from a different host fingerprint. The JSON report has the same data under `comparison`. With `-FailOnRegression` the script exits 1 only when a check newly fails, so you can adopt the catalog on an existing fleet and ratchet from there. Errors still exit 2.
 
+`-FailOnSeverity critical|high|medium|low|informational` limits exit code 1 to failures at that catalog severity or above, for example `-FailOnSeverity high` to let medium and low failures through a pipeline. Accepted risks do not count. Together with `-FailOnRegression` it filters the newly failing checks. Errors still exit 2, and the reports list every result as before.
+
 ## Permissions
 
 Live collection is read-only and stays on the machine that runs it. There is no telemetry.
@@ -127,6 +130,20 @@ Sources, read for the ids that are cited:
 
 The Grundschutz++ file is not vendored. Ids and short titles are stored, with a link.
 
+### Check the references against a current Grundschutz++ download
+
+BSI publishes Grundschutz++ as an OSCAL 1.1 catalog in the [Stand-der-Technik-Bibliothek](https://github.com/BSI-Bund/Stand-der-Technik-Bibliothek/tree/main/control_layer/Grundschutz%2B%2B) under [CC BY-SA 4.0](https://github.com/BSI-Bund/Stand-der-Technik-Bibliothek/blob/main/LICENSE). ShareAlike would put any bundled copy under that license, so this repository does not ship it. Download `Grundschutz++-resolved_catalog.json` yourself and import it:
+
+```powershell
+Import-Module ./GrundschutzCheck.psd1
+$gspp = Import-GsGrundschutzPlusPlus -Path ./Grundschutz++-resolved_catalog.json
+$result = Test-GsGrundschutzPlusPlusReference -Catalog (Get-GsCatalog) -Library $gspp
+$result | Select-Object library_version, catalog_source_version, version_differs, total, ok, title_changed, missing
+$result.references | Where-Object status -ne 'ok'
+```
+
+`Import-GsGrundschutzPlusPlus` reads the file only. It returns the catalog version and one row per control: id, title, practice, group, parent control, class, `sec_level`, `effort_level`, and the modal verb of the statement. Prose is not copied. `Test-GsGrundschutzPlusPlusReference` marks every Grundschutz++ reference in the check catalog as `ok`, `title_changed`, or `missing`, and says whether the catalog cites another Grundschutz++ version than the file you imported. ISO timestamps are normalized to UTC so Windows PowerShell 5.1 and PowerShell 7 report the same version string. The tests use a self-made fixture in the same OSCAL shape (`tests/fixtures/grundschutzplusplus-mini.json`), not BSI content.
+
 Audit policy in v0.1 scores two advanced-audit subcategories, Logon (`{0CCE9215-69AE-11D9-BED3-505054503030}`) and Credential Validation (`{0CCE923F-69AE-11D9-BED3-505054503030}`), because DET.3.1.1 says to log authentication success and failure. Those GUIDs are Windows identifiers from MS-GPAC, not BSI requirement ids. Live collection runs `auditpol /get /subcategory:{GUID} /r` for each scored subcategory and reads the CSV by column, so a German display name does not hide a pass or a fail. Inclusion settings such as `Erfolg und Fehler` and `Keine Überwachung` are stored as English. It also runs `auditpol /get /category:* /r` when that command succeeds, so the evidence section can still list subcategories that are not scored. That category-wide CSV is the fallback when a GUID query fails. The fallback accepts these de-DE names: Anmelden, Abmelden, Kontosperrung, Spezielle Anmeldung, Prozesserstellung, Benutzerkontenverwaltung, Sicherheitsgruppenverwaltung, and Anmeldeinformationen überprüfen (also Überprüfung der Anmeldeinformationen). A subcategory that is still missing is `error`, not `fail`.
 
 Names for languages other than English and German are not in the fallback table. Those systems still match when the CSV has the subcategory GUID. The offline fixtures cover one English CSV and one German CSV. CI does not run a live de-DE Windows session, so the German display names were not re-captured from a German install in this repository.
@@ -141,7 +158,7 @@ python3 tools/build_catalog.py --check
 python3 -m pytest tests/test_catalog.py -q
 ```
 
-Pester 5.7.1 is the version used in CI. Tests mock registry and secedit input. They do not need Windows.
+Pester 5.7.1 is the version used in CI. Tests mock registry and secedit input. They do not need Windows. CI runs PowerShell 7.6 LTS (7.6.9, SHA-256 pinned) via `.github/actions/install-pwsh-7-6`; PowerShell 7.4 and 7.5 reach end of support on 10 Nov 2026 ([support lifecycle](https://learn.microsoft.com/en-us/powershell/scripting/install/powershell-support-lifecycle)). Windows PowerShell 5.1 unchanged.
 
 ## How this differs from existing tools
 
@@ -185,4 +202,4 @@ MIT. Copyright (c) 2026 Wasaf Abbasi.
 
 ## Kurzfassung
 
-GrundschutzCheck prüft einen Windows-11-Client nur lesend gegen ausgewählte Empfehlungen des BSI: das Hilfsmittel für Windows-Clients 1.0, das IT-Grundschutz-Kompendium Edition 2023 und bestätigte Kontrollen aus Grundschutz++. Der Demo-Befehl lautet `pwsh -NoProfile -File ./Invoke-GrundschutzCheck.ps1 -Demo -OutputDirectory ./grundschutzcheck-out`. Er erzeugt einen Bericht aus fiktiven Daten. Die konkreten Werte stammen aus dem Windows-10-Hilfsmittel und sind für Windows 11 als `windows11_carryover: unverified` gekennzeichnet. Das Werkzeug ändert keine Einstellungen und sendet keine Daten.
+GrundschutzCheck prüft einen Windows-11-Client nur lesend gegen ausgewählte Empfehlungen des BSI: das Hilfsmittel für Windows-Clients 1.0, das IT-Grundschutz-Kompendium Edition 2023 und bestätigte Kontrollen aus Grundschutz++. Der Demo-Befehl lautet `pwsh -NoProfile -File ./Invoke-GrundschutzCheck.ps1 -Demo -OutputDirectory ./grundschutzcheck-out`. Er erzeugt einen Bericht aus fiktiven Daten. Die konkreten Werte stammen aus dem Windows-10-Hilfsmittel und sind für Windows 11 als `windows11_carryover: unverified` gekennzeichnet. Das Werkzeug ändert keine Einstellungen und sendet keine Daten. `Import-GsGrundschutzPlusPlus` liest einen selbst heruntergeladenen Grundschutz++-OSCAL-Katalog (CC BY-SA 4.0, daher nicht im Repository), und `Test-GsGrundschutzPlusPlusReference` prüft, ob alle zitierten Grundschutz++-Anforderungen dort noch mit gleichem Titel vorkommen.
