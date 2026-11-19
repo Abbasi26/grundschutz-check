@@ -115,7 +115,7 @@ Describe 'Demo report' {
 
         # Sum of the N/A column in the HTML GPP table must equal summary.not_applicable.
         $htmlNaSum = 0
-        $rowPattern = '<tr><td>([^<]+)</td><td>[^<]+</td><td>\d+</td><td>\d+</td><td>\d+</td><td>(\d+)</td></tr>'
+        $rowPattern = '<tr><td>([^<]+)</td><td>[^<]+</td><td>\d+</td><td>\d+</td><td>\d+</td><td>(\d+)</td><td>\d+</td></tr>'
         foreach ($m in [regex]::Matches($htmlSection, $rowPattern)) {
             $htmlNaSum += [int]$m.Groups[2].Value
         }
@@ -131,7 +131,7 @@ Describe 'Demo report' {
 
         # Sum of the N/A column in the MD GPP table must equal summary.not_applicable.
         $mdNaSum = 0
-        $mdRowPattern = '\| [^|]+ \| [^|]+ \| \d+ \| \d+ \| \d+ \| (\d+) \|'
+        $mdRowPattern = '\| [^|]+ \| [^|]+ \| \d+ \| \d+ \| \d+ \| (\d+) \| \d+ \|'
         foreach ($m in [regex]::Matches($mdSection, $mdRowPattern)) {
             $mdNaSum += [int]$m.Groups[1].Value
         }
