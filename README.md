@@ -112,6 +112,8 @@ pwsh -NoProfile -File ./Invoke-GrundschutzCheck.ps1 -BaselinePath ./last-month/g
 
 The reports get a "Changes since baseline" section: newly failing, fixed, still failing, new and removed checks, and a warning when the baseline comes from a different host fingerprint. The JSON report has the same data under `comparison`. With `-FailOnRegression` the script exits 1 only when a check newly fails, so you can adopt the catalog on an existing fleet and ratchet from there. Errors still exit 2.
 
+`-FailOnSeverity critical|high|medium|low|informational` limits exit code 1 to failures at that catalog severity or above, for example `-FailOnSeverity high` to let medium and low failures through a pipeline. Accepted risks do not count. Together with `-FailOnRegression` it filters the newly failing checks. Errors still exit 2, and the reports list every result as before.
+
 ## Permissions
 
 Live collection is read-only and stays on the machine that runs it. There is no telemetry.

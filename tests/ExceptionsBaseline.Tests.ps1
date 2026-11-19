@@ -227,4 +227,137 @@ Describe 'Script exit codes with -FailOnRegression' {
         & $script:Pwsh -NoProfile -File $script:Script -Demo -OutputDirectory (Join-Path $script:Work 'x2') -Timestamp $script:Stamp -BaselinePath $script:EditedBase -FailOnRegression | Out-Null
         $LASTEXITCODE | Should -Be 1
     }
+
+    It 'with -FailOnRegression and -FailOnSeverity counts only regressions at that severity or above' {
+        # GS-W11-010 (high) newly fails against the edited baseline.
+        & $script:Pwsh -NoProfile -File $script:Script -Demo -OutputDirectory (Join-Path $script:Work 'x3') -Timestamp $script:Stamp -BaselinePath $script:EditedBase -FailOnRegression -FailOnSeverity critical | Out-Null
+        $LASTEXITCODE | Should -Be 0
+        & $script:Pwsh -NoProfile -File $script:Script -Demo -OutputDirectory (Join-Path $script:Work 'x4') -Timestamp $script:Stamp -BaselinePath $script:EditedBase -FailOnRegression -FailOnSeverity high | Out-Null
+        $LASTEXITCODE | Should -Be 1
+    }
+}
+
+Describe 'Script exit codes with -FailOnSeverity' {
+    BeforeAll {
+        $script:Script = Join-Path $script:RepoRoot 'Invoke-GrundschutzCheck.ps1'
+        $script:Pwsh = (Get-Process -Id $PID).Path
+    }
+
+    It 'exits 1 without the switch because the demo has failures' {
+        & $script:Pwsh -NoProfile -File $script:Script -Demo -OutputDirectory (Join-Path $script:Work 's0') -Timestamp $script:Stamp | Out-Null
+        $LASTEXITCODE | Should -Be 1
+    }
+
+    It 'exits 0 at critical because no critical check fails in the demo' {
+        & $script:Pwsh -NoProfile -File $script:Script -Demo -OutputDirectory (Join-Path $script:Work 's1') -Timestamp $script:Stamp -FailOnSeverity critical | Out-Null
+        $LASTEXITCODE | Should -Be 0
+    }
+
+    It 'exits 1 at high because high checks fail in the demo' {
+        & $script:Pwsh -NoProfile -File $script:Script -Demo -OutputDirectory (Join-Path $script:Work 's2') -Timestamp $script:Stamp -FailOnSeverity high | Out-Null
+        $LASTEXITCODE | Should -Be 1
+    }
+
+    It 'does not count accepted risks' {
+        $demo = Invoke-GrundschutzCheck -Demo -OutputDirectory (Join-Path $script:Work 's3') -Timestamp $script:Stamp -Format Json
+        $ids = @($demo.results | Where-Object { $_.status -eq 'fail' -and @('critical', 'high') -contains $_.severity } | ForEach-Object { $_.id })
+        $ids.Count | Should -BeGreaterThan 0
+        $exceptions = @{ schema_version = '0.1'; exceptions = @($ids | ForEach-Object { @{ check_id = $_; reason = 'Test'; owner = 'Test owner (example)'; expires = '2099-01-01' } }) }
+        $path = Write-TestJson 'high-ex.json' ($exceptions | ConvertTo-Json -Depth 5)
+        & $script:Pwsh -NoProfile -File $script:Script -Demo -OutputDirectory (Join-Path $script:Work 's4') -Timestamp $script:Stamp -FailOnSeverity high -ExceptionPath $path | Out-Null
+        $LASTEXITCODE | Should -Be 0
+        & $script:Pwsh -NoProfile -File $script:Script -Demo -OutputDirectory (Join-Path $script:Work 's5') -Timestamp $script:Stamp -FailOnSeverity medium -ExceptionPath $path | Out-Null
+        $LASTEXITCODE | Should -Be 1
+    }
+}
+
+Describe 'Exception expiry warnings' {
+    BeforeAll {
+        $script:WarnWork = Join-Path $script:RepoRoot '.oc-tmp/pester-exception-expiry'
+        if (Test-Path -LiteralPath $script:WarnWork) { Remove-Item -LiteralPath $script:WarnWork -Recurse -Force }
+        New-Item -ItemType Directory -Path $script:WarnWork | Out-Null
+        function script:Write-WarnJson {
+            param([string]$Name, [string]$Text)
+            $path = Join-Path $script:WarnWork $Name
+            [System.IO.File]::WriteAllText($path, $Text)
+            return $path
+        }
+    }
+
+    AfterAll {
+        if (Test-Path -LiteralPath $script:WarnWork) { Remove-Item -LiteralPath $script:WarnWork -Recurse -Force }
+    }
+
+    It 'warns for a current applied exception expiring in <Days> days' -TestCases @(
+        @{ Days = 0;  Expires = '2026-10-21' }
+        @{ Days = 1;  Expires = '2026-10-22' }
+        @{ Days = 30; Expires = '2026-11-20' }
+    ) {
+        param($Days, $Expires)
+        $path = Write-WarnJson "soon-$Days.json" ('{"exceptions":[{"check_id":"GS-W11-004","reason":"r","owner":"o","expires":"' + $Expires + '"}]}')
+        $r = Invoke-GrundschutzCheck -Demo -OutputDirectory (Join-Path $script:WarnWork "soon-$Days") -Timestamp $script:Stamp -ExceptionPath $path -Format Json
+        $row = Get-Row $r 'GS-W11-004'
+        $row.status | Should -Be 'accepted'
+        $row.exception.state | Should -Be 'applied'
+        $notes = @($r.evidence.notes) -join ' '
+        $notes | Should -Match 'GS-W11-004 expires soon'
+        $notes | Should -Match $Expires
+        $notes | Should -Match 'within 30 days'
+    }
+
+    It 'does not warn when the exception expires in more than 30 days and keeps counts the same as a soon-expiring case' {
+        $soonPath = Write-WarnJson 'cmp-30.json' '{"exceptions":[{"check_id":"GS-W11-004","reason":"r","owner":"o","expires":"2026-11-20"}]}'
+        $latePath = Write-WarnJson 'cmp-31.json' '{"exceptions":[{"check_id":"GS-W11-004","reason":"r","owner":"o","expires":"2026-11-21"}]}'
+        $soon = Invoke-GrundschutzCheck -Demo -OutputDirectory (Join-Path $script:WarnWork 'cmp-30') -Timestamp $script:Stamp -ExceptionPath $soonPath -Format Json
+        $late = Invoke-GrundschutzCheck -Demo -OutputDirectory (Join-Path $script:WarnWork 'cmp-31') -Timestamp $script:Stamp -ExceptionPath $latePath -Format Json
+        $soonRow = Get-Row $soon 'GS-W11-004'
+        $lateRow = Get-Row $late 'GS-W11-004'
+        $soonRow.status | Should -Be 'accepted'
+        $lateRow.status | Should -Be 'accepted'
+        $soonRow.exception.state | Should -Be 'applied'
+        $lateRow.exception.state | Should -Be 'applied'
+        (@($soon.evidence.notes) -join ' ') | Should -Match 'expires soon'
+        (@($late.evidence.notes) -join ' ') | Should -Not -Match 'expires soon'
+        $late.summary.total | Should -Be $soon.summary.total
+        $late.summary.accepted | Should -Be $soon.summary.accepted
+        $late.summary.fail | Should -Be $soon.summary.fail
+        $late.summary.pass | Should -Be $soon.summary.pass
+        $late.summary.error | Should -Be $soon.summary.error
+    }
+
+    It 'keeps only the existing message for an already expired exception' {
+        $row = Get-Row $script:WithEx 'GS-W11-008'
+        $row.status | Should -Be 'fail'
+        $row.exception.state | Should -Be 'expired'
+        $notes = @($script:WithEx.evidence.notes) -join ' '
+        $notes | Should -Match 'GS-W11-008 expired'
+        $notes | Should -Not -Match 'GS-W11-008 expires soon'
+    }
+
+    It 'does not warn for a passing check even if its exception expires soon' {
+        $path = Write-WarnJson 'pass-soon.json' '{"exceptions":[{"check_id":"GS-W11-048","reason":"r","owner":"o","expires":"2026-10-22"}]}'
+        $r = Invoke-GrundschutzCheck -Demo -OutputDirectory (Join-Path $script:WarnWork 'pass-soon') -Timestamp $script:Stamp -ExceptionPath $path -Format Json
+        $row = Get-Row $r 'GS-W11-048'
+        $row.status | Should -Be 'pass'
+        $row.exception.state | Should -Be 'not_needed'
+        (@($r.evidence.notes) -join ' ') | Should -Not -Match 'expires soon'
+        (@($r.evidence.notes) -join ' ') | Should -Match 'no longer needed'
+    }
+
+    It 'does not warn for an evaluation error even if its exception expires soon' {
+        InModuleScope GrundschutzCheck {
+            $pairs = @([pscustomobject]@{
+                Check      = [pscustomobject]@{ id = 'GS-W11-099' }
+                Evaluation = [pscustomobject]@{ Status = 'error'; Message = 'boom' }
+            })
+            $exceptions = @{
+                'GS-W11-099' = [pscustomobject]@{ check_id = 'GS-W11-099'; reason = 'r'; owner = 'o'; expires = '2026-10-22'; ticket = '' }
+            }
+            $notes = @(Set-GsExceptionStatus -Pairs $pairs -Exceptions $exceptions -Timestamp '2026-10-21T12:00:00Z')
+            $pairs[0].Evaluation.Status | Should -Be 'error'
+            $pairs[0].Evaluation.Exception.state | Should -Be 'not_applied_error'
+            ($notes -join ' ') | Should -Match 'could not be evaluated'
+            ($notes -join ' ') | Should -Not -Match 'expires soon'
+        }
+    }
 }

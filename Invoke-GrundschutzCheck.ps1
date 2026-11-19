@@ -7,6 +7,9 @@
     Exit 0: every check passed (accepted risks count as passed for the exit code).
     Exit 1: at least one check failed. Exit 2: at least one check errored.
     With -BaselinePath and -FailOnRegression, exit 1 only when a check newly fails compared with the baseline.
+    With -FailOnSeverity, only failures at that catalog severity or above count for exit 1
+    (order: critical, high, medium, low, informational). Combined with -FailOnRegression it filters
+    the newly failing checks. Errors still exit 2. The reports are unchanged.
 #>
 [CmdletBinding()]
 param(
@@ -20,6 +23,8 @@ param(
     [string]$ExceptionPath,
     [string]$BaselinePath,
     [switch]$FailOnRegression,
+    [ValidateSet('critical', 'high', 'medium', 'low', 'informational')]
+    [string]$FailOnSeverity,
     [switch]$PassThru
 )
 
@@ -57,9 +62,23 @@ if ($PassThru) {
     $result
 }
 
+# Severity order from the catalog schema (src/Catalog.ps1); lower index = more severe.
+$severityOrder = @('critical', 'high', 'medium', 'low', 'informational')
+function Test-GsCountsForExit {
+    param($Row)
+    if (-not $FailOnSeverity) { return $true }
+    $rank = [array]::IndexOf($severityOrder, ([string]$Row.severity).ToLowerInvariant())
+    if ($rank -lt 0) { return $true }  # unknown severity: do not hide a failure
+    return $rank -le [array]::IndexOf($severityOrder, $FailOnSeverity)
+}
+
 if ($summary.error -gt 0) { exit 2 }
 if ($FailOnRegression) {
-    if (@($result.comparison.newly_failing).Count -gt 0) { exit 1 }
+    if (@(@($result.comparison.newly_failing) | Where-Object { $null -ne $_ -and (Test-GsCountsForExit $_) }).Count -gt 0) { exit 1 }
+    exit 0
+}
+if ($FailOnSeverity) {
+    if (@(@($result.results) | Where-Object { [string]$_.status -eq 'fail' -and (Test-GsCountsForExit $_) }).Count -gt 0) { exit 1 }
     exit 0
 }
 if ($summary.fail -gt 0) { exit 1 }
