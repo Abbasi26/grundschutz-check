@@ -24,7 +24,7 @@ jobs:
           Invoke-Pester -CI ./tests
       - name: Catalog builder
         run: |
-          python3 -m pip install --user pytest jsonschema
+          python3 -m pip install --user --require-hashes -r requirements-ci.txt
           python3 tools/build_catalog.py --check
           python3 -m pytest tests/test_catalog.py tests/test_verify_stig.py -q
       - name: Demo

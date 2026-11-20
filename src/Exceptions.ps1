@@ -94,6 +94,9 @@ function Set-GsExceptionStatus {
                     $evaluation.Status = 'accepted'
                     $evaluation.Message = ('Accepted risk until ' + $exception.expires + ' (owner: ' + $exception.owner + '): ' + $exception.reason + ' Observed result: ' + $evaluation.Message)
                     $state = 'applied'
+                    if ($expires -le $runDate.AddDays(30)) {
+                        $notes.Add("Exception for $id expires soon on $($exception.expires) (within 30 days).")
+                    }
                 }
                 else {
                     $evaluation.Message = ($evaluation.Message + ' The exception for this check expired on ' + $exception.expires + '.')

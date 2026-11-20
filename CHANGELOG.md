@@ -3,7 +3,8 @@
 ## Unreleased
 
 - `Test-GsCatalog` now rejects three broken references that used to surface only at run time: a `module.id` that is not in `modules` (empty module title in HTML/Markdown), a `source_id` that is not in `catalog.sources` (citation points at a missing source), and a registry evaluation on a hive other than `HKLM` (including nodes nested under `all_of`/`any_of`, which `Get-GsLocalEvidence` silently skips). The shipped catalog and the demo are unchanged.
-
+- Dependabot: weekly Python updates (uv ecosystem) for `requirements-ci.in` and the hash-pinned `requirements-ci.txt`. `requirements-ci.txt` is now compiled from `requirements-ci.in` so Dependabot can recompile it with hashes.
+- CI: the catalog builder job installs `pytest` and `jsonschema` from the hash-pinned `requirements-ci.txt` (`--require-hashes`, direct pins in `requirements-ci.in`) instead of the newest release on PyPI. Prompted by the malicious `agent-framework` 1.26.1/1.26.2 releases ([MAL-2026-20101](https://osv.dev/vulnerability/MAL-2026-20101)); this project does not depend on it.
 - `-FailOnSeverity` on `Invoke-GrundschutzCheck.ps1`: only failures at the given catalog severity or above set exit code 1; combines with `-FailOnRegression`. Reports unchanged, errors still exit 2.
 - First DISA Windows 11 STIG references (V2R11, `framework: disa-stig`) on 8 checks and 11 rules, each compared by hand with the XCCDF rule. New optional `group_id` and `rule_id` fields, required for `disa-stig`. `tools/verify_stig.py` re-checks ids and titles against a downloaded XCCDF file. The STIG is not bundled. Refs #14.
 - `Import-GsGrundschutzPlusPlus`: reads a user-downloaded Grundschutz++ OSCAL catalog (BSI, CC BY-SA 4.0, not bundled) into control rows without prose. `Test-GsGrundschutzPlusPlusReference` marks each Grundschutz++ reference in the check catalog as `ok`, `title_changed`, or `missing` and flags a different catalog version. Tests use a self-made fixture.
