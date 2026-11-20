@@ -96,6 +96,72 @@ Describe 'Demo report' {
             @($limit.PSObject.Properties.Name) | Should -Not -Contain 'requirement_id'
         }
     }
+
+    It 'shows N/A column in Grundschutz++ practice tables' {
+        $work = Join-Path $script:RepoRoot '.oc-tmp/opencode/report-na'
+        New-Item -ItemType Directory -Path $work -Force | Out-Null
+
+        # Build a modified catalog where GS-W11-038 (EnableLUA registry check)
+        # gets a GPP reference and when_absent=not_applicable. The demo evidence
+        # omits the EnableLUA value, so the check evaluates to not_applicable.
+        $catalog = Get-GsCatalog
+        $check = $catalog.checks | Where-Object { $_.id -eq 'GS-W11-038' }
+        $check.references = @(
+            [pscustomobject]@{
+                framework      = 'grundschutz-plus-plus'
+                requirement_id = 'KONF.2.4'
+                title          = 'Deaktivierung nicht benoetigter Systemfunktionen'
+                mapping        = 'verified'
+                source_id      = 'grundschutz-plus-plus-2026-09-24'
+                note           = 'Test fixture for N/A rendering.'
+            }
+        )
+        $check.evaluation.when_absent = 'not_applicable'
+        $catalogPath = Join-Path $work 'na-catalog.json'
+        [System.IO.File]::WriteAllText($catalogPath, ($catalog | ConvertTo-Json -Depth 12))
+
+        $evidence = [System.IO.File]::ReadAllText((Join-Path $script:RepoRoot 'demo/evidence.json')) | ConvertFrom-Json
+        $evidence.registry = @($evidence.registry | Where-Object { $_.name -ne 'EnableLUA' })
+        $evidencePath = Join-Path $work 'na-evidence.json'
+        [System.IO.File]::WriteAllText($evidencePath, ($evidence | ConvertTo-Json -Depth 12))
+
+        $report = Invoke-GrundschutzCheck -Demo -CatalogPath $catalogPath -EvidencePath $evidencePath -OutputDirectory (Join-Path $work 'out') -Timestamp '2026-11-17T00:00:00Z'
+
+        # At least one practice must have not_applicable > 0.
+        $naPractice = @($report.summary.grundschutz_plus_plus | Where-Object { $_.not_applicable -gt 0 })
+        $naPractice.Count | Should -BeGreaterThan 0
+        $report.summary.not_applicable | Should -BeGreaterOrEqual 1
+
+        # --- HTML: isolate the GPP practice table ---
+        $html = [System.IO.File]::ReadAllText($report.outputs.html)
+        $htmlStart = $html.IndexOf('Summary by Grundschutz++ practice')
+        $htmlSection = $html.Substring($htmlStart)
+        $htmlSection | Should -Match '<th>N/A</th>'
+
+        # Sum of the N/A column in the HTML GPP table must equal summary.not_applicable.
+        $htmlNaSum = 0
+        $rowPattern = '<tr><td>([^<]+)</td><td>[^<]+</td><td>\d+</td><td>\d+</td><td>\d+</td><td>(\d+)</td><td>\d+</td></tr>'
+        foreach ($m in [regex]::Matches($htmlSection, $rowPattern)) {
+            $htmlNaSum += [int]$m.Groups[2].Value
+        }
+        $htmlNaSum | Should -Be $report.summary.not_applicable
+
+        # --- Markdown: isolate the GPP practice table ---
+        $md = [System.IO.File]::ReadAllText($report.outputs.markdown)
+        $mdStart = $md.IndexOf('## Summary by Grundschutz++ practice')
+        $mdEnd   = $md.IndexOf('## Checks', $mdStart)
+        $mdSection = $md.Substring($mdStart, $mdEnd - $mdStart)
+        $mdSection | Should -Match '\| N/A \|'
+        $mdSection | Should -Match '\| --- \| --- \| --- \| --- \| --- \| --- \|'
+
+        # Sum of the N/A column in the MD GPP table must equal summary.not_applicable.
+        $mdNaSum = 0
+        $mdRowPattern = '\| [^|]+ \| [^|]+ \| \d+ \| \d+ \| \d+ \| (\d+) \| \d+ \|'
+        foreach ($m in [regex]::Matches($mdSection, $mdRowPattern)) {
+            $mdNaSum += [int]$m.Groups[1].Value
+        }
+        $mdNaSum | Should -Be $report.summary.not_applicable
+    }
 }
 
 Describe 'Local collection guard' {

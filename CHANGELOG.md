@@ -3,6 +3,9 @@
 ## Unreleased
 
 - Reports now include catalog-defined "Grenzen eines Pass" in HTML, Markdown, and JSON without changing check results or CSV output.
+- Dependabot: weekly Python updates (uv ecosystem) for `requirements-ci.in` and the hash-pinned `requirements-ci.txt`. `requirements-ci.txt` is now compiled from `requirements-ci.in` so Dependabot can recompile it with hashes.
+- CI: the catalog builder job installs `pytest` and `jsonschema` from the hash-pinned `requirements-ci.txt` (`--require-hashes`, direct pins in `requirements-ci.in`) instead of the newest release on PyPI. Prompted by the malicious `agent-framework` 1.26.1/1.26.2 releases ([MAL-2026-20101](https://osv.dev/vulnerability/MAL-2026-20101)); this project does not depend on it.
+- `-FailOnSeverity` on `Invoke-GrundschutzCheck.ps1`: only failures at the given catalog severity or above set exit code 1; combines with `-FailOnRegression`. Reports unchanged, errors still exit 2.
 - First DISA Windows 11 STIG references (V2R11, `framework: disa-stig`) on 8 checks and 11 rules, each compared by hand with the XCCDF rule. New optional `group_id` and `rule_id` fields, required for `disa-stig`. `tools/verify_stig.py` re-checks ids and titles against a downloaded XCCDF file. The STIG is not bundled. Refs #14.
 - `Import-GsGrundschutzPlusPlus`: reads a user-downloaded Grundschutz++ OSCAL catalog (BSI, CC BY-SA 4.0, not bundled) into control rows without prose. `Test-GsGrundschutzPlusPlusReference` marks each Grundschutz++ reference in the check catalog as `ok`, `title_changed`, or `missing` and flags a different catalog version. Tests use a self-made fixture.
 - CI: PowerShell 7.6 LTS (7.6.9, SHA-256 pinned) via `.github/actions/install-pwsh-7-6`; PowerShell 7.4 and 7.5 reach end of support on 10 Nov 2026 ([support lifecycle](https://learn.microsoft.com/en-us/powershell/scripting/install/powershell-support-lifecycle)). Windows PowerShell 5.1 remains required. An optional Pester job runs PowerShell 7.7.0-rc.1 with continue-on-error.
@@ -20,7 +23,7 @@
 - Audit checks query `auditpol /get /subcategory:{GUID} /r` and parse the CSV by column, so German-localized Windows does not return `error` for Logon or Credential Validation. If the GUID query fails, de-DE display names are accepted. Inclusion settings from a German `auditpol` CSV are normalized to English.
 - Read-only PowerShell module for Windows PowerShell 5.1 and PowerShell 7.
 - Windows 11 client catalog with 63 checks. Values are carried over from the BSI Hilfsmittel for Windows clients 1.0 and marked `windows11_carryover: unverified`.
-- Citations use requirement ids read from the IT-Grundschutz-Kompendium Edition 2023 and from Grundschutz++ catalog 2026-09-24. Uncertain links are `mapping: unverified`.
+- Citations use requirement ids read from the IT-Grundschutz-Kompendium Edition 2023 and Grundschutz++ catalog 2026-09-24. Uncertain links are `mapping: unverified`.
 - HTML, Markdown, JSON, and CSV evidence reports. The host name is stored only as a SHA-256 fingerprint.
 - `-Demo` renders a report from bundled fictional evidence.
 - Example Ansible playbook for remote read-only collection.

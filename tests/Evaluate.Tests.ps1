@@ -243,5 +243,3 @@ Describe 'any_of status precedence' {
     }
 }
 }
-# Not checked: full suites or live Windows collection; no repository files were changed.
-# Risk: custom fail/error alternatives become error and can change CLI exit code to 2.
