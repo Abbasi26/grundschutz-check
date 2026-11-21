@@ -25,6 +25,8 @@ param(
     [switch]$FailOnRegression,
     [ValidateSet('critical', 'high', 'medium', 'low', 'informational')]
     [string]$FailOnSeverity,
+    [ValidateSet('en', 'de')]
+    [string]$Language = 'en',
     [switch]$PassThru
 )
 
@@ -32,7 +34,7 @@ $ErrorActionPreference = 'Stop'
 $here = Split-Path -Parent $MyInvocation.MyCommand.Path
 Import-Module (Join-Path $here 'GrundschutzCheck.psd1') -Force
 
-$params = @{ Format = $Format }
+$params = @{ Format = $Format; Language = $Language }
 if ($Demo) { $params.Demo = $true }
 if ($PSBoundParameters.ContainsKey('CatalogPath')) { $params.CatalogPath = $CatalogPath }
 if ($PSBoundParameters.ContainsKey('EvidencePath')) { $params.EvidencePath = $EvidencePath }

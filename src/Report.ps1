@@ -376,103 +376,210 @@ function ConvertTo-GsHtmlReport {
     return $b.ToString()
 }
 
+function Get-GsMarkdownLabels {
+    param([string]$Language)
+    if ($Language -eq 'de') {
+        return @{
+            Title                = '# GrundschutzCheck Prüfbericht'
+            DemoNotice           = '> Demo. Diese Ergebnisse wurden aus mitgelieferten fiktiven Nachweisen erzeugt. Sie sind kein Audit eines echten Rechners.'
+            ReadOnly             = 'Nur-Lese-Lauf. Remediation-Snippets wurden nicht angewendet.'
+            Evidence             = '## Nachweise'
+            Generated            = '- Erstellt (UTC): '
+            ModeLabel            = '- Modus: '
+            Tool                 = '- Werkzeug: '
+            Catalog              = '- Katalog: '
+            HostFingerprint      = '- Host-Fingerprint (SHA-256): '
+            Platform             = '- Plattform: '
+            Summary              = '## Zusammenfassung'
+            NotApplicable        = '- Nicht anwendbar: '
+            AcceptedRisk         = '- Akzeptiertes Risiko (dokumentierte Ausnahme): '
+            Total                = '- Gesamt: '
+            ChangesSinceBaseline = '## Änderungen seit der Baseline'
+            BaselineGenerated    = 'Baseline erstellt am '
+            CatalogSuffix        = ', Katalog '
+            DifferentHost        = '> Die Baseline stammt von einem anderen Host.'
+            Change               = 'Änderung'
+            Count                = 'Anzahl'
+            NewlyFailingRow      = 'Neu fehlgeschlagen'
+            FixedRow             = 'Behoben'
+            StillFailingRow      = 'Weiterhin fehlgeschlagen'
+            NewChecksRow         = 'Neue Prüfungen'
+            RemovedChecksRow     = 'Entfernte Prüfungen'
+            NewlyFailingItem     = '- Neu fehlgeschlagen: '
+            FixedItem            = '- Behoben: '
+            SummaryByModule      = '## Zusammenfassung nach BSI-Modul'
+            Module               = 'Modul'
+            Practice             = 'Praxis'
+            TitleCol             = 'Titel'
+            SummaryByPractice    = '## Zusammenfassung nach Grundschutz++-Praxis'
+            Checks               = '## Prüfungen'
+            Requirement          = '- Anforderung: '
+            ModuleDetail         = '- Modul: '
+            Mapping              = '- Zuordnung: '
+            Windows11Carryover   = '- Windows-11-Übernahme: '
+            Expected             = '- Erwartet: '
+            Actual               = '- Ist: '
+            ExceptionPrefix      = '- Ausnahme ('
+            ExceptionSuffix      = '): '
+            Owner                = 'Verantwortlicher: '
+            Expires              = 'Gültig bis: '
+            Conflict             = 'Konflikt: '
+            AuditPolicy          = '## Erfasste Audit-Richtlinie'
+            Subcategory          = 'Unterkategorie'
+            Setting              = 'Einstellung'
+            Footer               = 'Keine Telemetrie. Die Daten blieben auf dem Rechner, der diese Datei erzeugt hat.'
+        }
+    }
+    return @{
+        Title                = '# GrundschutzCheck audit report'
+        DemoNotice           = '> Demo. These results were rendered from bundled fictional evidence. They are not an audit of a real computer.'
+        ReadOnly             = 'Read-only run. Remediation snippets were not applied.'
+        Evidence             = '## Evidence'
+        Generated            = '- Generated (UTC): '
+        ModeLabel            = '- Mode: '
+        Tool                 = '- Tool: '
+        Catalog              = '- Catalog: '
+        HostFingerprint      = '- Host fingerprint (SHA-256): '
+        Platform             = '- Platform: '
+        Summary              = '## Summary'
+        NotApplicable        = '- Not applicable: '
+        AcceptedRisk         = '- Accepted risk (documented exception): '
+        Total                = '- Total: '
+        ChangesSinceBaseline = '## Changes since baseline'
+        BaselineGenerated    = 'Baseline generated '
+        CatalogSuffix        = ', catalog '
+        DifferentHost        = '> The baseline is from a different host.'
+        Change               = 'Change'
+        Count                = 'Count'
+        NewlyFailingRow      = 'Newly failing'
+        FixedRow             = 'Fixed'
+        StillFailingRow      = 'Still failing'
+        NewChecksRow         = 'New checks'
+        RemovedChecksRow     = 'Removed checks'
+        NewlyFailingItem     = '- Newly failing: '
+        FixedItem            = '- Fixed: '
+        SummaryByModule      = '## Summary by BSI module'
+        Module               = 'Module'
+        Practice             = 'Practice'
+        TitleCol             = 'Title'
+        SummaryByPractice    = '## Summary by Grundschutz++ practice'
+        Checks               = '## Checks'
+        Requirement          = '- Requirement: '
+        ModuleDetail         = '- Module: '
+        Mapping              = '- Mapping: '
+        Windows11Carryover   = '- Windows 11 carry-over: '
+        Expected             = '- Expected: '
+        Actual               = '- Actual: '
+        ExceptionPrefix      = '- Exception ('
+        ExceptionSuffix      = '): '
+        Owner                = 'Owner: '
+        Expires              = 'Expires: '
+        Conflict             = 'Conflict: '
+        AuditPolicy          = '## Collected audit policy'
+        Subcategory          = 'Subcategory'
+        Setting              = 'Setting'
+        Footer               = 'No telemetry. Data stayed on the machine that produced this file.'
+    }
+}
+
 function ConvertTo-GsMarkdownReport {
-    param($Document)
+    param($Document, [string]$Language = 'en')
     $e = $Document.evidence
     $s = $Document.summary
+    $labels = Get-GsMarkdownLabels -Language $Language
     $lines = New-Object System.Collections.Generic.List[string]
-    $lines.Add('# GrundschutzCheck audit report')
+    $lines.Add($labels.Title)
     $lines.Add('')
     if ([string]$e.mode -eq 'demo') {
-        $lines.Add('> Demo. These results were rendered from bundled fictional evidence. They are not an audit of a real computer.')
+        $lines.Add($labels.DemoNotice)
         $lines.Add('')
     }
-    $lines.Add('Read-only run. Remediation snippets were not applied.')
+    $lines.Add($labels.ReadOnly)
     $lines.Add('')
-    $lines.Add('## Evidence')
+    $lines.Add($labels.Evidence)
     $lines.Add('')
-    $lines.Add('- Generated (UTC): ' + $e.generated_at)
-    $lines.Add('- Mode: ' + $e.mode)
-    $lines.Add('- Tool: ' + $Document.tool.name + ' ' + $Document.tool.version)
-    $lines.Add('- Catalog: ' + $Document.catalog.id + ' ' + $Document.catalog.version)
-    $lines.Add('- Host fingerprint (SHA-256): `' + $e.host_fingerprint_sha256 + '`')
+    $lines.Add($labels.Generated + $e.generated_at)
+    $lines.Add($labels.ModeLabel + $e.mode)
+    $lines.Add($labels.Tool + $Document.tool.name + ' ' + $Document.tool.version)
+    $lines.Add($labels.Catalog + $Document.catalog.id + ' ' + $Document.catalog.version)
+    $lines.Add($labels.HostFingerprint + '`' + $e.host_fingerprint_sha256 + '`')
     $lines.Add('- ' + $e.host_fingerprint_note)
-    $lines.Add('- Platform: ' + $e.platform.os_caption + ' / ' + $e.platform.os_version + ' / build ' + $e.platform.os_build)
+    $lines.Add($labels.Platform + $e.platform.os_caption + ' / ' + $e.platform.os_version + ' / build ' + $e.platform.os_build)
     $lines.Add('')
-    $lines.Add('## Summary')
+    $lines.Add($labels.Summary)
     $lines.Add('')
     $lines.Add('- Pass: ' + $s.pass)
     $lines.Add('- Fail: ' + $s.fail)
     $lines.Add('- Error: ' + $s.error)
-    $lines.Add('- Not applicable: ' + $s.not_applicable)
+    $lines.Add($labels.NotApplicable + $s.not_applicable)
     if ([int]$s.accepted -gt 0) {
-        $lines.Add('- Accepted risk (documented exception): ' + $s.accepted)
+        $lines.Add($labels.AcceptedRisk + $s.accepted)
     }
-    $lines.Add('- Total: ' + $s.total)
+    $lines.Add($labels.Total + $s.total)
     $lines.Add('')
     $cmp = Get-GsProperty $Document 'comparison'
     if ($null -ne $cmp) {
-        $lines.Add('## Changes since baseline')
+        $lines.Add($labels.ChangesSinceBaseline)
         $lines.Add('')
-        $lines.Add('Baseline generated ' + $cmp.baseline_generated_at + ', catalog ' + $cmp.baseline_catalog_version + '.')
+        $lines.Add($labels.BaselineGenerated + $cmp.baseline_generated_at + $labels.CatalogSuffix + $cmp.baseline_catalog_version + '.')
         if ($cmp.same_host -eq $false) {
             $lines.Add('')
-            $lines.Add('> The baseline is from a different host.')
+            $lines.Add($labels.DifferentHost)
         }
         $lines.Add('')
-        $lines.Add('| Change | Count |')
+        $lines.Add('| ' + $labels.Change + ' | ' + $labels.Count + ' |')
         $lines.Add('| --- | --- |')
-        $lines.Add('| Newly failing | ' + @($cmp.newly_failing).Count + ' |')
-        $lines.Add('| Fixed | ' + @($cmp.fixed).Count + ' |')
-        $lines.Add('| Still failing | ' + @($cmp.still_failing).Count + ' |')
-        $lines.Add('| New checks | ' + @($cmp.new_checks).Count + ' |')
-        $lines.Add('| Removed checks | ' + @($cmp.removed_checks).Count + ' |')
+        $lines.Add('| ' + $labels.NewlyFailingRow + ' | ' + @($cmp.newly_failing).Count + ' |')
+        $lines.Add('| ' + $labels.FixedRow + ' | ' + @($cmp.fixed).Count + ' |')
+        $lines.Add('| ' + $labels.StillFailingRow + ' | ' + @($cmp.still_failing).Count + ' |')
+        $lines.Add('| ' + $labels.NewChecksRow + ' | ' + @($cmp.new_checks).Count + ' |')
+        $lines.Add('| ' + $labels.RemovedChecksRow + ' | ' + @($cmp.removed_checks).Count + ' |')
         $lines.Add('')
         foreach ($item in @($cmp.newly_failing)) {
-            $lines.Add('- Newly failing: ' + $item.id + ' ' + (ConvertTo-GsMarkdownCell $item.title) + ' (' + $item.before + ' -> ' + $item.after + ')')
+            $lines.Add($labels.NewlyFailingItem + $item.id + ' ' + (ConvertTo-GsMarkdownCell $item.title) + ' (' + $item.before + ' -> ' + $item.after + ')')
         }
         foreach ($item in @($cmp.fixed)) {
-            $lines.Add('- Fixed: ' + $item.id + ' ' + (ConvertTo-GsMarkdownCell $item.title) + ' (' + $item.before + ' -> ' + $item.after + ')')
+            $lines.Add($labels.FixedItem + $item.id + ' ' + (ConvertTo-GsMarkdownCell $item.title) + ' (' + $item.before + ' -> ' + $item.after + ')')
         }
         $lines.Add('')
     }
-    $lines.Add('## Summary by BSI module')
+    $lines.Add($labels.SummaryByModule)
     $lines.Add('')
-    $lines.Add('| Module | Title | Pass | Fail | Error | N/A | Accepted |')
+    $lines.Add('| ' + $labels.Module + ' | ' + $labels.TitleCol + ' | Pass | Fail | Error | N/A | Accepted |')
     $lines.Add('| --- | --- | --- | --- | --- | --- | --- |')
     foreach ($module in @($s.modules)) {
         $lines.Add('| ' + (ConvertTo-GsMarkdownCell $module.id) + ' | ' + (ConvertTo-GsMarkdownCell $module.title) + ' | ' + $module.pass + ' | ' + $module.fail + ' | ' + $module.error + ' | ' + $module.not_applicable + ' | ' + $module.accepted + ' |')
     }
     $lines.Add('')
-    $lines.Add('## Summary by Grundschutz++ practice')
+    $lines.Add($labels.SummaryByPractice)
     $lines.Add('')
-    $lines.Add('| Practice | Title | Pass | Fail | Error | N/A | Accepted |')
+    $lines.Add('| ' + $labels.Practice + ' | ' + $labels.TitleCol + ' | Pass | Fail | Error | N/A | Accepted |')
     $lines.Add('| --- | --- | --- | --- | --- | --- | --- |')
     foreach ($practice in @($s.grundschutz_plus_plus)) {
         $lines.Add('| ' + (ConvertTo-GsMarkdownCell $practice.id) + ' | ' + (ConvertTo-GsMarkdownCell $practice.title) + ' | ' + $practice.pass + ' | ' + $practice.fail + ' | ' + $practice.error + ' | ' + $practice.not_applicable + ' | ' + $practice.accepted + ' |')
     }
     $lines.Add('')
-    $lines.Add('## Checks')
+    $lines.Add($labels.Checks)
     $lines.Add('')
     foreach ($row in @($Document.results)) {
         $lines.Add('### ' + $row.id + ' - ' + $row.status + ' (' + $row.severity + ')')
         $lines.Add('')
         $lines.Add($row.title)
         $lines.Add('')
-        $lines.Add('- Requirement: ' + $row.requirement_id + ' ' + $row.requirement_title)
-        $lines.Add('- Module: ' + $row.module_id)
-        $lines.Add('- Mapping: ' + $row.mapping)
-        $lines.Add('- Windows 11 carry-over: ' + $row.windows11_carryover)
-        $lines.Add('- Expected: ' + $row.expected)
-        $lines.Add('- Actual: ' + $row.actual)
+        $lines.Add($labels.Requirement + $row.requirement_id + ' ' + $row.requirement_title)
+        $lines.Add($labels.ModuleDetail + $row.module_id)
+        $lines.Add($labels.Mapping + $row.mapping)
+        $lines.Add($labels.Windows11Carryover + $row.windows11_carryover)
+        $lines.Add($labels.Expected + $row.expected)
+        $lines.Add($labels.Actual + $row.actual)
         $lines.Add('- ' + $row.message)
         $ex = Get-GsProperty $row 'exception'
         if ($null -ne $ex) {
-            $lines.Add('- Exception (' + $ex.state + '): ' + $ex.reason + ' Owner: ' + $ex.owner + '. Expires: ' + $ex.expires + '.')
+            $lines.Add($labels.ExceptionPrefix + $ex.state + $labels.ExceptionSuffix + $ex.reason + ' ' + $labels.Owner + $ex.owner + '. ' + $labels.Expires + $ex.expires + '.')
         }
         if (-not [string]::IsNullOrWhiteSpace([string]$row.conflict_note)) {
             $lines.Add('')
-            $lines.Add('Conflict: ' + $row.conflict_note)
+            $lines.Add($labels.Conflict + ' ' + $row.conflict_note)
         }
         $lines.Add('')
         $lines.Add($row.rationale)
@@ -496,15 +603,15 @@ function ConvertTo-GsMarkdownReport {
         $lines.Add('```')
         $lines.Add('')
     }
-    $lines.Add('## Collected audit policy')
+    $lines.Add($labels.AuditPolicy)
     $lines.Add('')
-    $lines.Add('| Subcategory | Setting |')
+    $lines.Add('| ' + $labels.Subcategory + ' | ' + $labels.Setting + ' |')
     $lines.Add('| --- | --- |')
     foreach ($row in @($e.audit_policy)) {
         $lines.Add('| ' + (ConvertTo-GsMarkdownCell $row.subcategory) + ' | ' + (ConvertTo-GsMarkdownCell $row.setting) + ' |')
     }
     $lines.Add('')
-    $lines.Add('No telemetry. Data stayed on the machine that produced this file.')
+    $lines.Add($labels.Footer)
     $lines.Add('')
     return ($lines -join "`n")
 }
@@ -536,7 +643,7 @@ function Write-GsUtf8 {
 }
 
 function Write-GsReportFiles {
-    param($Document, [string]$Directory, [string[]]$Formats)
+    param($Document, [string]$Directory, [string[]]$Formats, [string]$Language = 'en')
     if (-not (Test-Path -LiteralPath $Directory)) {
         New-Item -ItemType Directory -Path $Directory | Out-Null
     }
@@ -557,7 +664,7 @@ function Write-GsReportFiles {
     }
     if ($selected -contains 'Markdown') {
         $path = Join-Path $Directory 'grundschutzcheck-report.md'
-        Write-GsUtf8 -Path $path -Text (ConvertTo-GsMarkdownReport -Document $Document)
+        Write-GsUtf8 -Path $path -Text (ConvertTo-GsMarkdownReport -Document $Document -Language $Language)
         $written.markdown = $path
     }
     if ($selected -contains 'Json') {
