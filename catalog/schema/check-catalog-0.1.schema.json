@@ -11,7 +11,7 @@
     "catalog": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["id", "title", "version", "released", "description", "target", "limits", "sources"],
+      "required": ["id", "title", "version", "released", "description", "target", "sources"],
       "properties": {
         "id": { "type": "string", "minLength": 1 },
         "title": { "type": "string", "minLength": 1 },

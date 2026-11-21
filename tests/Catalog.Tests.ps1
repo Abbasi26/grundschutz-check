@@ -114,4 +114,44 @@ Describe 'Windows 11 catalog' {
             ($errors -join "`n") | Should -Match 'missing an SV- rule id'
         }
     }
+
+    It 'rejects a check whose module.id is not in modules' {
+        InModuleScope GrundschutzCheck {
+            $catalog = Get-GsCatalog
+            $check = @((ConvertTo-GsArray (Get-GsProperty $catalog 'checks')) | Where-Object { $_.id -eq 'GS-W11-001' })[0]
+            $check.module.id = 'SYS.9.9'
+            $errors = @(Test-GsCatalog -Catalog $catalog)
+            ($errors -join "`n") | Should -Match "GS-W11-001 uses unknown module\.id 'SYS\.9\.9'\."
+        }
+    }
+
+    It 'rejects a reference whose source_id is not in catalog.sources' {
+        InModuleScope GrundschutzCheck {
+            $catalog = Get-GsCatalog
+            $check = @((ConvertTo-GsArray (Get-GsProperty $catalog 'checks')) | Where-Object { $_.id -eq 'GS-W11-001' })[0]
+            $check.references[0].source_id = 'no-such-source'
+            $errors = @(Test-GsCatalog -Catalog $catalog)
+            ($errors -join "`n") | Should -Match "GS-W11-001 reference uses unknown source_id 'no-such-source'\."
+        }
+    }
+
+    It 'rejects a registry evaluation on a hive other than HKLM' {
+        InModuleScope GrundschutzCheck {
+            $catalog = Get-GsCatalog
+            $check = @((ConvertTo-GsArray (Get-GsProperty $catalog 'checks')) | Where-Object { $_.id -eq 'GS-W11-007' })[0]
+            $check.evaluation.hive = 'HKCU'
+            $errors = @(Test-GsCatalog -Catalog $catalog)
+            ($errors -join "`n") | Should -Match "GS-W11-007 registry hive 'HKCU' is not HKLM\."
+        }
+    }
+
+    It 'rejects a registry evaluation nested in all_of on a hive other than HKLM' {
+        InModuleScope GrundschutzCheck {
+            $catalog = Get-GsCatalog
+            $check = @((ConvertTo-GsArray (Get-GsProperty $catalog 'checks')) | Where-Object { $_.id -eq 'GS-W11-022' })[0]
+            $check.evaluation.evaluations[0].hive = 'HKCU'
+            $errors = @(Test-GsCatalog -Catalog $catalog)
+            ($errors -join "`n") | Should -Match "GS-W11-022 registry hive 'HKCU' is not HKLM\."
+        }
+    }
 }

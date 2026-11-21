@@ -164,6 +164,79 @@ Describe 'Demo report' {
     }
 }
 
+Describe 'Markdown report language switch' {
+    BeforeAll {
+        $script:LangWork = Join-Path $script:RepoRoot '.oc-tmp/opencode/report-language'
+        if (Test-Path -LiteralPath $script:LangWork) {
+            Remove-Item -LiteralPath $script:LangWork -Recurse -Force
+        }
+        New-Item -ItemType Directory -Path $script:LangWork -Force | Out-Null
+
+        $script:DeReport = Invoke-GrundschutzCheck -Demo -OutputDirectory (Join-Path $script:LangWork 'de') -Format Markdown -Timestamp '2026-11-21T00:00:00Z' -Language de
+        $script:DeMarkdown = [System.IO.File]::ReadAllText($script:DeReport.outputs.markdown)
+
+        $script:EnDefaultReport = Invoke-GrundschutzCheck -Demo -OutputDirectory (Join-Path $script:LangWork 'en-default') -Format Markdown -Timestamp '2026-11-21T00:00:00Z'
+        $script:EnDefaultMarkdown = [System.IO.File]::ReadAllText($script:EnDefaultReport.outputs.markdown)
+
+        $script:EnExplicitReport = Invoke-GrundschutzCheck -Demo -OutputDirectory (Join-Path $script:LangWork 'en-explicit') -Format Markdown -Timestamp '2026-11-21T00:00:00Z' -Language en
+        $script:EnExplicitMarkdown = [System.IO.File]::ReadAllText($script:EnExplicitReport.outputs.markdown)
+    }
+
+    It 'uses German headings and labels' {
+        $script:DeMarkdown | Should -Match '(?m)^# GrundschutzCheck Prüfbericht\r?$'
+        $script:DeMarkdown | Should -Match '(?m)^## Nachweise\r?$'
+        $script:DeMarkdown | Should -Match '(?m)^## Zusammenfassung\r?$'
+        $script:DeMarkdown | Should -Match '(?m)^## Zusammenfassung nach BSI-Modul\r?$'
+        $script:DeMarkdown | Should -Match '(?m)^## Zusammenfassung nach Grundschutz\+\+-Praxis\r?$'
+        $script:DeMarkdown | Should -Match '(?m)^## Prüfungen\r?$'
+        $script:DeMarkdown | Should -Match '(?m)^## Erfasste Audit-Richtlinie\r?$'
+        $script:DeMarkdown | Should -Match '\| Modul \| Titel \|'
+        $script:DeMarkdown | Should -Match '\| Unterkategorie \| Einstellung \|'
+        $script:DeMarkdown.Contains('## Evidence') | Should -BeFalse
+        $script:DeMarkdown.Contains('## Summary') | Should -BeFalse
+        $script:DeMarkdown.Contains('## Checks') | Should -BeFalse
+    }
+
+    It 'keeps the English output as the unchanged default' {
+        $script:EnDefaultMarkdown | Should -Be $script:EnExplicitMarkdown
+        $script:EnDefaultMarkdown | Should -Match '(?m)^# GrundschutzCheck audit report\r?$'
+        $script:EnDefaultMarkdown | Should -Match '(?m)^## Evidence\r?$'
+        $script:EnDefaultMarkdown | Should -Match '(?m)^## Summary\r?$'
+        $script:EnDefaultMarkdown | Should -Match '(?m)^## Checks\r?$'
+    }
+
+    It 'localizes the changes-since-baseline section' {
+        $baselineReport = Invoke-GrundschutzCheck -Demo -OutputDirectory (Join-Path $script:LangWork 'baseline-src') -Format Json -Timestamp '2026-11-21T00:00:00Z' -Language en
+        $jsonPath = $baselineReport.outputs.json
+        $baselineOut = Invoke-GrundschutzCheck -Demo -OutputDirectory (Join-Path $script:LangWork 'de-baseline') -Format Markdown -Timestamp '2026-11-21T01:00:00Z' -Language de -BaselinePath $jsonPath
+        $md = [System.IO.File]::ReadAllText($baselineOut.outputs.markdown)
+        $md | Should -Match '(?m)^## Änderungen seit der Baseline\r?$'
+        $md | Should -Match '\| Änderung \| Anzahl \|'
+        $md | Should -Match '\| Weiterhin fehlgeschlagen \|'
+        $md.Contains('## Changes since baseline') | Should -BeFalse
+    }
+
+    It 'leaves HTML, JSON, and CSV identical across languages' {
+        $deAll = Invoke-GrundschutzCheck -Demo -OutputDirectory (Join-Path $script:LangWork 'de-all') -Format All -Timestamp '2026-11-21T02:00:00Z' -Language de
+        $enAll = Invoke-GrundschutzCheck -Demo -OutputDirectory (Join-Path $script:LangWork 'en-all') -Format All -Timestamp '2026-11-21T02:00:00Z' -Language en
+        foreach ($key in @('html', 'json', 'csv')) {
+            $deText = [System.IO.File]::ReadAllText($deAll.outputs.$key)
+            $enText = [System.IO.File]::ReadAllText($enAll.outputs.$key)
+            $deText | Should -Be $enText
+        }
+    }
+
+    It 'rejects an unknown language at parameter binding' {
+        { Invoke-GrundschutzCheck -Demo -OutputDirectory (Join-Path $script:LangWork 'bad') -Format Markdown -Language fr } | Should -Throw
+    }
+
+    AfterAll {
+        if (Test-Path -LiteralPath $script:LangWork) {
+            Remove-Item -LiteralPath $script:LangWork -Recurse -Force
+        }
+    }
+}
+
 Describe 'Local collection guard' {
     It 'refuses a live run when the platform is not Windows' {
         $onWindows = $false

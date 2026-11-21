@@ -32,7 +32,9 @@ function Invoke-GrundschutzCheck {
         [string[]]$Format = @('All'),
         [string]$Timestamp,
         [string]$ExceptionPath,
-        [string]$BaselinePath
+        [string]$BaselinePath,
+        [ValidateSet('en', 'de')]
+        [string]$Language = 'en'
     )
 
     $catalog = Get-GsCatalog -Path $CatalogPath
@@ -84,7 +86,7 @@ function Invoke-GrundschutzCheck {
     if ($null -ne $baseline) {
         Add-Member -InputObject $document -NotePropertyName comparison -NotePropertyValue (Compare-GsReport -Baseline $baseline -Document $document) -Force
     }
-    $files = Write-GsReportFiles -Document $document -Directory $OutputDirectory -Formats $Format
+    $files = Write-GsReportFiles -Document $document -Directory $OutputDirectory -Formats $Format -Language $Language
     Add-Member -InputObject $document -NotePropertyName outputs -NotePropertyValue $files -Force
     return $document
 }
