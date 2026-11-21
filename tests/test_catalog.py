@@ -5,6 +5,7 @@ import subprocess
 import sys
 from pathlib import Path
 
+import jsonschema
 import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -54,7 +55,7 @@ def test_builder_matches_committed_json():
 def test_requirement_ids_stay_inside_the_allow_list():
     catalog = json.loads(CATALOG.read_text(encoding="utf-8"))
     assert catalog["schema_version"] == "0.1.0"
-    assert len(catalog["checks"]) >= 40
+    assert len(catalog["checks"]) == 63
     for check in catalog["checks"]:
         assert check["windows11_carryover"] == "unverified"
         for ref in check["references"]:
@@ -94,8 +95,31 @@ def test_schema_file_is_json():
     assert schema["properties"]["schema_version"]["const"] == "0.1.0"
 
 
+def test_catalog_limits_are_informational_only():
+    catalog = json.loads(CATALOG.read_text(encoding="utf-8"))
+    limits = catalog["catalog"]["limits"]
+    assert [limit["id"] for limit in limits] == [
+        "smartscreen",
+        "maps",
+        "password-complexity",
+        "store-wording",
+        "firewall-profile-status",
+        "defender-signatures",
+        "third-party-antivirus",
+        "domain-accounts",
+    ]
+    assert len({limit["id"] for limit in limits}) == 8
+    for limit in limits:
+        assert set(limit) == {"id", "title", "note"}
+        assert all(limit[field].strip() for field in ("id", "title", "note"))
+        assert "requirement_id" not in limit
+
+
 def test_catalog_validates_against_schema():
-    jsonschema = pytest.importorskip("jsonschema")
     schema = json.loads((ROOT / "catalog" / "schema" / "check-catalog-0.1.schema.json").read_text(encoding="utf-8"))
     catalog = json.loads(CATALOG.read_text(encoding="utf-8"))
     jsonschema.validate(catalog, schema)
+
+    catalog["catalog"]["limits"][0]["requirement_id"] = "NOT-ALLOWED"
+    with pytest.raises(jsonschema.ValidationError):
+        jsonschema.validate(catalog, schema)

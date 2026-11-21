@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Reports now include catalog-defined "Grenzen eines Pass" in HTML, Markdown, and JSON without changing check results or CSV output.
 - `Test-GsCatalog` now rejects three broken references that used to surface only at run time: a `module.id` that is not in `modules` (empty module title in HTML/Markdown), a `source_id` that is not in `catalog.sources` (citation points at a missing source), and a registry evaluation on a hive other than `HKLM` (including nodes nested under `all_of`/`any_of`, which `Get-GsLocalEvidence` silently skips). The shipped catalog and the demo are unchanged.
 - Dependabot: weekly Python updates (uv ecosystem) for `requirements-ci.in` and the hash-pinned `requirements-ci.txt`. `requirements-ci.txt` is now compiled from `requirements-ci.in` so Dependabot can recompile it with hashes.
 - CI: the catalog builder job installs `pytest` and `jsonschema` from the hash-pinned `requirements-ci.txt` (`--require-hashes`, direct pins in `requirements-ci.in`) instead of the newest release on PyPI. Prompted by the malicious `agent-framework` 1.26.1/1.26.2 releases ([MAL-2026-20101](https://osv.dev/vulnerability/MAL-2026-20101)); this project does not depend on it.
@@ -23,7 +24,7 @@
 - Audit checks query `auditpol /get /subcategory:{GUID} /r` and parse the CSV by column, so German-localized Windows does not return `error` for Logon or Credential Validation. If the GUID query fails, de-DE display names are accepted. Inclusion settings from a German `auditpol` CSV are normalized to English.
 - Read-only PowerShell module for Windows PowerShell 5.1 and PowerShell 7.
 - Windows 11 client catalog with 63 checks. Values are carried over from the BSI Hilfsmittel for Windows clients 1.0 and marked `windows11_carryover: unverified`.
-- Citations use requirement ids read from the IT-Grundschutz-Kompendium Edition 2023 and from Grundschutz++ catalog 2026-09-24. Uncertain links are `mapping: unverified`.
+- Citations use requirement ids read from the IT-Grundschutz-Kompendium Edition 2023 and Grundschutz++ catalog 2026-09-24. Uncertain links are `mapping: unverified`.
 - HTML, Markdown, JSON, and CSV evidence reports. The host name is stored only as a SHA-256 fingerprint.
 - `-Demo` renders a report from bundled fictional evidence.
 - Example Ansible playbook for remote read-only collection.
