@@ -80,8 +80,9 @@ Describe 'Demo report' {
             'Ein Firewall-Pass belegt keine Allow-List.'
             'Ein Defender-Pass belegt keine aktuellen Signaturen.'
         )
+        $html | Should -Match 'Limits of a pass'
+        $markdown | Should -Match 'Grenzen eines Pass'
         foreach ($text in @($html, $markdown)) {
-            $text | Should -Match 'Grenzen eines Pass'
             foreach ($sentence in $sentences) {
                 $text.Contains($sentence) | Should -BeTrue
             }
@@ -216,10 +217,54 @@ Describe 'Markdown report language switch' {
         $md.Contains('## Changes since baseline') | Should -BeFalse
     }
 
-    It 'leaves HTML, JSON, and CSV identical across languages' {
+    It 'localizes the HTML report labels' {
+        $deHtmlReport = Invoke-GrundschutzCheck -Demo -OutputDirectory (Join-Path $script:LangWork 'de-html') -Format Html -Timestamp '2026-11-21T02:00:00Z' -Language de -ExceptionPath (Join-Path $script:RepoRoot 'examples/exceptions.example.json')
+        $html = [System.IO.File]::ReadAllText($deHtmlReport.outputs.html)
+
+        $html | Should -Match '<html lang="de">'
+        $html | Should -Match '<h1>GrundschutzCheck Prüfbericht</h1>'
+        $html | Should -Match '<h2>Zusammenfassung nach BSI-Modul</h2>'
+        $html | Should -Match '<h2>Prüfungen</h2>'
+        $html | Should -Match '<th>Modul</th><th>Titel</th>'
+        $html | Should -Match '<th>Akzeptiert</th>'
+        $html | Should -Match '<strong>Nur-Lese-Lauf\.</strong>'
+        $html | Should -Match '<h2>Nachweise</h2>'
+        $html | Should -Match '<div>Erstellt \(UTC\)</div>'
+        $html | Should -Match '<strong>2 akzeptierte Risiken\.</strong>'
+        $html | Should -Match 'Ausnahme \(applied\):'
+        $html | Should -Match '<footer><p>Keine Telemetrie\.'
+        $html | Should -Not -Match '<h1>GrundschutzCheck audit report</h1>'
+        $html | Should -Not -Match '<h2>(Evidence|Summary by BSI module|Summary by Grundschutz\+\+ practice|Checks|Collected audit policy)</h2>'
+        $html | Should -Not -Match '<th>(Module|Title|Accepted|Requirement|Observed|Subcategory|Setting)</th>'
+    }
+
+    It 'localizes the HTML baseline section' {
+        $baseline = Invoke-GrundschutzCheck -Demo -OutputDirectory (Join-Path $script:LangWork 'html-baseline-src') -Format Json -Timestamp '2026-11-21T02:00:00Z'
+        $compared = Invoke-GrundschutzCheck -Demo -OutputDirectory (Join-Path $script:LangWork 'de-html-baseline') -Format Html -Timestamp '2026-11-21T03:00:00Z' -Language de -BaselinePath $baseline.outputs.json
+        $html = [System.IO.File]::ReadAllText($compared.outputs.html)
+
+        $html | Should -Match '<h2>Änderungen seit der Baseline</h2>'
+        $html | Should -Match 'Neu fehlgeschlagen: 0'
+        $html | Should -Not -Match '<h2>Changes since baseline</h2>'
+    }
+
+    It 'keeps English HTML as the default' {
+        $default = Invoke-GrundschutzCheck -Demo -OutputDirectory (Join-Path $script:LangWork 'html-en-default') -Format Html -Timestamp '2026-11-21T02:00:00Z'
+        $explicit = Invoke-GrundschutzCheck -Demo -OutputDirectory (Join-Path $script:LangWork 'html-en-explicit') -Format Html -Timestamp '2026-11-21T02:00:00Z' -Language en
+        $defaultHtml = [System.IO.File]::ReadAllText($default.outputs.html)
+        $explicitHtml = [System.IO.File]::ReadAllText($explicit.outputs.html)
+
+        $defaultHtml | Should -Be $explicitHtml
+        $defaultHtml | Should -Match '<html lang="en">'
+        $defaultHtml | Should -Match '<h1>GrundschutzCheck audit report</h1>'
+        $defaultHtml | Should -Match '<h2>Summary by BSI module</h2>'
+        $defaultHtml | Should -Match '<h2>Checks</h2>'
+    }
+
+    It 'leaves JSON and CSV identical across languages' {
         $deAll = Invoke-GrundschutzCheck -Demo -OutputDirectory (Join-Path $script:LangWork 'de-all') -Format All -Timestamp '2026-11-21T02:00:00Z' -Language de
         $enAll = Invoke-GrundschutzCheck -Demo -OutputDirectory (Join-Path $script:LangWork 'en-all') -Format All -Timestamp '2026-11-21T02:00:00Z' -Language en
-        foreach ($key in @('html', 'json', 'csv')) {
+        foreach ($key in @('json', 'csv')) {
             $deText = [System.IO.File]::ReadAllText($deAll.outputs.$key)
             $enText = [System.IO.File]::ReadAllText($enAll.outputs.$key)
             $deText | Should -Be $enText

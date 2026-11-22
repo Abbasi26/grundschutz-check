@@ -265,40 +265,79 @@ function gscFilter(kind, button) {
 '@
 }
 
+function Get-GsHtmlLabels {
+    param([string]$Language)
+    if ($Language -eq 'de') {
+        return @{
+            Lang = 'de'; Title = 'GrundschutzCheck Prüfbericht'; Introduction = 'Nachweise zur Härtung von Windows-11-Clients nach BSI IT-Grundschutz und Grundschutz++.'
+            Demo = 'Demo.'; DemoNotice = 'Diese Ergebnisse wurden aus mitgelieferten fiktiven Nachweisen erzeugt. Sie sind kein Audit eines echten Rechners.'
+            ReadOnly = 'Nur-Lese-Lauf.'; ReadOnlyNotice = 'Remediation-Snippets sind Text. Dieser Lauf hat das System nicht verändert. Ein Pass ist ein Indikator, kein Nachweis, dass die gesamte BSI-Anforderung erfüllt ist.'
+            Pass = 'Bestanden'; Fail = 'Fehlgeschlagen'; Error = 'Fehler'; Checks = 'Prüfungen'; Accepted = 'Akzeptiert'; NotApplicable = 'N/A'
+            AcceptedRisks = 'akzeptierte Risiken.'; AcceptedNotice = 'Diese Prüfungen sind fehlgeschlagen, werden aber durch eine dokumentierte Ausnahme mit Verantwortlichem und Ablaufdatum abgedeckt. Sie werden mit dem Status ACCEPTED aufgeführt.'
+            Changes = 'Änderungen seit der Baseline'; BaselineGenerated = 'Baseline erstellt am '; CatalogLower = ', Katalog '; DifferentHost = 'Die Baseline stammt von einem anderen Host.'
+            NewlyFailing = 'Neu fehlgeschlagen'; Fixed = 'Behoben'; StillFailing = 'Weiterhin fehlgeschlagen'
+            Evidence = 'Nachweise'; Generated = 'Erstellt (UTC)'; Mode = 'Modus'; Tool = 'Werkzeug'; Catalog = 'Katalog'; HostFingerprint = 'Host-Fingerprint'; FingerprintNote = 'Fingerprint-Hinweis'; Platform = 'Plattform'; Build = 'Build'
+            PassLimits = 'Grenzen eines Pass'; SummaryByModule = 'Zusammenfassung nach BSI-Modul'; SummaryByPractice = 'Zusammenfassung nach Grundschutz++-Praxis'
+            Module = 'Modul'; Practice = 'Praxis'; TitleCol = 'Titel'; PracticeNote = 'Die Zahlen enthalten jede Prüfung, die eine Anforderung dieser Praxis zitiert, einschließlich als ungeprüft markierter Zuordnungen.'
+            All = 'Alle'; Status = 'Status'; Check = 'Prüfung'; Requirement = 'Anforderung'; Observed = 'Beobachtet'; Mapping = 'Zuordnung'; Carryover = 'Windows-11-Übernahme'
+            Exception = 'Ausnahme'; Owner = 'Verantwortlicher: '; Expires = 'Gültig bis: '; Details = 'Begründung und Remediation (nicht angewendet)'; Registry = 'Registrierung'; NoId = '(keine ID)'; Expected = 'Erwartet: '; Actual = 'Ist: '
+            AuditPolicy = 'Erfasste Audit-Richtlinie'; AuditNotice = 'Die vollständige erweiterte Audit-Richtlinie, die für diesen Lauf erfasst wurde. Oben werden nur Unterkategorien mit einer Katalogprüfung bewertet.'; Subcategory = 'Unterkategorie'; Setting = 'Einstellung'
+            Footer = 'Keine Telemetrie. Die Daten blieben auf dem Rechner, der diese Datei erzeugt hat.'
+        }
+    }
+    return @{
+        Lang = 'en'; Title = 'GrundschutzCheck audit report'; Introduction = 'Windows 11 client hardening evidence against BSI IT-Grundschutz and Grundschutz++.'
+        Demo = 'Demo.'; DemoNotice = 'These results were rendered from bundled fictional evidence. They are not an audit of a real computer.'
+        ReadOnly = 'Read-only.'; ReadOnlyNotice = 'Remediation snippets are text. This run did not change the system. A pass is an indicator, not a certificate that the whole BSI requirement is met.'
+        Pass = 'Pass'; Fail = 'Fail'; Error = 'Error'; Checks = 'Checks'; Accepted = 'Accepted'; NotApplicable = 'N/A'
+        AcceptedRisks = 'accepted risk(s).'; AcceptedNotice = 'These checks fail, but a documented exception with an owner and an expiry date covers them. They are listed with status ACCEPTED.'
+        Changes = 'Changes since baseline'; BaselineGenerated = 'Baseline generated '; CatalogLower = ', catalog '; DifferentHost = 'The baseline is from a different host.'
+        NewlyFailing = 'Newly failing'; Fixed = 'Fixed'; StillFailing = 'Still failing'
+        Evidence = 'Evidence'; Generated = 'Generated (UTC)'; Mode = 'Mode'; Tool = 'Tool'; Catalog = 'Catalog'; HostFingerprint = 'Host fingerprint'; FingerprintNote = 'Fingerprint note'; Platform = 'Platform'; Build = 'build'
+        PassLimits = 'Limits of a pass'; SummaryByModule = 'Summary by BSI module'; SummaryByPractice = 'Summary by Grundschutz++ practice'
+        Module = 'Module'; Practice = 'Practice'; TitleCol = 'Title'; PracticeNote = 'Counts include every check that cites a control in that practice, including citations marked unverified.'
+        All = 'All'; Status = 'Status'; Check = 'Check'; Requirement = 'Requirement'; Observed = 'Observed'; Mapping = 'mapping'; Carryover = 'Windows 11 carry-over'
+        Exception = 'Exception'; Owner = 'Owner: '; Expires = 'Expires: '; Details = 'Rationale and remediation (not applied)'; Registry = 'Registry'; NoId = '(no id)'; Expected = 'Expected: '; Actual = 'Actual: '
+        AuditPolicy = 'Collected audit policy'; AuditNotice = 'The full advanced audit policy captured for this run. Only subcategories that have a catalog check are scored above.'; Subcategory = 'Subcategory'; Setting = 'Setting'
+        Footer = 'No telemetry. Data stayed on the machine that produced this file.'
+    }
+}
+
 function ConvertTo-GsHtmlReport {
-    param($Document)
+    param($Document, [string]$Language = 'en')
     $e = $Document.evidence
     $s = $Document.summary
+    $labels = Get-GsHtmlLabels -Language $Language
     $b = New-Object System.Text.StringBuilder
     [void]$b.AppendLine('<!DOCTYPE html>')
-    [void]$b.AppendLine('<html lang="en"><head><meta charset="utf-8">')
+    [void]$b.AppendLine('<html lang="' + $labels.Lang + '"><head><meta charset="utf-8">')
     [void]$b.AppendLine('<meta name="viewport" content="width=device-width, initial-scale=1">')
-    [void]$b.AppendLine('<title>GrundschutzCheck audit report</title>')
+    [void]$b.AppendLine('<title>' + $labels.Title + '</title>')
     [void]$b.AppendLine('<style>')
     [void]$b.AppendLine((Get-GsHtmlStyle))
     [void]$b.AppendLine('</style></head><body>')
-    [void]$b.AppendLine('<header><h1>GrundschutzCheck</h1>')
-    [void]$b.AppendLine('<p>Windows 11 client hardening evidence against BSI IT-Grundschutz and Grundschutz++.</p></header>')
+    [void]$b.AppendLine('<header><h1>' + $labels.Title + '</h1>')
+    [void]$b.AppendLine('<p>' + $labels.Introduction + '</p></header>')
     [void]$b.AppendLine('<main>')
     if ([string]$e.mode -eq 'demo') {
-        [void]$b.AppendLine('<div class="banner demo"><strong>Demo.</strong> These results were rendered from bundled fictional evidence. They are not an audit of a real computer.</div>')
+        [void]$b.AppendLine('<div class="banner demo"><strong>' + $labels.Demo + '</strong> ' + $labels.DemoNotice + '</div>')
     }
-    [void]$b.AppendLine('<div class="banner"><strong>Read-only.</strong> Remediation snippets are text. This run did not change the system. A pass is an indicator, not a certificate that the whole BSI requirement is met.</div>')
+    [void]$b.AppendLine('<div class="banner"><strong>' + $labels.ReadOnly + '</strong> ' + $labels.ReadOnlyNotice + '</div>')
     [void]$b.AppendLine('<div class="grid">')
-    [void]$b.AppendLine('<div class="card pass"><div class="n">' + $s.pass + '</div><span>Pass</span></div>')
-    [void]$b.AppendLine('<div class="card fail"><div class="n">' + $s.fail + '</div><span>Fail</span></div>')
-    [void]$b.AppendLine('<div class="card err"><div class="n">' + $s.error + '</div><span>Error</span></div>')
-    [void]$b.AppendLine('<div class="card"><div class="n">' + $s.total + '</div><span>Checks</span></div>')
+    [void]$b.AppendLine('<div class="card pass"><div class="n">' + $s.pass + '</div><span>' + $labels.Pass + '</span></div>')
+    [void]$b.AppendLine('<div class="card fail"><div class="n">' + $s.fail + '</div><span>' + $labels.Fail + '</span></div>')
+    [void]$b.AppendLine('<div class="card err"><div class="n">' + $s.error + '</div><span>' + $labels.Error + '</span></div>')
+    [void]$b.AppendLine('<div class="card"><div class="n">' + $s.total + '</div><span>' + $labels.Checks + '</span></div>')
     [void]$b.AppendLine('</div>')
     if ([int]$s.accepted -gt 0) {
-        [void]$b.AppendLine('<div class="banner"><strong>' + $s.accepted + ' accepted risk(s).</strong> These checks fail, but a documented exception with an owner and an expiry date covers them. They are listed with status ACCEPTED.</div>')
+        [void]$b.AppendLine('<div class="banner"><strong>' + $s.accepted + ' ' + $labels.AcceptedRisks + '</strong> ' + $labels.AcceptedNotice + '</div>')
     }
     $cmp = Get-GsProperty $Document 'comparison'
     if ($null -ne $cmp) {
-        [void]$b.AppendLine('<section class="card delta"><h2>Changes since baseline</h2>')
-        [void]$b.AppendLine('<p>Baseline generated ' + (ConvertTo-GsHtmlText $cmp.baseline_generated_at) + ', catalog ' + (ConvertTo-GsHtmlText $cmp.baseline_catalog_version) + '.' + $(if ($cmp.same_host -eq $false) { ' <strong>The baseline is from a different host.</strong>' } else { '' }) + '</p>')
-        [void]$b.AppendLine('<p>Newly failing: ' + @($cmp.newly_failing).Count + ' &middot; Fixed: ' + @($cmp.fixed).Count + ' &middot; Still failing: ' + @($cmp.still_failing).Count + '</p>')
-        foreach ($group in @(@('Newly failing', $cmp.newly_failing), @('Fixed', $cmp.fixed))) {
+        [void]$b.AppendLine('<section class="card delta"><h2>' + $labels.Changes + '</h2>')
+        [void]$b.AppendLine('<p>' + $labels.BaselineGenerated + (ConvertTo-GsHtmlText $cmp.baseline_generated_at) + $labels.CatalogLower + (ConvertTo-GsHtmlText $cmp.baseline_catalog_version) + '.' + $(if ($cmp.same_host -eq $false) { ' <strong>' + $labels.DifferentHost + '</strong>' } else { '' }) + '</p>')
+        [void]$b.AppendLine('<p>' + $labels.NewlyFailing + ': ' + @($cmp.newly_failing).Count + ' &middot; ' + $labels.Fixed + ': ' + @($cmp.fixed).Count + ' &middot; ' + $labels.StillFailing + ': ' + @($cmp.still_failing).Count + '</p>')
+        foreach ($group in @(@($labels.NewlyFailing, $cmp.newly_failing), @($labels.Fixed, $cmp.fixed))) {
             if (@($group[1]).Count -gt 0) {
                 [void]$b.AppendLine('<p><strong>' + $group[0] + '</strong></p><ul>')
                 foreach ($item in @($group[1])) {
@@ -309,80 +348,80 @@ function ConvertTo-GsHtmlReport {
         }
         [void]$b.AppendLine('</section>')
     }
-    [void]$b.AppendLine('<section class="card"><h2>Evidence</h2><div class="meta">')
-    [void]$b.AppendLine('<div>Generated (UTC)</div><div>' + (ConvertTo-GsHtmlText $e.generated_at) + '</div>')
-    [void]$b.AppendLine('<div>Mode</div><div>' + (ConvertTo-GsHtmlText $e.mode) + '</div>')
-    [void]$b.AppendLine('<div>Tool</div><div>' + (ConvertTo-GsHtmlText $Document.tool.name) + ' ' + (ConvertTo-GsHtmlText $Document.tool.version) + '</div>')
-    [void]$b.AppendLine('<div>Catalog</div><div>' + (ConvertTo-GsHtmlText $Document.catalog.id) + ' ' + (ConvertTo-GsHtmlText $Document.catalog.version) + '</div>')
-    [void]$b.AppendLine('<div>Host fingerprint</div><div><code>' + (ConvertTo-GsHtmlText $e.host_fingerprint_sha256) + '</code></div>')
-    [void]$b.AppendLine('<div>Fingerprint note</div><div>' + (ConvertTo-GsHtmlText $e.host_fingerprint_note) + '</div>')
-    [void]$b.AppendLine('<div>Platform</div><div>' + (ConvertTo-GsHtmlText $e.platform.os_caption) + ' / ' + (ConvertTo-GsHtmlText $e.platform.os_version) + ' / build ' + (ConvertTo-GsHtmlText $e.platform.os_build) + '</div>')
+    [void]$b.AppendLine('<section class="card"><h2>' + $labels.Evidence + '</h2><div class="meta">')
+    [void]$b.AppendLine('<div>' + $labels.Generated + '</div><div>' + (ConvertTo-GsHtmlText $e.generated_at) + '</div>')
+    [void]$b.AppendLine('<div>' + $labels.Mode + '</div><div>' + (ConvertTo-GsHtmlText $e.mode) + '</div>')
+    [void]$b.AppendLine('<div>' + $labels.Tool + '</div><div>' + (ConvertTo-GsHtmlText $Document.tool.name) + ' ' + (ConvertTo-GsHtmlText $Document.tool.version) + '</div>')
+    [void]$b.AppendLine('<div>' + $labels.Catalog + '</div><div>' + (ConvertTo-GsHtmlText $Document.catalog.id) + ' ' + (ConvertTo-GsHtmlText $Document.catalog.version) + '</div>')
+    [void]$b.AppendLine('<div>' + $labels.HostFingerprint + '</div><div><code>' + (ConvertTo-GsHtmlText $e.host_fingerprint_sha256) + '</code></div>')
+    [void]$b.AppendLine('<div>' + $labels.FingerprintNote + '</div><div>' + (ConvertTo-GsHtmlText $e.host_fingerprint_note) + '</div>')
+    [void]$b.AppendLine('<div>' + $labels.Platform + '</div><div>' + (ConvertTo-GsHtmlText $e.platform.os_caption) + ' / ' + (ConvertTo-GsHtmlText $e.platform.os_version) + ' / ' + $labels.Build + ' ' + (ConvertTo-GsHtmlText $e.platform.os_build) + '</div>')
     [void]$b.AppendLine('</div></section>')
     if (@($Document.catalog.limits).Count -gt 0) {
-        [void]$b.AppendLine('<section class="card"><h2>Grenzen eines Pass</h2><ul>')
+        [void]$b.AppendLine('<section class="card"><h2>' + $labels.PassLimits + '</h2><ul>')
         foreach ($limit in @($Document.catalog.limits)) {
             [void]$b.AppendLine('<li><strong>' + (ConvertTo-GsHtmlText $limit.title) + '.</strong> ' + (ConvertTo-GsHtmlText $limit.note) + '</li>')
         }
         [void]$b.AppendLine('</ul></section>')
     }
-    [void]$b.AppendLine('<h2>Summary by BSI module</h2>')
-    [void]$b.AppendLine('<table><thead><tr><th>Module</th><th>Title</th><th>Pass</th><th>Fail</th><th>Error</th><th>N/A</th><th>Accepted</th></tr></thead><tbody>')
+    [void]$b.AppendLine('<h2>' + $labels.SummaryByModule + '</h2>')
+    [void]$b.AppendLine('<table><thead><tr><th>' + $labels.Module + '</th><th>' + $labels.TitleCol + '</th><th>' + $labels.Pass + '</th><th>' + $labels.Fail + '</th><th>' + $labels.Error + '</th><th>' + $labels.NotApplicable + '</th><th>' + $labels.Accepted + '</th></tr></thead><tbody>')
     foreach ($module in @($s.modules)) {
         [void]$b.AppendLine('<tr><td>' + (ConvertTo-GsHtmlText $module.id) + '</td><td>' + (ConvertTo-GsHtmlText $module.title) + '</td><td>' + $module.pass + '</td><td>' + $module.fail + '</td><td>' + $module.error + '</td><td>' + $module.not_applicable + '</td><td>' + $module.accepted + '</td></tr>')
     }
     [void]$b.AppendLine('</tbody></table>')
-    [void]$b.AppendLine('<h2>Summary by Grundschutz++ practice</h2>')
-    [void]$b.AppendLine('<p>Counts include every check that cites a control in that practice, including citations marked unverified.</p>')
-    [void]$b.AppendLine('<table><thead><tr><th>Practice</th><th>Title</th><th>Pass</th><th>Fail</th><th>Error</th><th>N/A</th><th>Accepted</th></tr></thead><tbody>')
+    [void]$b.AppendLine('<h2>' + $labels.SummaryByPractice + '</h2>')
+    [void]$b.AppendLine('<p>' + $labels.PracticeNote + '</p>')
+    [void]$b.AppendLine('<table><thead><tr><th>' + $labels.Practice + '</th><th>' + $labels.TitleCol + '</th><th>' + $labels.Pass + '</th><th>' + $labels.Fail + '</th><th>' + $labels.Error + '</th><th>' + $labels.NotApplicable + '</th><th>' + $labels.Accepted + '</th></tr></thead><tbody>')
     foreach ($practice in @($s.grundschutz_plus_plus)) {
         [void]$b.AppendLine('<tr><td>' + (ConvertTo-GsHtmlText $practice.id) + '</td><td>' + (ConvertTo-GsHtmlText $practice.title) + '</td><td>' + $practice.pass + '</td><td>' + $practice.fail + '</td><td>' + $practice.error + '</td><td>' + $practice.not_applicable + '</td><td>' + $practice.accepted + '</td></tr>')
     }
     [void]$b.AppendLine('</tbody></table>')
-    [void]$b.AppendLine('<h2>Checks</h2>')
-    [void]$b.AppendLine('<p><button type="button" data-filter="all" class="active" onclick="gscFilter(''all'', this)">All</button>')
-    [void]$b.AppendLine('<button type="button" data-filter="fail" onclick="gscFilter(''fail'', this)">Fail</button>')
-    [void]$b.AppendLine('<button type="button" data-filter="error" onclick="gscFilter(''error'', this)">Error</button>')
-    [void]$b.AppendLine('<button type="button" data-filter="accepted" onclick="gscFilter(''accepted'', this)">Accepted</button>')
-    [void]$b.AppendLine('<button type="button" data-filter="pass" onclick="gscFilter(''pass'', this)">Pass</button></p>')
-    [void]$b.AppendLine('<table><thead><tr><th>Status</th><th>Check</th><th>Requirement</th><th>Observed</th></tr></thead><tbody>')
+    [void]$b.AppendLine('<h2>' + $labels.Checks + '</h2>')
+    [void]$b.AppendLine('<p><button type="button" data-filter="all" class="active" onclick="gscFilter(''all'', this)">' + $labels.All + '</button>')
+    [void]$b.AppendLine('<button type="button" data-filter="fail" onclick="gscFilter(''fail'', this)">' + $labels.Fail + '</button>')
+    [void]$b.AppendLine('<button type="button" data-filter="error" onclick="gscFilter(''error'', this)">' + $labels.Error + '</button>')
+    [void]$b.AppendLine('<button type="button" data-filter="accepted" onclick="gscFilter(''accepted'', this)">' + $labels.Accepted + '</button>')
+    [void]$b.AppendLine('<button type="button" data-filter="pass" onclick="gscFilter(''pass'', this)">' + $labels.Pass + '</button></p>')
+    [void]$b.AppendLine('<table><thead><tr><th>' + $labels.Status + '</th><th>' + $labels.Check + '</th><th>' + $labels.Requirement + '</th><th>' + $labels.Observed + '</th></tr></thead><tbody>')
     foreach ($row in @($Document.results)) {
         [void]$b.AppendLine('<tr data-status="' + (ConvertTo-GsHtmlText $row.status) + '"><td><div class="status ' + (ConvertTo-GsHtmlText $row.status) + '">' + (ConvertTo-GsHtmlText $row.status) + '</div><div class="sev">' + (ConvertTo-GsHtmlText $row.severity) + '</div></td><td>')
         [void]$b.AppendLine('<strong>' + (ConvertTo-GsHtmlText $row.id) + '</strong> ' + (ConvertTo-GsHtmlText $row.title))
-        [void]$b.AppendLine('<div><span class="badge ' + (ConvertTo-GsHtmlText $row.mapping) + '">mapping ' + (ConvertTo-GsHtmlText $row.mapping) + '</span>')
-        [void]$b.AppendLine('<span class="badge ' + (ConvertTo-GsHtmlText $row.windows11_carryover) + '">Windows 11 carry-over ' + (ConvertTo-GsHtmlText $row.windows11_carryover) + '</span></div>')
+        [void]$b.AppendLine('<div><span class="badge ' + (ConvertTo-GsHtmlText $row.mapping) + '">' + $labels.Mapping + ' ' + (ConvertTo-GsHtmlText $row.mapping) + '</span>')
+        [void]$b.AppendLine('<span class="badge ' + (ConvertTo-GsHtmlText $row.windows11_carryover) + '">' + $labels.Carryover + ' ' + (ConvertTo-GsHtmlText $row.windows11_carryover) + '</span></div>')
         if (-not [string]::IsNullOrWhiteSpace([string]$row.conflict_note)) {
             [void]$b.AppendLine('<div class="banner">' + (ConvertTo-GsHtmlText $row.conflict_note) + '</div>')
         }
         $ex = Get-GsProperty $row 'exception'
         if ($null -ne $ex) {
-            [void]$b.AppendLine('<div class="banner">Exception (' + (ConvertTo-GsHtmlText $ex.state) + '): ' + (ConvertTo-GsHtmlText $ex.reason) + ' Owner: ' + (ConvertTo-GsHtmlText $ex.owner) + '. Expires: ' + (ConvertTo-GsHtmlText $ex.expires) + '.</div>')
+            [void]$b.AppendLine('<div class="banner">' + $labels.Exception + ' (' + (ConvertTo-GsHtmlText $ex.state) + '): ' + (ConvertTo-GsHtmlText $ex.reason) + ' ' + $labels.Owner + (ConvertTo-GsHtmlText $ex.owner) + '. ' + $labels.Expires + (ConvertTo-GsHtmlText $ex.expires) + '.</div>')
         }
-        [void]$b.AppendLine('<details><summary>Rationale and remediation (not applied)</summary>')
+        [void]$b.AppendLine('<details><summary>' + $labels.Details + '</summary>')
         [void]$b.AppendLine('<p>' + (ConvertTo-GsHtmlText $row.rationale) + '</p>')
         if (-not [string]::IsNullOrWhiteSpace([string]$row.applicability_note)) {
             [void]$b.AppendLine('<p>' + (ConvertTo-GsHtmlText $row.applicability_note) + '</p>')
         }
         [void]$b.AppendLine('<p><strong>GPO.</strong></p><pre>' + (ConvertTo-GsHtmlText $row.remediation.gpo) + '</pre>')
         [void]$b.AppendLine('<p><strong>Intune.</strong></p><pre>' + (ConvertTo-GsHtmlText $row.remediation.intune) + '</pre>')
-        [void]$b.AppendLine('<p><strong>Registry.</strong></p><pre>' + (ConvertTo-GsHtmlText $row.remediation.registry) + '</pre>')
+        [void]$b.AppendLine('<p><strong>' + $labels.Registry + '.</strong></p><pre>' + (ConvertTo-GsHtmlText $row.remediation.registry) + '</pre>')
         [void]$b.AppendLine('<p>' + (ConvertTo-GsHtmlText $row.remediation.summary) + '</p></details></td><td>')
         [void]$b.AppendLine('<div>' + (ConvertTo-GsHtmlText $row.requirement_id) + '</div><div>' + (ConvertTo-GsHtmlText $row.requirement_title) + '</div>')
         foreach ($ref in @($row.references)) {
             $rid = [string]$ref.requirement_id
-            if ([string]::IsNullOrWhiteSpace($rid)) { $rid = '(no id)' }
+            if ([string]::IsNullOrWhiteSpace($rid)) { $rid = $labels.NoId }
             [void]$b.AppendLine('<div><span class="badge ' + (ConvertTo-GsHtmlText $ref.mapping) + '">' + (ConvertTo-GsHtmlText $ref.mapping) + '</span> ' + (ConvertTo-GsHtmlText $ref.framework) + ' ' + (ConvertTo-GsHtmlText $rid) + '</div>')
         }
-        [void]$b.AppendLine('</td><td><div>Expected: ' + (ConvertTo-GsHtmlText $row.expected) + '</div><div>Actual: ' + (ConvertTo-GsHtmlText $row.actual) + '</div><div>' + (ConvertTo-GsHtmlText $row.message) + '</div></td></tr>')
+        [void]$b.AppendLine('</td><td><div>' + $labels.Expected + (ConvertTo-GsHtmlText $row.expected) + '</div><div>' + $labels.Actual + (ConvertTo-GsHtmlText $row.actual) + '</div><div>' + (ConvertTo-GsHtmlText $row.message) + '</div></td></tr>')
     }
     [void]$b.AppendLine('</tbody></table>')
-    [void]$b.AppendLine('<h2>Collected audit policy</h2>')
-    [void]$b.AppendLine('<p>The full advanced audit policy captured for this run. Only subcategories that have a catalog check are scored above.</p>')
-    [void]$b.AppendLine('<table><thead><tr><th>Subcategory</th><th>Setting</th></tr></thead><tbody>')
+    [void]$b.AppendLine('<h2>' + $labels.AuditPolicy + '</h2>')
+    [void]$b.AppendLine('<p>' + $labels.AuditNotice + '</p>')
+    [void]$b.AppendLine('<table><thead><tr><th>' + $labels.Subcategory + '</th><th>' + $labels.Setting + '</th></tr></thead><tbody>')
     foreach ($row in @($e.audit_policy)) {
         [void]$b.AppendLine('<tr><td>' + (ConvertTo-GsHtmlText $row.subcategory) + '</td><td>' + (ConvertTo-GsHtmlText $row.setting) + '</td></tr>')
     }
     [void]$b.AppendLine('</tbody></table>')
-    [void]$b.AppendLine('<footer><p>No telemetry. Data stayed on the machine that produced this file.</p>')
+    [void]$b.AppendLine('<footer><p>' + $labels.Footer + '</p>')
     foreach ($note in @($e.notes)) {
         [void]$b.AppendLine('<p>' + (ConvertTo-GsHtmlText $note) + '</p>')
     }
@@ -683,7 +722,7 @@ function Write-GsReportFiles {
     $written = [ordered]@{}
     if ($selected -contains 'Html') {
         $path = Join-Path $Directory 'grundschutzcheck-report.html'
-        Write-GsUtf8 -Path $path -Text (ConvertTo-GsHtmlReport -Document $Document)
+        Write-GsUtf8 -Path $path -Text (ConvertTo-GsHtmlReport -Document $Document -Language $Language)
         $written.html = $path
     }
     if ($selected -contains 'Markdown') {
