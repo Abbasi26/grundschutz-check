@@ -78,6 +78,39 @@ Describe 'Windows 11 catalog' {
         }
     }
 
+    It 'matches the checked DISA STIG V2R11 subset exactly' {
+        InModuleScope GrundschutzCheck {
+            $expected = @(
+                'GS-W11-001|WN11-AC-000020|V-253300|SV-253300r1256653_rule'
+                'GS-W11-006|WN11-SO-000010|V-253433|SV-253433r958504_rule'
+                'GS-W11-023|WN11-CC-000020|V-253353|SV-253353r1268251_rule'
+                'GS-W11-023|WN11-CC-000025|V-253354|SV-253354r1268251_rule'
+                'GS-W11-024|WN11-SO-000100|V-253449|SV-253449r958908_rule'
+                'GS-W11-025|WN11-SO-000120|V-253451|SV-253451r958908_rule'
+                'GS-W11-041|WN11-CC-000326|V-253414|SV-253414r958422_rule'
+                'GS-W11-060|WN11-AU-000070|V-253316|SV-253316r991581_rule'
+                'GS-W11-060|WN11-AU-000075|V-253317|SV-253317r991581_rule'
+                'GS-W11-061|WN11-AU-000005|V-253306|SV-253306r991570_rule'
+                'GS-W11-061|WN11-AU-000010|V-253307|SV-253307r991570_rule'
+            )
+            $catalog = Get-GsCatalog
+            $found = @(
+                foreach ($check in @(ConvertTo-GsArray (Get-GsProperty $catalog 'checks'))) {
+                    $checkId = [string](Get-GsProperty $check 'id')
+                    foreach ($ref in @(ConvertTo-GsArray (Get-GsProperty $check 'references'))) {
+                        if ([string](Get-GsProperty $ref 'framework') -ne 'disa-stig') { continue }
+                        $requirementId = [string](Get-GsProperty $ref 'requirement_id')
+                        $requirementId | Should -Match '^WN11-[A-Z0-9]+-[0-9]{6}$'
+                        [string](Get-GsProperty $ref 'mapping') | Should -Be 'verified'
+                        [string](Get-GsProperty $ref 'source_id') | Should -Be 'disa-stig-windows-11-v2r11'
+                        '{0}|{1}|{2}|{3}' -f $checkId, $requirementId, (Get-GsProperty $ref 'group_id'), (Get-GsProperty $ref 'rule_id')
+                    }
+                }
+            )
+            (Compare-Object ($expected | Sort-Object) ($found | Sort-Object)) | Should -BeNullOrEmpty
+        }
+    }
+
     It 'queries the audit checks by MS-GPAC subcategory GUID' {
         InModuleScope GrundschutzCheck {
             $catalog = Get-GsCatalog
