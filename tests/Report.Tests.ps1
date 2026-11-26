@@ -164,6 +164,94 @@ Describe 'Demo report' {
     }
 }
 
+Describe 'Findings CSV safety' {
+    It 'protects dangerous values in every column and preserves CSV quoting' {
+        $result = InModuleScope GrundschutzCheck {
+            $headers = @(
+                'id', 'title', 'status', 'severity', 'mapping', 'windows11_carryover',
+                'module_id', 'requirement_id', 'expected', 'actual', 'message'
+            )
+            $dangerous = @(
+                '=1+1', '+1+1', '-1+1', '@SUM(1,2)', '  =leading-space',
+                "`t+leading-tab", "`r-leading-cr", "`n@leading-lf",
+                ([char]0x00A0 + '=unicode-space'), '  +"quoted",value', "@line`r`nbreak"
+            )
+            $harmless = @(
+                $null, '   ', 'normal text', 'Umlaute äöü', '42', "'already-safe",
+                'text = formula', 'comma,value', 'a "quoted" value', "line`nbreak",
+                ([char]0x00A0 + 'only whitespace after this')
+            )
+
+            $dangerousRow = [ordered]@{}
+            $harmlessRow = [ordered]@{}
+            for ($i = 0; $i -lt $headers.Count; $i++) {
+                $dangerousRow[$headers[$i]] = $dangerous[$i]
+                $harmlessRow[$headers[$i]] = $harmless[$i]
+            }
+            $document = [pscustomobject]@{
+                results = @([pscustomobject]$dangerousRow, [pscustomobject]$harmlessRow)
+            }
+            $before = $document | ConvertTo-Json -Depth 4 -Compress
+            $csv = ConvertTo-GsCsvReport -Document $document
+
+            [pscustomobject]@{
+                Headers   = $headers
+                Dangerous = $dangerous
+                Harmless  = $harmless
+                Csv       = $csv
+                Unchanged = (($document | ConvertTo-Json -Depth 4 -Compress) -eq $before)
+            }
+        }
+
+        $parsed = @($result.Csv | ConvertFrom-Csv)
+        $parsed.Count | Should -Be 2
+        @($parsed[0].PSObject.Properties.Name).Count | Should -Be 11
+        for ($i = 0; $i -lt $result.Headers.Count; $i++) {
+            $name = $result.Headers[$i]
+            $parsed[0].$name | Should -Be ("'" + $result.Dangerous[$i])
+            $parsed[1].$name | Should -Be ([string]$result.Harmless[$i])
+
+            $expectedCell = "'" + $result.Dangerous[$i] -replace '"', '""'
+            $result.Csv.Contains('"' + $expectedCell + '"') | Should -BeTrue
+        }
+        $result.Unchanged | Should -BeTrue
+        $result.Csv.Contains('"a ""quoted"" value"') | Should -BeTrue
+    }
+
+    It 'protects dangerous values when writing a CSV report file' {
+        $work = Join-Path $script:RepoRoot ('.oc-tmp/gsc-csv-safety-' + [guid]::NewGuid().ToString('n'))
+        try {
+            $output = InModuleScope GrundschutzCheck -Parameters @{ Work = $work } {
+                param($Work)
+                $document = [pscustomobject]@{
+                    results = @([pscustomobject]@{
+                        id = 'safe-id'; title = '  =1+1'; status = 'fail'; severity = 'medium'
+                        mapping = 'verified'; windows11_carryover = 'true'; module_id = 'SYS.2.1'
+                        requirement_id = 'REQ-1'; expected = 'text,with comma'
+                        actual = '+cmd|value'; message = 'a "quoted" message'
+                    })
+                }
+                Write-GsReportFiles -Document $document -Directory $Work -Formats Csv
+            }
+
+            $output.csv | Should -Be (Join-Path $work 'grundschutzcheck-findings.csv')
+            Test-Path -LiteralPath $output.csv | Should -BeTrue
+            $raw = [System.IO.File]::ReadAllText($output.csv)
+            $row = @($raw | ConvertFrom-Csv)[0]
+            $row.title | Should -Be "'  =1+1"
+            $row.actual | Should -Be "'+cmd|value"
+            $row.expected | Should -Be 'text,with comma'
+            $row.message | Should -Be 'a "quoted" message'
+            $raw.Contains('"a ""quoted"" message"') | Should -BeTrue
+        }
+        finally {
+            if (Test-Path -LiteralPath $work) {
+                Remove-Item -LiteralPath $work -Recurse -Force
+            }
+        }
+    }
+}
+
 Describe 'Markdown report language switch' {
     BeforeAll {
         $script:LangWork = Join-Path $script:RepoRoot '.oc-tmp/opencode/report-language'

@@ -652,6 +652,9 @@ function ConvertTo-GsCsvReport {
         $encoded = @()
         foreach ($field in $fields) {
             $text = [string]$field
+            if ($text -match '^\s*[=+@-]') {
+                $text = "'" + $text
+            }
             $text = $text -replace '"', '""'
             $encoded += ('"' + $text + '"')
         }
