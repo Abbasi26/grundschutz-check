@@ -21,7 +21,11 @@ function Compare-GsReport {
     )
     $before = @{}
     foreach ($row in (ConvertTo-GsArray (Get-GsProperty $Baseline 'results'))) {
-        $before[[string](Get-GsProperty $row 'id')] = [string](Get-GsProperty $row 'status')
+        $id = [string](Get-GsProperty $row 'id')
+        if ($before.ContainsKey($id)) {
+            throw "Baseline report repeats check $id."
+        }
+        $before[$id] = [string](Get-GsProperty $row 'status')
     }
     if ($before.Count -eq 0) {
         throw 'Baseline report has no results. Use a grundschutzcheck-report.json from an earlier run.'
