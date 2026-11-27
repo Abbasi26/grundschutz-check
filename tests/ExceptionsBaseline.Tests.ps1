@@ -209,6 +209,18 @@ Describe 'Baseline comparison' {
         $path = Write-TestJson 'empty-base.json' '{"results":[]}'
         { Invoke-GrundschutzCheck -Demo -OutputDirectory (Join-Path $script:Work 'eb') -BaselinePath $path -Format Json } | Should -Throw '*no results*'
     }
+
+    It 'rejects duplicate check IDs in a baseline' {
+        $doc = [System.IO.File]::ReadAllText($script:BaseJson) | ConvertFrom-Json
+        $duplicate = $doc.results[0].PSObject.Copy()
+        $duplicate.status = 'pass'
+        $doc.results = @($doc.results) + $duplicate
+        $path = Join-Path $script:Work 'duplicate-base.json'
+        [System.IO.File]::WriteAllText($path, ($doc | ConvertTo-Json -Depth 12))
+
+        { Invoke-GrundschutzCheck -Demo -OutputDirectory (Join-Path $script:Work 'duplicate') -BaselinePath $path -Format Json } |
+            Should -Throw "*Baseline report repeats check $($duplicate.id).*"
+    }
 }
 
 Describe 'Script exit codes with -FailOnRegression' {
